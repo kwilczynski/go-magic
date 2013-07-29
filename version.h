@@ -30,6 +30,10 @@ extern "C" {
 # define ENOSYS 38
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+# define HAVE_WARNING 1
+#endif
+
 extern int magic_version_wrapper(void);
 
 #if defined(__cplusplus)

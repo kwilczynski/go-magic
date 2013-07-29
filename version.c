@@ -22,8 +22,13 @@ inline int
 magic_version_wrapper(void)
 {
 #if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
-    return magic_version(void);
+    return magic_version();
 #else
+# if defined(HAVE_WARNING)
+#  warning "function `int magic_version(void)' not implemented"
+# else
+#  pragma message("function `int magic_version(void)' not implemented")
+# endif
     return -ENOSYS;
 #endif
 }
