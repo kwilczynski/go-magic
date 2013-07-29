@@ -1,0 +1,12 @@
+language: go
+go:
+  - 1.0
+  - 1.1
+branches:
+  only:
+    - master
+before_script:
+  - sudo apt-get update
+  - sudo apt-get install --force-yes -y libmagic1 libmagic-dev
+  - go get -v -x github.com/kwilczynski/magic
+script: go test -v -x ./... -run '^Test.*'
