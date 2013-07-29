@@ -5,6 +5,7 @@ go:
 branches:
   only:
     - master
+install: false
 before_script:
   - sudo apt-get update
   - sudo apt-get install --force-yes -y libmagic1 libmagic-dev
