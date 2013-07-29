@@ -6,8 +6,9 @@ branches:
   only:
     - master
 install: false
-before_script:
+before_install:
   - sudo apt-get update
   - sudo apt-get install --force-yes -y libmagic1 libmagic-dev
+before_script:
   - go get -v -x github.com/kwilczynski/magic
 script: go test -v -x ./... -run '^Test.*'
