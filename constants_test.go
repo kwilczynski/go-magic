@@ -34,7 +34,7 @@ func TestConstants(t *testing.T) {
 	defer mgc.Close()
 
 	NO_CHECK_BUILTIN_override := 0x3fb000
-	if rv := mgc.Version(); rv > 0 {
+	if rv, _ := mgc.Version(); rv > 0 {
 		NO_CHECK_BUILTIN_override = NO_CHECK_COMPRESS |
 			NO_CHECK_TAR |
 			NO_CHECK_APPTYPE |
