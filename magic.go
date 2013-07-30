@@ -1,4 +1,4 @@
-// +build linux,cgo !darwin,!cgo !windows
+// +build linux,cgo darwin,cgo !windows
 // +build 386 amd64
 
 /*
