@@ -28,6 +28,7 @@ package magic
 import "C"
 
 import (
+	"fmt"
 	"runtime"
 	"strings"
 	"sync"
