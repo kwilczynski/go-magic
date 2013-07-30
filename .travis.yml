@@ -2,6 +2,10 @@ language: go
 go:
   - 1.0
   - 1.1
+  - tip
+matrix:
+  allow_failures:
+    - gvm: tip
 branches:
   only:
     - master
