@@ -64,6 +64,10 @@ func (mgc *Magic) Close() {
 	mgc.magic.close()
 }
 
+func (mgc *Magic) String() string {
+	return fmt.Sprintf("Magic{cookie:%p}", mgc.cookie)
+}
+
 func (mgc *Magic) GetPath() []string {
 	mgc.Lock()
 	defer mgc.Unlock()
