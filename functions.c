@@ -25,9 +25,11 @@ struct save {
 
 typedef struct save save_t;
 
-static inline int
-suppress_error_output(save_t *s)
+static int
+suppress_error_output(void *p)
 {
+    save_t *s = p;
+
     fflush(stderr);
     fgetpos(stderr, &s->position);
 
@@ -39,14 +41,17 @@ suppress_error_output(save_t *s)
     return 0;
 }
 
-static inline void
-restore_error_output(save_t *s)
+static void
+restore_error_output(void *p)
 {
+    save_t *s = p;
+
     fflush(stderr);
     dup2(s->fd, fileno(stderr));
     close(s->fd);
     clearerr(stderr);
     fsetpos(stderr, &s->position);
+    setvbuf(stderr, NULL, _IONBF, 0);
 }
 
 inline int
