@@ -19,11 +19,20 @@
 package magic_test
 
 import (
+	"bytes"
+	"fmt"
 	"reflect"
 	"testing"
 
 	. "github.com/kwilczynski/magic"
 )
+
+func CompareStrings(this, other string) bool {
+	if this == "" || other == "" {
+		return false
+	}
+	return bytes.Equal([]byte(this), []byte(other))
+}
 
 func TestNew(t *testing.T) {
 	mgc := New()
@@ -32,4 +41,16 @@ func TestNew(t *testing.T) {
 			t.Fatalf("not a Magic type: %s", reflect.TypeOf(mgc).String())
 		}
 	}(mgc)
+}
+
+func TestString(t *testing.T) {
+	mgc := New()
+
+	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
+	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
+
+	v := fmt.Sprintf("Magic{cookie:0x%x}", cookie)
+	if ok := CompareStrings(mgc.String(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", mgc.String(), v)
+	}
 }
