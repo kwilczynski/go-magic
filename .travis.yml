@@ -5,7 +5,7 @@ go:
   - tip
 matrix:
   allow_failures:
-    - gvm: tip
+    - go: tip
 branches:
   only:
     - master
