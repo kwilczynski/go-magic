@@ -54,6 +54,12 @@ restore_error_output(void *p)
     setvbuf(stderr, NULL, _IONBF, 0);
 }
 
+inline const char*
+magic_getpath_wrapper(void)
+{
+    return magic_getpath(NULL, 0);
+}
+
 inline int
 magic_load_wrapper(struct magic_set *ms, const char *magicfile)
 {

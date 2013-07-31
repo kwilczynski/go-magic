@@ -46,6 +46,8 @@ extern "C" {
 
 extern int errno;
 
+extern const char* magic_getpath_wrapper(void);
+
 extern int magic_load_wrapper(struct magic_set *ms, const char *magicfile);
 extern int magic_compile_wrapper(struct magic_set *ms, const char *magicfile);
 extern int magic_check_wrapper(struct magic_set *ms, const char *magicfile);

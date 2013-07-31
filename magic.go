@@ -29,6 +29,7 @@ import "C"
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
@@ -37,6 +38,8 @@ import (
 
 type magic struct {
 	sync.Mutex
+	flags  int
+	path   []string
 	cookie C.magic_t
 }
 
@@ -53,7 +56,7 @@ type Magic struct {
 }
 
 func New() *Magic {
-	mgc := &Magic{&magic{cookie: C.magic_open(C.int(NONE))}}
+	mgc := &Magic{&magic{flags: NONE, cookie: C.magic_open(C.int(NONE))}}
 	runtime.SetFinalizer(mgc.magic, (*magic).close)
 	return mgc
 }
@@ -61,20 +64,30 @@ func New() *Magic {
 func (mgc *Magic) Close() {
 	mgc.Lock()
 	defer mgc.Unlock()
-
 	mgc.magic.close()
 }
 
 func (mgc *Magic) String() string {
-	return fmt.Sprintf("Magic{cookie:%p}", mgc.cookie)
+	return fmt.Sprintf("Magic{flags:%d path:%s cookie:%p}",
+		mgc.flags, mgc.path, mgc.cookie)
 }
 
-func (mgc *Magic) GetPath() []string {
+func (mgc *Magic) Path() []string {
 	mgc.Lock()
 	defer mgc.Unlock()
 
-	path := C.GoString(C.magic_getpath(nil, C.int(0)))
-	return strings.Split(path, ":")
+	if len(mgc.path) != 0 && os.Getenv("MAGIC") == "" {
+		return mgc.path
+	}
+	rv := C.GoString(C.magic_getpath_wrapper())
+	mgc.path = strings.Split(rv, ":")
+	return mgc.path
+}
+
+func (mgc *Magic) Flags() int {
+	mgc.Lock()
+	defer mgc.Unlock()
+	return mgc.flags
 }
 
 func (mgc *Magic) SetFlags(flags int) error {
@@ -84,6 +97,7 @@ func (mgc *Magic) SetFlags(flags int) error {
 	if rv := C.magic_setflags(mgc.cookie, C.int(flags)); rv < 0 {
 		return mgc.error()
 	}
+	mgc.flags = flags
 	return nil
 }
 
@@ -92,14 +106,18 @@ func (mgc *Magic) Load(files ...string) error {
 	defer mgc.Unlock()
 
 	var cfiles *C.char
+	defer C.free(unsafe.Pointer(cfiles))
+
 	if len(files) != 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
-		defer C.free(unsafe.Pointer(cfiles))
+	} else {
+		cfiles = C.magic_getpath_wrapper()
 	}
 
 	if rv := C.magic_load_wrapper(mgc.cookie, cfiles); rv < 0 {
 		return mgc.error()
 	}
+	mgc.path = strings.Split(C.GoString(cfiles), ":")
 	return nil
 }
 
@@ -199,84 +217,78 @@ func (mgc *Magic) destroy() {
 
 func Compile(files ...string) error {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Compile(files...); err != nil {
 		return err
 	}
-	defer mgc.Close()
 	return nil
 }
 
 func Check(files ...string) error {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Check(files...); err != nil {
 		return err
 	}
-	defer mgc.Close()
 	return nil
 }
 
 func FileMime(filename string, files ...string) (string, error) {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Load(files...); err != nil {
 		return "", err
 	}
-	defer mgc.Close()
-
 	mgc.SetFlags(MIME)
 	return mgc.File(filename)
 }
 
 func FileEncoding(filename string, files ...string) (string, error) {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Load(files...); err != nil {
 		return "", err
 	}
-	defer mgc.Close()
-
 	mgc.SetFlags(MIME_ENCODING)
 	return mgc.File(filename)
 }
 
 func FileType(filename string, files ...string) (string, error) {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Load(files...); err != nil {
 		return "", err
 	}
-	defer mgc.Close()
-
 	mgc.SetFlags(MIME_TYPE)
 	return mgc.File(filename)
 }
 
 func BufferMime(buffer []byte, files ...string) (string, error) {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Load(files...); err != nil {
 		return "", err
 	}
-	defer mgc.Close()
-
 	mgc.SetFlags(MIME)
 	return mgc.Buffer(buffer)
 }
 
 func BufferEncoding(buffer []byte, files ...string) (string, error) {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Load(files...); err != nil {
 		return "", err
 	}
-	defer mgc.Close()
-
 	mgc.SetFlags(MIME_ENCODING)
 	return mgc.Buffer(buffer)
 }
 
 func BufferType(buffer []byte, files ...string) (string, error) {
 	mgc := New()
+	defer mgc.Close()
 	if err := mgc.Load(files...); err != nil {
 		return "", err
 	}
-	defer mgc.Close()
-
 	mgc.SetFlags(MIME_TYPE)
 	return mgc.Buffer(buffer)
 }
