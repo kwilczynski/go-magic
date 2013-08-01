@@ -92,28 +92,52 @@ func TestMagic_Flags(t *testing.T) {
 	mgc := New()
 	defer mgc.Close()
 
-	var flagsTest = []struct {
-		flag     int
-		expected int
-	}{
-		{NONE, 0x000000},
-		{MIME_TYPE, 0x000010},
-		{MIME_ENCODING, 0x000400},
-		{MIME, 0x000010 | 0x000400},
-		{MIME, MIME_TYPE | MIME_ENCODING},
-	}
+	mgc.SetFlags(MIME)
 
-	for _, tt := range flagsTest {
-		mgc.SetFlags(tt.flag)
-		given := mgc.Flags()
-		if given != tt.expected {
-			t.Errorf("value given 0x%06x, want 0x%06x",
-				given, tt.expected)
-		}
+	v := MIME_TYPE | MIME_ENCODING
+	if mgc.Flags() != v {
+		t.Errorf("value given 0x%06x, want 0x%06x", mgc.Flags(), v)
 	}
 }
 
 func TestMagic_SetFlags(t *testing.T) {
+	mgc := New()
+	defer mgc.Close()
+
+	var flagsTests = []struct {
+		flag      int
+		expected  int
+		incorrect bool
+		errno     int
+	}{
+		{-1, 0x000000, true, -22},
+		{NONE, 0x000000, false, 0},
+		{MIME_TYPE, 0x000010, false, 0},
+		{MIME_ENCODING, 0x000400, false, 0},
+		{0xffffff, 0x000400, true, -22},
+		{MIME, 0x000010 | 0x000400, false, 0},
+		{MIME, MIME_TYPE | MIME_ENCODING, false, 0},
+		{NO_CHECK_ASCII, NO_CHECK_TEXT, false, 0},
+	}
+
+	var err error
+	var given, errno int
+	for _, tt := range flagsTests {
+		err = mgc.SetFlags(tt.flag)
+		given = mgc.Flags()
+		if err != nil && tt.incorrect {
+			errno = err.(*MagicError).Errno
+			if given != tt.expected || errno != tt.errno {
+				t.Errorf("value given {0x%06x %d}, want {0x%06x %d}",
+					given, errno, tt.expected, tt.errno)
+				continue
+			}
+		}
+		if given != tt.expected {
+			t.Errorf("value given 0x%06x, want 0x%06x", given, tt.expected)
+		}
+	}
+
 }
 
 func TestMagic_Load(t *testing.T) {
