@@ -36,7 +36,7 @@ func CompareStrings(this, other string) bool {
 	return bytes.Equal([]byte(this), []byte(other))
 }
 
-func TestMagic_New(t *testing.T) {
+func TestNew(t *testing.T) {
 	mgc := New()
 	defer mgc.Close()
 
