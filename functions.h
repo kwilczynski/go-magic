@@ -25,10 +25,20 @@
 #include <errno.h>
 #include <magic.h>
 
-#include "version.h"
-
 #if defined(__cplusplus)
 extern "C" {
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+# define HAVE_WARNING 1
+#endif
+
+#if !defined(EINVAL)
+# define EINVAL 22
+#endif
+
+#if !defined(ENOSYS)
+# define ENOSYS 38
 #endif
 
 #define SUPPRESS_ERROR_OUTPUT(a, b)       \
@@ -48,9 +58,12 @@ extern int errno;
 
 extern const char* magic_getpath_wrapper(void);
 
+extern int magic_setflags_wrapper(struct magic_set *ms, int flags);
 extern int magic_load_wrapper(struct magic_set *ms, const char *magicfile);
 extern int magic_compile_wrapper(struct magic_set *ms, const char *magicfile);
 extern int magic_check_wrapper(struct magic_set *ms, const char *magicfile);
+
+extern int magic_version_wrapper(void);
 
 #if defined(__cplusplus)
 }

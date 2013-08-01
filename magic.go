@@ -94,8 +94,9 @@ func (mgc *Magic) SetFlags(flags int) error {
 	mgc.Lock()
 	defer mgc.Unlock()
 
-	if rv := C.magic_setflags(mgc.cookie, C.int(flags)); rv < 0 {
-		return mgc.error()
+	rv := int(C.magic_setflags_wrapper(mgc.cookie, C.int(flags)))
+	if rv < 0 {
+		return &MagicError{rv, "invalid argument"}
 	}
 	mgc.flags = flags
 	return nil
@@ -195,11 +196,11 @@ func (mgc *Magic) Version() (int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
 
-	v := int(C.magic_version_wrapper())
-	if v < 0 {
-		return v, &MagicError{v, "function not implemented"}
+	rv := int(C.magic_version_wrapper())
+	if rv < 0 {
+		return rv, &MagicError{rv, "function not implemented"}
 	}
-	return v, nil
+	return rv, nil
 }
 
 func (mgc *Magic) error() *MagicError {

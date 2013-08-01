@@ -61,6 +61,15 @@ magic_getpath_wrapper(void)
 }
 
 inline int
+magic_setflags_wrapper(struct magic_set *ms, int flags) {
+    if (flags < MAGIC_NONE || flags > MAGIC_NO_CHECK_BUILTIN) {
+        errno = EINVAL;
+        return -EINVAL;
+    }
+    return magic_setflags(ms, flags);
+}
+
+inline int
 magic_load_wrapper(struct magic_set *ms, const char *magicfile)
 {
     int rv;
@@ -97,4 +106,20 @@ magic_check_wrapper(struct magic_set *ms, const char *magicfile)
     RESTORE_ERROR_OUTPUT(&s);
 
     return rv;
+}
+
+inline int
+magic_version_wrapper(void)
+{
+#if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
+    return magic_version();
+#else
+# if defined(HAVE_WARNING)
+#  warning "function `int magic_version(void)' not implemented"
+# else
+#  pragma message("function `int magic_version(void)' not implemented")
+# endif
+    errno = ENOSYS;
+    return -ENOSYS;
+#endif
 }
