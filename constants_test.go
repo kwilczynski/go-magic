@@ -24,34 +24,29 @@ import (
 	. "github.com/kwilczynski/magic"
 )
 
-type ConstantsTests struct {
-	given    int
-	expected int
-}
-
 func TestConstants(t *testing.T) {
-	mgc := New()
+	mgc, _ := New()
 	defer mgc.Close()
 
+	// Older version of libmagic has this *magic* constant defined ...
 	NO_CHECK_BUILTIN_override := 0x3fb000
 	if rv, _ := mgc.Version(); rv > 0 {
-		NO_CHECK_BUILTIN_override = NO_CHECK_COMPRESS |
-			NO_CHECK_TAR |
-			NO_CHECK_APPTYPE |
-			NO_CHECK_ELF |
-			NO_CHECK_TEXT |
-			NO_CHECK_CDF |
-			NO_CHECK_TOKENS |
-			NO_CHECK_ENCODING
+		NO_CHECK_BUILTIN_override = NO_CHECK_COMPRESS | NO_CHECK_TAR |
+			NO_CHECK_APPTYPE | NO_CHECK_ELF | NO_CHECK_TEXT |
+			NO_CHECK_CDF | NO_CHECK_TOKENS | NO_CHECK_ENCODING
 	}
 
-	var ct = []ConstantsTests{
+	// Check if underlaying constants coming from libmagic are sane.
+	var constantTests = []struct {
+		given    int
+		expected int
+	}{
 		{MIME, MIME_TYPE | MIME_ENCODING},
 		{NO_CHECK_BUILTIN, NO_CHECK_BUILTIN_override},
 		{NO_CHECK_ASCII, NO_CHECK_TEXT},
 	}
 
-	for _, tt := range ct {
+	for _, tt := range constantTests {
 		if tt.given != tt.expected {
 			t.Errorf("value given 0x%x, want 0x%x",
 				tt.given, tt.expected)

@@ -37,7 +37,10 @@ func CompareStrings(this, other string) bool {
 }
 
 func TestNew(t *testing.T) {
-	mgc := New()
+	mgc, err := New()
+	if err != nil {
+		t.Fatalf("unable to create new Magic type: %s", err.Error())
+	}
 	defer mgc.Close()
 
 	func(v interface{}) {
@@ -48,7 +51,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestMagic_String(t *testing.T) {
-	mgc := New()
+	mgc, _ := New()
 	defer mgc.Close()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
@@ -61,10 +64,10 @@ func TestMagic_String(t *testing.T) {
 }
 
 func TestMagic_Path(t *testing.T) {
-	mgc := New()
+	mgc, _ := New()
 	defer mgc.Close()
 
-	v := mgc.Path()
+	v, _ := mgc.Path()
 	if len(v) == 0 {
 		t.Fatalf("value given \"%T\", should not be empty", v)
 	}
@@ -79,8 +82,9 @@ func TestMagic_Path(t *testing.T) {
 		t.Fatalf("unable to set \"MAGIC\" environment variable to \"%s\"", p)
 	}
 
-	if ok := CompareStrings(mgc.Path()[0], p); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", mgc.Path()[0], p)
+	v, _ = mgc.Path()
+	if ok := CompareStrings(v[0], p); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", v[0], p)
 	}
 
 	// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
@@ -89,52 +93,53 @@ func TestMagic_Path(t *testing.T) {
 }
 
 func TestMagic_Flags(t *testing.T) {
-	mgc := New()
+	mgc, _ := New()
 	defer mgc.Close()
 
 	mgc.SetFlags(MIME)
 
-	v := MIME_TYPE | MIME_ENCODING
-	if mgc.Flags() != v {
-		t.Errorf("value given 0x%06x, want 0x%06x", mgc.Flags(), v)
+	flags := MIME_TYPE | MIME_ENCODING
+	if v, _ := mgc.Flags(); v != flags {
+		t.Errorf("value given 0x%06x, want 0x%06x", v, flags)
 	}
 }
 
 func TestMagic_SetFlags(t *testing.T) {
-	mgc := New()
+	mgc, _ := New()
 	defer mgc.Close()
 
 	var flagsTests = []struct {
-		flag      int
-		expected  int
-		incorrect bool
-		errno     int
+		broken   bool
+		errno    int
+		expected int
+		given    int
 	}{
-		{-1, 0x000000, true, -22},
-		{NONE, 0x000000, false, 0},
-		{MIME_TYPE, 0x000010, false, 0},
-		{MIME_ENCODING, 0x000400, false, 0},
-		{0xffffff, 0x000400, true, -22},
-		{MIME, 0x000010 | 0x000400, false, 0},
-		{MIME, MIME_TYPE | MIME_ENCODING, false, 0},
-		{NO_CHECK_ASCII, NO_CHECK_TEXT, false, 0},
+		// Test lower boundary limit.
+		{true, 22, 0x000000, -0xffffff},
+		// Genuine flags ...
+		{false, 0, 0x000000, 0x000000}, // Flag: NONE
+		{false, 0, 0x000010, 0x000010}, // Flag: MIME_TYPE
+		{false, 0, 0x000400, 0x000400}, // Flag: MIME_ENCODING
+		{false, 0, 0x000410, 0x000410}, // Flag: MIME_TYPE | MIME_ENCODING
+		// Test upper boundary limit.
+		{true, 22, 0x000410, 0xffffff},
 	}
 
 	var err error
-	var given, errno int
+	var actual, errno int
 	for _, tt := range flagsTests {
-		err = mgc.SetFlags(tt.flag)
-		given = mgc.Flags()
-		if err != nil && tt.incorrect {
+		err = mgc.SetFlags(tt.given)
+		actual, _ = mgc.Flags()
+		if err != nil && tt.broken {
 			errno = err.(*MagicError).Errno
-			if given != tt.expected || errno != tt.errno {
+			if actual != tt.expected || errno != tt.errno {
 				t.Errorf("value given {0x%06x %d}, want {0x%06x %d}",
-					given, errno, tt.expected, tt.errno)
+					actual, errno, tt.expected, tt.errno)
 				continue
 			}
 		}
-		if given != tt.expected {
-			t.Errorf("value given 0x%06x, want 0x%06x", given, tt.expected)
+		if actual != tt.expected {
+			t.Errorf("value given 0x%06x, want 0x%06x", actual, tt.expected)
 		}
 	}
 
