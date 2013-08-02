@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"runtime"
 	"syscall"
 	"testing"
 
@@ -168,9 +169,18 @@ func TestMagic_Version(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
 
+	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
+	f := reflect.ValueOf(t).MethodByName("Skip")
+	if ok := f.IsValid(); !ok {
+		f = reflect.ValueOf(t).MethodByName("Log")
+	}
+
 	v, err := mgc.Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		t.Skip("function `int magic_version(void)' is not implemented")
+		f.Call([]reflect.Value{
+			reflect.ValueOf("function `int magic_version(void)' is not implemented"),
+		})
+		return // Should not me reachable on modern Go version.
 	}
 
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
