@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"runtime"
 	"syscall"
 	"testing"
 
