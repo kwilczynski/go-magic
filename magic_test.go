@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"syscall"
 	"testing"
 
 	. "github.com/kwilczynski/magic"
@@ -164,4 +165,16 @@ func TestMagic_Descriptor(t *testing.T) {
 }
 
 func TestMagic_Version(t *testing.T) {
+	mgc, _ := New()
+	defer mgc.Close()
+
+	v, err := mgc.Version()
+	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
+		t.Skip("function `int magic_version(void)' is not implemented")
+	}
+
+	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
+		t.Errorf("value given {%v %d}, want {%v > 0}",
+			reflect.ValueOf(v).Kind(), v, reflect.Int)
+	}
 }
