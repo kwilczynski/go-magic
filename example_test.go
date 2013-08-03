@@ -21,7 +21,7 @@ package magic_test
 import (
 	"fmt"
 
-	"github.com/kwilczynski/magic"
+	"github.com/kwilczynski/go-magic"
 )
 
 func ExampleMagic() {

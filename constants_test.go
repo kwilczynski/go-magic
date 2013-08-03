@@ -21,7 +21,7 @@ package magic_test
 import (
 	"testing"
 
-	. "github.com/kwilczynski/magic"
+	. "github.com/kwilczynski/go-magic"
 )
 
 func TestConstants(t *testing.T) {

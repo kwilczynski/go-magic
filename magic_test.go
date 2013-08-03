@@ -27,7 +27,7 @@ import (
 	"syscall"
 	"testing"
 
-	. "github.com/kwilczynski/magic"
+	. "github.com/kwilczynski/go-magic"
 )
 
 func CompareStrings(this, other string) bool {
