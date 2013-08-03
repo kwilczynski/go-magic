@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef _MAGIC_FUNCTIONS_WRAPPER_H
-#define _MAGIC_FUNCTIONS_WRAPPER_H
+#ifndef _GO_MAGIC_FUNCTION_WRAPPERS_H
+#define _GO_MAGIC_FUNCTION_WRAPPERS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,4 +69,4 @@ extern int magic_version_wrapper(void);
 }
 #endif
 
-#endif /* _MAGIC_FUNCTIONS_WRAPPER_H */
+#endif /* _GO_MAGIC_FUNCTION_WRAPPERS_H */
