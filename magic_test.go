@@ -21,8 +21,9 @@ package magic_test
 import (
 	"bytes"
 	"fmt"
-	"os"
-	"path"
+// XXX(kwilczynski): Not in use at the moment, see comment below ...
+//	"os"
+//	"path"
 	"reflect"
 	"syscall"
 	"testing"
