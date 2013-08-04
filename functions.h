@@ -19,6 +19,14 @@
 #ifndef _GO_MAGIC_FUNCTION_WRAPPERS_H
 #define _GO_MAGIC_FUNCTION_WRAPPERS_H
 
+#if !defined(_GNU_SOURCE)
+# define _GNU_SOURCE 1
+#endif
+
+#if !defined(_BSD_SOURCE)
+# define _BSD_SOURCE 1
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -46,12 +54,12 @@ extern "C" {
 # define ENOSYS 38
 #endif
 
-#define SUPPRESS_ERROR_OUTPUT(name, result, arguments...)       \
+#define SUPPRESS_ERROR_OUTPUT(name, result, ...)                \
     do {                                                        \
         int name##_result;                                      \
         save_t name##_save;                                     \
         name##_result = suppress_error_output(&(name##_save));  \
-        result = name(arguments);                               \
+        result = name(__VA_ARGS__);                             \
             restore_error_output(&name##_save);                 \
     } while(0)
 
