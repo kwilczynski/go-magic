@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <magic.h>
 
@@ -33,6 +34,10 @@ extern "C" {
 # define HAVE_WARNING 1
 #endif
 
+#if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
+# define HAVE_MAGIC_VERSION 1
+#endif
+
 #if !defined(EINVAL)
 # define EINVAL 22
 #endif
@@ -41,17 +46,13 @@ extern "C" {
 # define ENOSYS 38
 #endif
 
-#define SUPPRESS_ERROR_OUTPUT(a, b)       \
-    do {                                  \
-        (b) = suppress_error_output((a)); \
-        if ((b) != 0) {                   \
-            return (b);                   \
-        }                                 \
-    } while(0)
-
-#define RESTORE_ERROR_OUTPUT(a)    \
-    do {                           \
-        restore_error_output((a)); \
+#define SUPPRESS_ERROR_OUTPUT(name, result, arguments...)       \
+    do {                                                        \
+        int name##_result;                                      \
+        save_t name##_save;                                     \
+        name##_result = suppress_error_output(&(name##_save));  \
+        result = name(arguments);                               \
+            restore_error_output(&name##_save);                 \
     } while(0)
 
 extern int errno;

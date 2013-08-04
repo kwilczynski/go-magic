@@ -19,36 +19,55 @@
 #include "functions.h"
 
 struct save {
-    int fd;
+    int old_fd;
+    int new_fd;
+    int status;
     fpos_t position;
 };
 
 typedef struct save save_t;
 
 static int
-suppress_error_output(void *p)
+suppress_error_output(void *data)
 {
-    save_t *s = p;
+    save_t *s = data;
 
     fflush(stderr);
     fgetpos(stderr, &s->position);
 
-    s->fd = dup(fileno(stderr));
-    
-    if (freopen("/dev/null", "w", stderr) == NULL) {
-        return errno;
+    s->status = 0;
+
+    s->old_fd = dup(fileno(stderr));
+    s->new_fd = open("/dev/null", O_WRONLY);
+    if (s->new_fd < 0) {
+        dup2(s->old_fd, fileno(stderr));
+        close(s->old_fd);
+
+        s->old_fd = -1;
+        s->new_fd = s->old_fd;
+        s->status = errno;
+
+        return -1;
     }
+
+    dup2(s->new_fd, fileno(stderr));
+    close(s->new_fd);
+
     return 0;
 }
 
 static void
-restore_error_output(void *p)
+restore_error_output(void *data)
 {
-    save_t *s = p;
+    save_t *s = data;
+
+    if (s->old_fd < 0 && s->status != 0) {
+        return;
+    }
 
     fflush(stderr);
-    dup2(s->fd, fileno(stderr));
-    close(s->fd);
+    dup2(s->old_fd, fileno(stderr));
+    close(s->old_fd);
     clearerr(stderr);
     fsetpos(stderr, &s->position);
     setvbuf(stderr, NULL, _IONBF, 0);
@@ -81,11 +100,8 @@ inline int
 magic_load_wrapper(struct magic_set *ms, const char *magicfile)
 {
     int rv;
-    save_t s;
     
-    SUPPRESS_ERROR_OUTPUT(&s, rv);
-    rv = magic_load(ms, magicfile);
-    RESTORE_ERROR_OUTPUT(&s);
+    SUPPRESS_ERROR_OUTPUT(magic_load, rv, ms, magicfile);
 
     return rv;
 }
@@ -94,11 +110,8 @@ inline int
 magic_compile_wrapper(struct magic_set *ms, const char *magicfile)
 {
     int rv;
-    save_t s;
     
-    SUPPRESS_ERROR_OUTPUT(&s, rv);
-    rv = magic_compile(ms, magicfile);
-    RESTORE_ERROR_OUTPUT(&s);
+    SUPPRESS_ERROR_OUTPUT(magic_compile, rv, ms, magicfile);
 
     return rv;
 }
@@ -107,11 +120,8 @@ inline int
 magic_check_wrapper(struct magic_set *ms, const char *magicfile)
 {
     int rv;
-    save_t s;
     
-    SUPPRESS_ERROR_OUTPUT(&s, rv);
-    rv = magic_check(ms, magicfile);
-    RESTORE_ERROR_OUTPUT(&s);
+    SUPPRESS_ERROR_OUTPUT(magic_check, rv, ms, magicfile);
 
     return rv;
 }
@@ -119,7 +129,7 @@ magic_check_wrapper(struct magic_set *ms, const char *magicfile)
 inline int
 magic_version_wrapper(void)
 {
-#if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
+#if defined(HAVE_MAGIC_VERSION)
     return magic_version();
 #else
 # if defined(HAVE_WARNING)
