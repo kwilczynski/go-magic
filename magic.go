@@ -114,12 +114,9 @@ func (mgc *Magic) SetFlags(flags int) error {
 	}
 
 	rv, err := C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
-	if err != nil {
+	if rv < 0 && err != nil {
 		errno := err.(syscall.Errno)
 		return &MagicError{int(errno), errno.Error()}
-	}
-	if rv < 0 {
-		return mgc.error()
 	}
 
 	mgc.flags = flags
@@ -245,7 +242,7 @@ func (mgc *Magic) Version() (int, error) {
 	defer mgc.Unlock()
 
 	rv, err := C.magic_version_wrapper()
-	if err != nil {
+	if rv < 0 && err != nil {
 		errno := err.(syscall.Errno)
 		return -1, &MagicError{int(errno), errno.Error()}
 	}
