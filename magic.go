@@ -30,6 +30,7 @@ import "C"
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"runtime"
 	"strings"
 	"sync"
@@ -265,6 +266,36 @@ func (mgc *Magic) error() *MagicError {
 
 func (mgc *Magic) destroy() {
 	mgc.Close()
+}
+
+func Open(f func(magic *Magic) error, files ...string) (err error) {
+	var ok bool
+        errno := syscall.EINVAL
+
+        if f == nil || reflect.TypeOf(f).Kind() != reflect.Func {
+                return &MagicError{int(errno), errno.Error()}
+        }
+
+	mgc, err := New()
+	if err != nil {
+		return err
+	}
+	defer mgc.Close()
+
+	if err = mgc.Load(files...); err != nil {
+		return err
+	}
+
+        defer func() {
+                if r := recover(); r != nil {
+                        err, ok = r.(error)
+                        if !ok {
+                                err = &MagicError{int(errno), fmt.Sprintf("%v", r)}
+                        }
+                }
+        }()
+
+        return f(mgc)
 }
 
 func Compile(files ...string) error {
