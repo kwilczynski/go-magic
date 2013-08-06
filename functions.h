@@ -60,7 +60,9 @@ extern "C" {
         save_t name##_save;                                     \
         name##_result = suppress_error_output(&(name##_save));  \
         result = name(__VA_ARGS__);                             \
+        if (name##_result == 0) {                               \
             restore_error_output(&name##_save);                 \
+        }                                                       \
     } while(0)
 
 extern int errno;
