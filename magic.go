@@ -120,7 +120,7 @@ func (mgc *Magic) SetFlags(flags int) error {
 	}
 
 	rv, err := C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
-	if rv < 0 && err != nil {
+	if rv != 0 && err != nil {
 		errno := err.(syscall.Errno)
 		return &MagicError{int(errno), errno.Error()}
 	}
@@ -146,7 +146,7 @@ func (mgc *Magic) Load(files ...string) error {
 		cfiles = C.magic_getpath_wrapper()
 	}
 
-	if rv := C.magic_load_wrapper(mgc.cookie, cfiles); rv < 0 {
+	if rv := C.magic_load_wrapper(mgc.cookie, cfiles); rv != 0 {
 		return mgc.error()
 	}
 	mgc.path = strings.Split(C.GoString(cfiles), ":")
@@ -167,7 +167,7 @@ func (mgc *Magic) Compile(files ...string) error {
 		defer C.free(unsafe.Pointer(cfiles))
 	}
 
-	if rv := C.magic_compile_wrapper(mgc.cookie, cfiles); rv < 0 {
+	if rv := C.magic_compile_wrapper(mgc.cookie, cfiles); rv != 0 {
 		return mgc.error()
 	}
 	return nil
@@ -187,7 +187,7 @@ func (mgc *Magic) Check(files ...string) error {
 		defer C.free(unsafe.Pointer(cfiles))
 	}
 
-	if rv := C.magic_check_wrapper(mgc.cookie, cfiles); rv < 0 {
+	if rv := C.magic_check_wrapper(mgc.cookie, cfiles); rv != 0 {
 		return mgc.error()
 	}
 	return nil
@@ -248,7 +248,7 @@ func (mgc *Magic) Version() (int, error) {
 	defer mgc.Unlock()
 
 	rv, err := C.magic_version_wrapper()
-	if rv < 0 && err != nil {
+	if rv != 0 && err != nil {
 		errno := err.(syscall.Errno)
 		return -1, &MagicError{int(errno), errno.Error()}
 	}
