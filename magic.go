@@ -57,7 +57,7 @@ type Magic struct {
 	*magic
 }
 
-func New() (*Magic, error) {
+func New(files ...string) (*Magic, error) {
 	rv := C.magic_open(C.int(NONE))
 	if rv == nil {
 		errno := syscall.ENOMEM
@@ -66,6 +66,11 @@ func New() (*Magic, error) {
 
 	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
 	runtime.SetFinalizer(mgc.magic, (*magic).close)
+
+	if err := mgc.Load(files...); err != nil {
+		return nil, err
+	}
+
 	return mgc, nil
 }
 
@@ -276,15 +281,11 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
                 return &MagicError{int(errno), errno.Error()}
         }
 
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return err
 	}
 	defer mgc.Close()
-
-	if err = mgc.Load(files...); err != nil {
-		return err
-	}
 
         defer func() {
                 if r := recover(); r != nil {
@@ -325,85 +326,67 @@ func Check(files ...string) error {
 }
 
 func FileMime(filename string, files ...string) (string, error) {
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return "", err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Load(files...); err != nil {
-		return "", err
-	}
 	mgc.SetFlags(MIME)
 	return mgc.File(filename)
 }
 
 func FileEncoding(filename string, files ...string) (string, error) {
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return "", err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Load(files...); err != nil {
-		return "", err
-	}
 	mgc.SetFlags(MIME_ENCODING)
 	return mgc.File(filename)
 }
 
 func FileType(filename string, files ...string) (string, error) {
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return "", err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Load(files...); err != nil {
-		return "", err
-	}
 	mgc.SetFlags(MIME_TYPE)
 	return mgc.File(filename)
 }
 
 func BufferMime(buffer []byte, files ...string) (string, error) {
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return "", err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Load(files...); err != nil {
-		return "", err
-	}
 	mgc.SetFlags(MIME)
 	return mgc.Buffer(buffer)
 }
 
 func BufferEncoding(buffer []byte, files ...string) (string, error) {
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return "", err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Load(files...); err != nil {
-		return "", err
-	}
 	mgc.SetFlags(MIME_ENCODING)
 	return mgc.Buffer(buffer)
 }
 
 func BufferType(buffer []byte, files ...string) (string, error) {
-	mgc, err := New()
+	mgc, err := New(files...)
 	if err != nil {
 		return "", err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Load(files...); err != nil {
-		return "", err
-	}
 	mgc.SetFlags(MIME_TYPE)
 	return mgc.Buffer(buffer)
 }

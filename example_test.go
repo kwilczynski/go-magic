@@ -25,13 +25,9 @@ import (
 )
 
 func ExampleMagic() {
+	// Open and load default Magic database ...
 	m, err := magic.New()
 	if err != nil {
-		panic("Unable to initialise Magic library!")
-	}
-
-	// Load default Magic database ...
-	if err = m.Load(); err != nil {
 		panic(fmt.Sprintf("An error occurred: %s\n", err))
 	}
 

@@ -57,9 +57,16 @@ func TestMagic_String(t *testing.T) {
 	defer mgc.Close()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
+	path := reflect.ValueOf(mgc).Elem().FieldByName("path")
 	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
 
-	v := fmt.Sprintf("Magic{flags:%d path:%s cookie:0x%x}", 0, []string{}, cookie)
+	// Get whatever the underlying default path is ...
+	paths := make([]string, path.Len())
+	for i := 0; i < path.Len(); i++ {
+		paths[i] = path.Index(i).String()
+	}
+
+	v := fmt.Sprintf("Magic{flags:%d path:%s cookie:0x%x}", 0, paths, cookie)
 	if ok := CompareStrings(mgc.String(), v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", mgc.String(), v)
 	}
@@ -93,9 +100,9 @@ func TestMagic_Path(t *testing.T) {
 //		t.Errorf("value given \"%s\", want \"%s\"", v[0], p)
 //	}
 
-	// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
-	// that requires working os.Clearenv() which is yet to be implemented as
-	// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
+// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
+// that requires working os.Clearenv() which is yet to be implemented as
+// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
 }
 
 func TestMagic_Flags(t *testing.T) {
@@ -191,4 +198,31 @@ func TestMagic_Version(t *testing.T) {
 		t.Errorf("value given {%v %d}, want {%v > 0}",
 			reflect.ValueOf(v).Kind(), v, reflect.Int)
 	}
+}
+
+func TestOpen(t *testing.T) {
+}
+
+func TestCompile(t *testing.T) {
+}
+
+func TestCheck(t *testing.T) {
+}
+
+func TestFileMime(t *testing.T) {
+}
+
+func TestFileEncoding(t *testing.T) {
+}
+
+func TestFileType(t *testing.T) {
+}
+
+func TestBufferMime(t *testing.T) {
+}
+
+func TestBufferEncoding(t *testing.T) {
+}
+
+func TestBufferType(t *testing.T) {
 }
