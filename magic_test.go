@@ -21,9 +21,9 @@ package magic_test
 import (
 	"bytes"
 	"fmt"
-// XXX(kwilczynski): Not in use at the moment, see comment below ...
-//	"os"
-//	"path"
+	// XXX(kwilczynski): Not in use at the moment, see comment below ...
+	//	"os"
+	//	"path"
 	"reflect"
 	"syscall"
 	"testing"
@@ -81,28 +81,28 @@ func TestMagic_Path(t *testing.T) {
 		t.Fatalf("value given \"%T\", should not be empty", v)
 	}
 
-// XXX(krzysztof): Setting "MAGIC" here breaks tests later as it will
-// be persistent between different tests, sadly needed to be disabled
-// for the time being.
-//
-//	p, err := os.Getwd()
-//	if err != nil {
-//		t.Fatal("unable to get current and/or working directory")
-//	}
-//
-//	p = path.Clean(path.Join(p, "fixtures"))
-//	if err = os.Setenv("MAGIC", p); err != nil {
-//		t.Fatalf("unable to set \"MAGIC\" environment variable to \"%s\"", p)
-//	}
-//
-//	v, _ = mgc.Path()
-//	if ok := CompareStrings(v[0], p); !ok {
-//		t.Errorf("value given \"%s\", want \"%s\"", v[0], p)
-//	}
+	// XXX(krzysztof): Setting "MAGIC" here breaks tests later as it will
+	// be persistent between different tests, sadly needed to be disabled
+	// for the time being.
+	//
+	//	p, err := os.Getwd()
+	//	if err != nil {
+	//		t.Fatal("unable to get current and/or working directory")
+	//	}
+	//
+	//	p = path.Clean(path.Join(p, "fixtures"))
+	//	if err = os.Setenv("MAGIC", p); err != nil {
+	//		t.Fatalf("unable to set \"MAGIC\" environment variable to \"%s\"", p)
+	//	}
+	//
+	//	v, _ = mgc.Path()
+	//	if ok := CompareStrings(v[0], p); !ok {
+	//		t.Errorf("value given \"%s\", want \"%s\"", v[0], p)
+	//	}
 
-// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
-// that requires working os.Clearenv() which is yet to be implemented as
-// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
+	// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
+	// that requires working os.Clearenv() which is yet to be implemented as
+	// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
 }
 
 func TestMagic_Flags(t *testing.T) {

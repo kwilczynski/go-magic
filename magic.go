@@ -275,11 +275,11 @@ func (mgc *Magic) destroy() {
 
 func Open(f func(magic *Magic) error, files ...string) (err error) {
 	var ok bool
-        errno := syscall.EINVAL
+	errno := syscall.EINVAL
 
-        if f == nil || reflect.TypeOf(f).Kind() != reflect.Func {
-                return &MagicError{int(errno), errno.Error()}
-        }
+	if f == nil || reflect.TypeOf(f).Kind() != reflect.Func {
+		return &MagicError{int(errno), errno.Error()}
+	}
 
 	mgc, err := New(files...)
 	if err != nil {
@@ -287,16 +287,16 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 	}
 	defer mgc.Close()
 
-        defer func() {
-                if r := recover(); r != nil {
-                        err, ok = r.(error)
-                        if !ok {
-                                err = &MagicError{int(errno), fmt.Sprintf("%v", r)}
-                        }
-                }
-        }()
+	defer func() {
+		if r := recover(); r != nil {
+			err, ok = r.(error)
+			if !ok {
+				err = &MagicError{int(errno), fmt.Sprintf("%v", r)}
+			}
+		}
+	}()
 
-        return f(mgc)
+	return f(mgc)
 }
 
 func Compile(files ...string) error {
