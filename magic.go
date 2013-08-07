@@ -239,18 +239,6 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 	return C.GoString(cstring), nil
 }
 
-func (mgc *Magic) Version() (int, error) {
-	mgc.Lock()
-	defer mgc.Unlock()
-
-	rv, err := C.magic_version_wrapper()
-	if rv != 0 && err != nil {
-		errno := err.(syscall.Errno)
-		return -1, &MagicError{int(errno), errno.Error()}
-	}
-	return int(rv), nil
-}
-
 func (mgc *Magic) error() *MagicError {
 	if mgc.cookie == nil {
 		errno := syscall.EINVAL
@@ -333,6 +321,15 @@ func Check(files ...string) (bool, error) {
 		return rv, err
 	}
 	return rv, nil
+}
+
+func Version() (int, error) {
+	rv, err := C.magic_version_wrapper()
+	if rv != 0 && err != nil {
+		errno := err.(syscall.Errno)
+		return -1, &MagicError{int(errno), errno.Error()}
+	}
+	return int(rv), nil
 }
 
 func FileMime(filename string, files ...string) (string, error) {

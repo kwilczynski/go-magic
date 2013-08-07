@@ -176,17 +176,23 @@ func TestMagic_Buffer(t *testing.T) {
 func TestMagic_Descriptor(t *testing.T) {
 }
 
-func TestMagic_Version(t *testing.T) {
-	mgc, _ := New()
-	defer mgc.Close()
+func TestOpen(t *testing.T) {
+}
 
+func TestCompile(t *testing.T) {
+}
+
+func TestCheck(t *testing.T) {
+}
+
+func TestVersion(t *testing.T) {
 	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
 	f := reflect.ValueOf(t).MethodByName("Skip")
 	if ok := f.IsValid(); !ok {
 		f = reflect.ValueOf(t).MethodByName("Log")
 	}
 
-	v, err := mgc.Version()
+	v, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
 		f.Call([]reflect.Value{
 			reflect.ValueOf("function `int magic_version(void)' is not implemented"),
@@ -198,15 +204,6 @@ func TestMagic_Version(t *testing.T) {
 		t.Errorf("value given {%v %d}, want {%v > 0}",
 			reflect.ValueOf(v).Kind(), v, reflect.Int)
 	}
-}
-
-func TestOpen(t *testing.T) {
-}
-
-func TestCompile(t *testing.T) {
-}
-
-func TestCheck(t *testing.T) {
 }
 
 func TestFileMime(t *testing.T) {

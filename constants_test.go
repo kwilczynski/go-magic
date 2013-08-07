@@ -25,15 +25,14 @@ import (
 )
 
 func TestConstants(t *testing.T) {
-	mgc, _ := New()
-	defer mgc.Close()
+	// Any recent version of libmagic have 0x37b000 by default.
+	NO_CHECK_BUILTIN_override := NO_CHECK_COMPRESS | NO_CHECK_TAR |
+		NO_CHECK_APPTYPE | NO_CHECK_ELF | NO_CHECK_TEXT |
+		NO_CHECK_CDF | NO_CHECK_TOKENS | NO_CHECK_ENCODING
 
-	// Older version of libmagic has this *magic* constant defined ...
-	NO_CHECK_BUILTIN_override := 0x3fb000
-	if rv, _ := mgc.Version(); rv > 0 {
-		NO_CHECK_BUILTIN_override = NO_CHECK_COMPRESS | NO_CHECK_TAR |
-			NO_CHECK_APPTYPE | NO_CHECK_ELF | NO_CHECK_TEXT |
-			NO_CHECK_CDF | NO_CHECK_TOKENS | NO_CHECK_ENCODING
+	// Older versions of libmagic have 0x3fb000 here historically ...
+	if rv, _ := Version(); rv != 0 {
+		NO_CHECK_BUILTIN_override ^= 0x080000 // 0x37b000 ^ 0x080000 is 0x3fb000
 	}
 
 	// Check if underlaying constants coming from libmagic are sane.
