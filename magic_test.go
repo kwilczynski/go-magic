@@ -52,12 +52,36 @@ func TestNew(t *testing.T) {
 	}(mgc)
 }
 
+func TestMagic_Close(t *testing.T) {
+	mgc, _ := New()
+
+	var cookie reflect.Value
+
+	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
+
+	cookie = magic.FieldByName("cookie").Elem()
+	if ok := cookie.IsValid(); !ok {
+		t.Errorf("value given %v, want %v", ok, true)
+	}
+
+	mgc.Close()
+
+	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
+	cookie = magic.FieldByName("cookie").Elem()
+	if ok := cookie.IsValid(); ok {
+		t.Errorf("value given %v, want %v", ok, false)
+	}
+
+	// Should be a no-op ...
+	mgc.Close()
+}
+
 func TestMagic_String(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
-	path := reflect.ValueOf(mgc).Elem().FieldByName("path")
+	path := magic.FieldByName("path")
 	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
 
 	// Get whatever the underlying default path is ...
@@ -121,6 +145,9 @@ func TestMagic_SetFlags(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
 
+	var err error
+	var actual, errno int
+
 	var flagsTests = []struct {
 		broken   bool
 		errno    int
@@ -138,8 +165,6 @@ func TestMagic_SetFlags(t *testing.T) {
 		{true, 22, 0x000410, 0xffffff},
 	}
 
-	var err error
-	var actual, errno int
 	for _, tt := range flagsTests {
 		err = mgc.SetFlags(tt.given)
 		actual, _ = mgc.Flags()
