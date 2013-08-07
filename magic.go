@@ -58,14 +58,10 @@ type Magic struct {
 }
 
 func New(files ...string) (*Magic, error) {
-	rv := C.magic_open(C.int(NONE))
-	if rv == nil {
-		errno := syscall.ENOMEM
-		return nil, &MagicError{int(errno), errno.Error()}
+	mgc, err := open()
+	if err != nil {
+		return nil, err
 	}
-
-	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
-	runtime.SetFinalizer(mgc.magic, (*magic).close)
 
 	if err := mgc.Load(files...); err != nil {
 		return nil, err
@@ -153,12 +149,12 @@ func (mgc *Magic) Load(files ...string) error {
 	return nil
 }
 
-func (mgc *Magic) Compile(files ...string) error {
+func (mgc *Magic) Compile(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
 
 	if mgc.cookie == nil {
-		return mgc.error()
+		return false, mgc.error()
 	}
 
 	var cfiles *C.char
@@ -168,17 +164,17 @@ func (mgc *Magic) Compile(files ...string) error {
 	}
 
 	if rv := C.magic_compile_wrapper(mgc.cookie, cfiles); rv != 0 {
-		return mgc.error()
+		return false, mgc.error()
 	}
-	return nil
+	return true, nil
 }
 
-func (mgc *Magic) Check(files ...string) error {
+func (mgc *Magic) Check(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
 
 	if mgc.cookie == nil {
-		return mgc.error()
+		return false, mgc.error()
 	}
 
 	var cfiles *C.char
@@ -188,9 +184,9 @@ func (mgc *Magic) Check(files ...string) error {
 	}
 
 	if rv := C.magic_check_wrapper(mgc.cookie, cfiles); rv != 0 {
-		return mgc.error()
+		return false, mgc.error()
 	}
-	return nil
+	return true, nil
 }
 
 func (mgc *Magic) File(filename string) (string, error) {
@@ -273,6 +269,18 @@ func (mgc *Magic) destroy() {
 	mgc.Close()
 }
 
+func open() (*Magic, error) {
+	rv := C.magic_open(C.int(NONE))
+	if rv == nil {
+		errno := syscall.ENOMEM
+		return nil, &MagicError{int(errno), errno.Error()}
+	}
+
+	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
+	runtime.SetFinalizer(mgc.magic, (*magic).close)
+	return mgc, nil
+}
+
 func Open(f func(magic *Magic) error, files ...string) (err error) {
 	var ok bool
 	errno := syscall.EINVAL
@@ -299,30 +307,32 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 	return f(mgc)
 }
 
-func Compile(files ...string) error {
-	mgc, err := New()
+func Compile(files ...string) (bool, error) {
+	mgc, err := open()
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Compile(files...); err != nil {
-		return err
+	rv, err := mgc.Compile(files...)
+	if err != nil {
+		return rv, nil
 	}
-	return nil
+	return rv, nil
 }
 
-func Check(files ...string) error {
-	mgc, err := New()
+func Check(files ...string) (bool, error) {
+	mgc, err := open()
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer mgc.Close()
 
-	if err := mgc.Check(files...); err != nil {
-		return err
+	rv, err := mgc.Check(files...)
+	if err != nil {
+		return rv, err
 	}
-	return nil
+	return rv, nil
 }
 
 func FileMime(filename string, files ...string) (string, error) {
