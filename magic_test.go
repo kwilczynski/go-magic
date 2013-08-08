@@ -336,7 +336,8 @@ func TestMagic_Compile(t *testing.T) {
 		buffer := make([]byte, 5)
 
 		// Header (8 bytes) of the compiled Magic file should be: 1c 04 1e f1 08 00 00 00
-		// Where the 5th byte always denotes which version of the Magic database is it.
+		// on any little-endian architecture. Where the 5th byte always denotes which version
+		// of the Magic database is it.
 		expected := []byte{0x1c, 0x04, 0x1e, 0xf1}
 
 		f, err := os.Open(compiled)
