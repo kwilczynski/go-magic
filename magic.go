@@ -63,7 +63,7 @@ func New(files ...string) (*Magic, error) {
 		return nil, err
 	}
 
-	if err := mgc.Load(files...); err != nil {
+	if _, err := mgc.Load(files...); err != nil {
 		return nil, err
 	}
 
@@ -125,12 +125,12 @@ func (mgc *Magic) SetFlags(flags int) error {
 	return nil
 }
 
-func (mgc *Magic) Load(files ...string) error {
+func (mgc *Magic) Load(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
 
 	if mgc.cookie == nil {
-		return mgc.error()
+		return false, mgc.error()
 	}
 
 	var cfiles *C.char
@@ -143,10 +143,10 @@ func (mgc *Magic) Load(files ...string) error {
 	}
 
 	if rv := C.magic_load_wrapper(mgc.cookie, cfiles); rv != 0 {
-		return mgc.error()
+		return false, mgc.error()
 	}
 	mgc.path = strings.Split(C.GoString(cfiles), ":")
-	return nil
+	return true, nil
 }
 
 func (mgc *Magic) Compile(files ...string) (bool, error) {
