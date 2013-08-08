@@ -21,9 +21,9 @@ package magic_test
 import (
 	"bytes"
 	"fmt"
-	// XXX(kwilczynski): Not in use at the moment, see comment below ...
-	//	"os"
-	//	"path"
+	"os"
+	"path"
+	"path/filepath"
 	"reflect"
 	"syscall"
 	"testing"
@@ -188,10 +188,11 @@ func TestMagic_Load(t *testing.T) {
 
 	var rv bool
 	var err error
-	var path []string
+	var p []string
 
 	mgc, _ = New()
 
+	// Will load default Magic database ...
 	rv, err = mgc.Load()
 	if !rv && err != nil {
 		if ok := CompareStrings(err.Error(), ""); !ok {
@@ -215,9 +216,16 @@ func TestMagic_Load(t *testing.T) {
 	// to do about it, sadly.
 	mgc.Close()
 
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal("unable to get current and/or working directory")
+	}
+
+	correct := path.Clean(path.Join(wd, "fixtures", "png.magic"))
+
 	mgc, _ = New()
 
-	rv, err = mgc.Load("fixtures/png.magic")
+	rv, err = mgc.Load(correct)
 	if !rv && err != nil {
 		if ok := CompareStrings(err.Error(), ""); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -226,15 +234,16 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	// Current path should change accordingly ...
-	path, _ = mgc.Path()
+	p, _ = mgc.Path()
 
-	v := "fixtures/png.magic"
-	if ok := CompareStrings(path[0], v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", path[0], v)
+	if ok := CompareStrings(p[0], correct); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], correct)
 	}
 
-	rv, err = mgc.Load("fixtures/png-broken.magic")
-	if rv && err != nil {
+	broken := path.Clean(path.Join(wd, "fixtures", "png-broken.magic"))
+
+	rv, err = mgc.Load(broken)
+	if !rv && err != nil {
 		v := "magic: No current entry for continuation"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -243,18 +252,181 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	// Since there was an error, path should remain the same.
-	path, _ = mgc.Path()
-	if ok := CompareStrings(path[0], v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", path[0], v)
+	p, _ = mgc.Path()
+	if ok := CompareStrings(p[0], correct); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], correct)
 	}
 
 	mgc.Close()
 }
 
 func TestMagic_Compile(t *testing.T) {
+	var mgc *Magic
+
+	var rv bool
+	var err error
+
+	clean := func() {
+		files, _ := filepath.Glob("*.mgc")
+		for _, f := range files {
+			os.Remove(f)
+		}
+	}
+
+	mgc, _ = New()
+
+	rv, err = mgc.Compile("")
+	if !rv && err != nil {
+		v := "magic: could not find any magic files!"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
+
+	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
+	// there is one, therefore a whole new session has to be created in order to
+	// clear it. Unless upstream fixes this bad design choice, there is nothing
+	// to do about it, sadly.
+	mgc.Close()
+
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal("unable to get current and/or working directory")
+	}
+
+	correct := path.Clean(path.Join(wd, "fixtures", "png.magic"))
+
+	mgc, _ = New()
+
+	os.Chdir(path.Clean(path.Join(wd, "fixtures")))
+
+	defer func() {
+		clean()
+		os.Chdir(wd)
+	}()
+
+	clean()
+
+	rv, err = mgc.Compile(correct)
+	if !rv && err != nil {
+		if ok := CompareStrings(err.Error(), ""); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), true, "")
+		}
+	}
+
+	compiled := path.Clean(path.Join(wd, "fixtures", "png.magic.mgc"))
+
+	stat, err := os.Stat(compiled)
+	if stat == nil && err != nil {
+		v := os.IsNotExist(err)
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			v, err.Error(), false, "")
+	}
+
+	// Assuming that success would yield a non-zero size compiled Magic file ...
+	if stat != nil && err == nil {
+		v := os.IsNotExist(err)
+		if s := stat.Size(); s < 5 {
+			t.Errorf("value given {%v %d}, want {%v > 5}",
+				v, s, false)
+		}
+
+		buffer := make([]byte, 5)
+
+		// Header (8 bytes) of the compiled Magic file should be: 1c 04 1e f1 08 00 00 00
+		// Where the 5th byte always denotes which version of the Magic database is it.
+		expected := []byte{0x1c, 0x04, 0x1e, 0xf1}
+
+		f, err := os.Open(compiled)
+		if err != nil {
+			t.Fatalf("")
+		}
+		f.Read(buffer)
+		f.Close()
+
+		last := buffer[len(buffer)-1:][0] // Get version only ...
+		buffer = buffer[:len(buffer)-1]
+
+		ok := bytes.Equal(buffer, expected)
+		if !ok || last <= 0 {
+			t.Errorf("value given {0x%x 0x%02x}, want {0x%x > 0x00}",
+				buffer, last, expected)
+		}
+	}
+
+	broken := path.Clean(path.Join(wd, "fixtures", "png-broken.magic"))
+
+	rv, err = mgc.Compile(broken)
+	if !rv && err != nil {
+		v := "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestMagic_Check(t *testing.T) {
+	var mgc *Magic
+
+	var rv bool
+	var err error
+
+	mgc, _ = New()
+
+	// Will check default Magic database ...
+	rv, err = mgc.Check()
+	if !rv && err != nil {
+		if ok := CompareStrings(err.Error(), ""); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), true, "")
+		}
+	}
+
+	rv, err = mgc.Check("")
+	if !rv && err != nil {
+		v := "magic: could not find any magic files!"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
+
+	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
+	// there is one, therefore a whole new session has to be created in order to
+	// clear it. Unless upstream fixes this bad design choice, there is nothing
+	// to do about it, sadly.
+	mgc.Close()
+
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal("unable to get current and/or working directory")
+	}
+
+	correct := path.Clean(path.Join(wd, "fixtures", "png.magic"))
+
+	mgc, _ = New()
+
+	rv, err = mgc.Check(correct)
+	if !rv && err != nil {
+		if ok := CompareStrings(err.Error(), ""); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), true, "")
+		}
+	}
+
+	broken := path.Clean(path.Join(wd, "fixtures", "png-broken.magic"))
+
+	rv, err = mgc.Check(broken)
+	if !rv && err != nil {
+		v := "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestMagic_File(t *testing.T) {
