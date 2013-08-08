@@ -184,6 +184,71 @@ func TestMagic_SetFlags(t *testing.T) {
 }
 
 func TestMagic_Load(t *testing.T) {
+	var mgc *Magic
+
+	var rv bool
+	var err error
+	var path []string
+
+	mgc, _ = New()
+
+	rv, err = mgc.Load()
+	if !rv && err != nil {
+		if ok := CompareStrings(err.Error(), ""); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), true, "")
+		}
+	}
+
+	rv, err = mgc.Load("")
+	if rv && err != nil {
+		v := "magic: could not find any magic files!"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
+
+	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
+	// there is one, therefore a whole new session has to be created in order to
+	// clear it. Unless upstream fixes this bad design choice, there is nothing
+	// to do about it, sadly.
+	mgc.Close()
+
+	mgc, _ = New()
+
+	rv, err = mgc.Load("fixtures/png.magic")
+	if !rv && err != nil {
+		if ok := CompareStrings(err.Error(), ""); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), true, "")
+		}
+	}
+
+	// Current path should change accordingly ...
+	path, _ = mgc.Path()
+
+	v := "fixtures/png.magic"
+	if ok := CompareStrings(path[0], v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", path[0], v)
+	}
+
+	rv, err = mgc.Load("fixtures/png-broken.magic")
+	if rv && err != nil {
+		v := "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
+
+	// Since there was an error, path should remain the same.
+	path, _ = mgc.Path()
+	if ok := CompareStrings(path[0], v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", path[0], v)
+	}
+
+	mgc.Close()
 }
 
 func TestMagic_Compile(t *testing.T) {
