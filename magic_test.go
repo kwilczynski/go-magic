@@ -21,6 +21,7 @@ package magic_test
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -44,6 +45,7 @@ const (
 )
 
 var (
+	image   string
 	genuine string
 	broken  string
 	fake    string
@@ -57,6 +59,7 @@ func CompareStrings(this, other string) bool {
 }
 
 func init() {
+	image = path.Clean(path.Join(fixturesDirectory, sampleImageFile))
 	genuine = path.Clean(path.Join(fixturesDirectory, genuineMagicFile))
 	broken = path.Clean(path.Join(fixturesDirectory, brokenMagicFile))
 	fake = path.Clean(path.Join(fixturesDirectory, fakeMagicFile))
@@ -225,7 +228,7 @@ func TestMagic_Load(t *testing.T) {
 		}
 	}
 
-	rv, err = mgc.Load("")
+	rv, err = mgc.Load("does/not/exist")
 	if rv && err != nil {
 		v := "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
@@ -290,7 +293,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	mgc, _ = New()
 
-	rv, err = mgc.Compile("")
+	rv, err = mgc.Compile("does/not/exist")
 	if !rv && err != nil {
 		v := "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
@@ -399,7 +402,7 @@ func TestMagic_Check(t *testing.T) {
 		}
 	}
 
-	rv, err = mgc.Check("")
+	rv, err = mgc.Check("does/not/exist")
 	if !rv && err != nil {
 		v := "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
@@ -435,11 +438,186 @@ func TestMagic_Check(t *testing.T) {
 func TestMagic_File(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
+
+	var ok bool
+	var err error
+	var v, rv string
+
+	mgc.SetFlags(NONE)
+	mgc.Load(genuine)
+
+	rv, err = mgc.File(image)
+
+	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(MIME)
+
+	rv, err = mgc.File(image)
+
+	v = "image/png; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(NONE)
+	mgc.Load(fake)
+
+	rv, err = mgc.File(image)
+
+	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(MIME)
+
+	rv, err = mgc.File(image)
+
+	v = "image/x-go-gopher; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = mgc.File("does/not/exist")
+
+	v = "magic: cannot open `does/not/exist' (No such file or directory)"
+	if ok = CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
 }
 
 func TestMagic_Buffer(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
+
+	var ok bool
+	var err error
+	var v, rv string
+
+	buffer := &bytes.Buffer{}
+
+	f, err := os.Open(image)
+	if err != nil {
+		t.Fatalf("")
+	}
+	io.Copy(buffer, f)
+	f.Close()
+
+	mgc.SetFlags(NONE)
+	mgc.Load(genuine)
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(MIME)
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "image/png; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(NONE)
+	mgc.Load(fake)
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(MIME)
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "image/x-go-gopher; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("Hello, 世界")
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "text/plain; charset=utf-8"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	mgc.SetFlags(NONE)
+
+	buffer.Reset()
+	buffer.WriteString("#!/bin/bash\n")
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	// This is correct since custom Magic database was loaded,
+	// libmagic does not have enough know-how to correctly
+	// identify Bash scripts.
+	v = "ASCII text"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	// Re-load default Magic database ...
+	mgc.Load()
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "Bourne-Again shell script, ASCII text executable"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("#!/bin/sh\n")
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	// Quite redundant, but fun ...
+	v = "POSIX shell script, ASCII text executable"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.Write([]byte{0x0})
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "very short file (no magic)"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("did not panic")
+			return
+		}
+		v = "runtime error: index out of range"
+		if ok := CompareStrings(r.(error).Error(), v); !ok {
+			t.Errorf("value given \"%s\", want \"%s\"",
+				r.(error).Error(), v)
+			return
+		}
+	}()
+
+	// Will panic ...
+	mgc.Buffer(buffer.Bytes())
 }
 
 func TestMagic_Descriptor(t *testing.T) {
