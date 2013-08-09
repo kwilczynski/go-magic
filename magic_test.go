@@ -31,11 +31,35 @@ import (
 	. "github.com/kwilczynski/go-magic"
 )
 
+const (
+	fixturesDirectory = "fixtures"
+
+	// PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced
+	sampleImageFile = "gopher.png"
+
+	// Magic files for testing only ...
+	genuineMagicFile = "png.magic"
+	brokenMagicFile  = "png-broken.magic"
+	fakeMagicFile    = "png-fake.magic"
+)
+
+var (
+	genuine string
+	broken  string
+	fake    string
+)
+
 func CompareStrings(this, other string) bool {
 	if this == "" || other == "" {
 		return false
 	}
 	return bytes.Equal([]byte(this), []byte(other))
+}
+
+func init() {
+	genuine = path.Clean(path.Join(fixturesDirectory, genuineMagicFile))
+	broken = path.Clean(path.Join(fixturesDirectory, brokenMagicFile))
+	fake = path.Clean(path.Join(fixturesDirectory, fakeMagicFile))
 }
 
 func TestNew(t *testing.T) {
@@ -216,16 +240,9 @@ func TestMagic_Load(t *testing.T) {
 	// to do about it, sadly.
 	mgc.Close()
 
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal("unable to get current and/or working directory")
-	}
-
-	correct := path.Clean(path.Join(wd, "fixtures", "png.magic"))
-
 	mgc, _ = New()
 
-	rv, err = mgc.Load(correct)
+	rv, err = mgc.Load(genuine)
 	if !rv && err != nil {
 		if ok := CompareStrings(err.Error(), ""); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -236,11 +253,9 @@ func TestMagic_Load(t *testing.T) {
 	// Current path should change accordingly ...
 	p, _ = mgc.Path()
 
-	if ok := CompareStrings(p[0], correct); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], correct)
+	if ok := CompareStrings(p[0], genuine); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuine)
 	}
-
-	broken := path.Clean(path.Join(wd, "fixtures", "png-broken.magic"))
 
 	rv, err = mgc.Load(broken)
 	if !rv && err != nil {
@@ -253,8 +268,8 @@ func TestMagic_Load(t *testing.T) {
 
 	// Since there was an error, path should remain the same.
 	p, _ = mgc.Path()
-	if ok := CompareStrings(p[0], correct); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], correct)
+	if ok := CompareStrings(p[0], genuine); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuine)
 	}
 
 	mgc.Close()
@@ -284,10 +299,7 @@ func TestMagic_Compile(t *testing.T) {
 		}
 	}
 
-	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
-	// there is one, therefore a whole new session has to be created in order to
-	// clear it. Unless upstream fixes this bad design choice, there is nothing
-	// to do about it, sadly.
+	// See comment in TestMagic_Load() ...
 	mgc.Close()
 
 	wd, err := os.Getwd()
@@ -295,11 +307,16 @@ func TestMagic_Compile(t *testing.T) {
 		t.Fatal("unable to get current and/or working directory")
 	}
 
-	correct := path.Clean(path.Join(wd, "fixtures", "png.magic"))
-
 	mgc, _ = New()
+	defer mgc.Close()
 
-	os.Chdir(path.Clean(path.Join(wd, "fixtures")))
+	os.Chdir(path.Join(wd, fixturesDirectory))
+
+	// Re-define as we are no longer in top-level directory ...
+	genuine := path.Clean(path.Join(".", genuineMagicFile))
+	broken := path.Clean(path.Join(".", brokenMagicFile))
+
+	compiled := fmt.Sprintf("%s.mgc", genuine)
 
 	defer func() {
 		clean()
@@ -308,15 +325,13 @@ func TestMagic_Compile(t *testing.T) {
 
 	clean()
 
-	rv, err = mgc.Compile(correct)
+	rv, err = mgc.Compile(genuine)
 	if !rv && err != nil {
 		if ok := CompareStrings(err.Error(), ""); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), true, "")
 		}
 	}
-
-	compiled := path.Clean(path.Join(wd, "fixtures", "png.magic.mgc"))
 
 	stat, err := os.Stat(compiled)
 	if stat == nil && err != nil {
@@ -357,8 +372,6 @@ func TestMagic_Compile(t *testing.T) {
 		}
 	}
 
-	broken := path.Clean(path.Join(wd, "fixtures", "png-broken.magic"))
-
 	rv, err = mgc.Compile(broken)
 	if !rv && err != nil {
 		v := "magic: No current entry for continuation"
@@ -395,30 +408,19 @@ func TestMagic_Check(t *testing.T) {
 		}
 	}
 
-	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
-	// there is one, therefore a whole new session has to be created in order to
-	// clear it. Unless upstream fixes this bad design choice, there is nothing
-	// to do about it, sadly.
+	// See comment in TestMagic_Load() ...
 	mgc.Close()
 
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal("unable to get current and/or working directory")
-	}
-
-	correct := path.Clean(path.Join(wd, "fixtures", "png.magic"))
-
 	mgc, _ = New()
+	defer mgc.Close()
 
-	rv, err = mgc.Check(correct)
+	rv, err = mgc.Check(genuine)
 	if !rv && err != nil {
 		if ok := CompareStrings(err.Error(), ""); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), true, "")
 		}
 	}
-
-	broken := path.Clean(path.Join(wd, "fixtures", "png-broken.magic"))
 
 	rv, err = mgc.Check(broken)
 	if !rv && err != nil {
@@ -431,12 +433,18 @@ func TestMagic_Check(t *testing.T) {
 }
 
 func TestMagic_File(t *testing.T) {
+	mgc, _ := New()
+	defer mgc.Close()
 }
 
 func TestMagic_Buffer(t *testing.T) {
+	mgc, _ := New()
+	defer mgc.Close()
 }
 
 func TestMagic_Descriptor(t *testing.T) {
+	mgc, _ := New()
+	defer mgc.Close()
 }
 
 func TestOpen(t *testing.T) {
