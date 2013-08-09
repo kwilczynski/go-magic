@@ -623,6 +623,88 @@ func TestMagic_Buffer(t *testing.T) {
 func TestMagic_Descriptor(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
+
+	var f *os.File
+
+	var ok bool
+	var err error
+	var v, rv string
+
+	// Sadly, the function `const char* magic_descriptor(struct magic_set*, int)',
+	// which is a part of libmagic will *kindly* close file referenced by given
+	// file-descriptor for us, and so we have to re-open each time ...
+	file := func() {
+		f, err = os.Open(image)
+		if err != nil {
+			t.Fatalf("")
+		}
+	}
+
+	file()
+
+	mgc.SetFlags(NONE)
+	mgc.Load(genuine)
+
+	rv, err = mgc.Descriptor(f.Fd())
+
+	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	f.Close()
+	file()
+
+	mgc.SetFlags(MIME)
+
+	rv, err = mgc.Descriptor(f.Fd())
+
+	v = "image/png; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	f.Close()
+	file()
+
+	mgc.SetFlags(NONE)
+	mgc.Load(fake)
+
+	rv, err = mgc.Descriptor(f.Fd())
+
+	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	f.Close()
+	file()
+	mgc.SetFlags(MIME)
+
+	rv, err = mgc.Descriptor(f.Fd())
+
+	v = "image/x-go-gopher; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	f.Close()
+
+	rv, err = mgc.Descriptor(f.Fd())
+
+	v = "magic: cannot read `(null)' (Bad file descriptor)"
+	if ok = CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	// Reading from standard input (0) will yield no data in this case.
+	rv, err = mgc.Descriptor(0)
+
+	v = "application/x-empty"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
 }
 
 func TestOpen(t *testing.T) {
