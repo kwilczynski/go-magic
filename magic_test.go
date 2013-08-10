@@ -352,7 +352,7 @@ func TestMagic_Compile(t *testing.T) {
 
 		f, err := os.Open(compiled)
 		if err != nil {
-			t.Fatalf("")
+			t.Fatalf("unable to open file `%s'", compiled)
 		}
 		f.Read(buffer)
 		f.Close()
@@ -486,7 +486,7 @@ func TestMagic_Buffer(t *testing.T) {
 	image := func() {
 		f, err = os.Open(image)
 		if err != nil {
-			t.Fatalf("")
+			t.Fatalf("unable to open file `%s'", image)
 		}
 		io.Copy(buffer, f)
 		f.Close()
@@ -637,7 +637,7 @@ func TestMagic_Descriptor(t *testing.T) {
 	file := func() {
 		f, err = os.Open(image)
 		if err != nil {
-			t.Fatalf("")
+			t.Fatalf("unable to open file `%s'", image)
 		}
 	}
 
@@ -709,6 +709,19 @@ func TestMagic_Descriptor(t *testing.T) {
 }
 
 func TestOpen(t *testing.T) {
+	var ok bool
+	var rv error
+	var v string
+
+	rv = Open(func (mgc *Magic) error {
+		// A canary value to test error propagation ...
+		panic("123abc456")
+	})
+
+	v = "magic: 123abc456"
+	if ok = CompareStrings(rv.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv.Error(), v)
+	}
 }
 
 func TestCompile(t *testing.T) {
@@ -924,10 +937,235 @@ func TestFileType(t *testing.T) {
 }
 
 func TestBufferMime(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	buffer := &bytes.Buffer{}
+
+	f, err := os.Open(image)
+	if err != nil {
+		t.Fatalf("unable to open file `%s'", image)
+	}
+	io.Copy(buffer, f)
+	f.Close()
+
+	rv, err = BufferMime(buffer.Bytes(), genuine)
+
+	v = "image/png; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = BufferMime(buffer.Bytes(), fake)
+
+	v = "image/x-go-gopher; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("Hello, 世界")
+
+	rv, err = BufferMime(buffer.Bytes())
+
+	v = "text/plain; charset=utf-8"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("#!/bin/bash\n")
+
+	rv, err = BufferMime(buffer.Bytes())
+
+	v = "text/x-shellscript; charset=us-ascii"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.Write([]byte{0x0})
+
+	rv, err = BufferMime(buffer.Bytes())
+
+	v = "application/octet-stream"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("did not panic")
+			return
+		}
+		v = "runtime error: index out of range"
+		if ok := CompareStrings(r.(error).Error(), v); !ok {
+			t.Errorf("value given \"%s\", want \"%s\"",
+				r.(error).Error(), v)
+			return
+		}
+	}()
+
+	// Will panic ...
+	BufferMime(buffer.Bytes())
 }
 
 func TestBufferEncoding(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	buffer := &bytes.Buffer{}
+
+	f, err := os.Open(image)
+	if err != nil {
+		t.Fatalf("unable to open file `%s'", image)
+	}
+	io.Copy(buffer, f)
+	f.Close()
+
+	rv, err = BufferEncoding(buffer.Bytes(), genuine)
+
+	v = "binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = BufferEncoding(buffer.Bytes(), fake)
+
+	v = "binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("Hello, 世界")
+
+	rv, err = BufferEncoding(buffer.Bytes())
+
+	v = "utf-8"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("#!/bin/bash\n")
+
+	rv, err = BufferEncoding(buffer.Bytes())
+
+	v = "us-ascii"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.Write([]byte{0x0})
+
+	rv, err = BufferEncoding(buffer.Bytes())
+
+	v = "" // Should be empty ...
+	if ok = CompareStrings(rv, v); ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("did not panic")
+			return
+		}
+		v = "runtime error: index out of range"
+		if ok := CompareStrings(r.(error).Error(), v); !ok {
+			t.Errorf("value given \"%s\", want \"%s\"",
+				r.(error).Error(), v)
+			return
+		}
+	}()
+
+	// Will panic ...
+	BufferEncoding(buffer.Bytes())
 }
 
 func TestBufferType(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	buffer := &bytes.Buffer{}
+
+	f, err := os.Open(image)
+	if err != nil {
+		t.Fatalf("unable to open file `%s'", image)
+	}
+	io.Copy(buffer, f)
+	f.Close()
+
+	rv, err = BufferType(buffer.Bytes(), genuine)
+
+	v = "image/png"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = BufferType(buffer.Bytes(), fake)
+
+	v = "image/x-go-gopher"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("Hello, 世界")
+
+	rv, err = BufferType(buffer.Bytes())
+
+	v = "text/plain"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("#!/bin/bash\n")
+
+	rv, err = BufferType(buffer.Bytes())
+
+	v = "text/x-shellscript"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.Write([]byte{0x0})
+
+	rv, err = BufferType(buffer.Bytes())
+
+	v = "application/octet-stream"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("did not panic")
+			return
+		}
+		v = "runtime error: index out of range"
+		if ok := CompareStrings(r.(error).Error(), v); !ok {
+			t.Errorf("value given \"%s\", want \"%s\"",
+				r.(error).Error(), v)
+			return
+		}
+	}()
+
+	// Will panic ...
+	BufferType(buffer.Bytes())
 }
