@@ -219,12 +219,13 @@ func TestMagic_Load(t *testing.T) {
 	var rv bool
 	var err error
 	var p []string
+	var v string
 
 	mgc, _ = New()
 
 	rv, err = mgc.Load("does/not/exist")
 	if rv && err != nil {
-		v := "magic: could not find any magic files!"
+		v = "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -254,7 +255,7 @@ func TestMagic_Load(t *testing.T) {
 
 	rv, err = mgc.Load(broken)
 	if !rv && err != nil {
-		v := "magic: No current entry for continuation"
+		v = "magic: No current entry for continuation"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -275,6 +276,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	var rv bool
 	var err error
+	var v string
 
 	clean := func() {
 		files, _ := filepath.Glob("*.mgc")
@@ -287,7 +289,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	rv, err = mgc.Compile("does/not/exist")
 	if !rv && err != nil {
-		v := "magic: could not find any magic files!"
+		v = "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -328,17 +330,17 @@ func TestMagic_Compile(t *testing.T) {
 
 	stat, err := os.Stat(compiled)
 	if stat == nil && err != nil {
-		v := os.IsNotExist(err)
+		x := os.IsNotExist(err)
 		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			v, err.Error(), false, "")
+			x, err.Error(), false, "")
 	}
 
 	// Assuming that success would yield a non-zero size compiled Magic file ...
 	if stat != nil && err == nil {
-		v := os.IsNotExist(err)
+		x := os.IsNotExist(err)
 		if s := stat.Size(); s < 5 {
 			t.Errorf("value given {%v %d}, want {%v > 5}",
-				v, s, false)
+				x, s, false)
 		}
 
 		buffer := make([]byte, 5)
@@ -367,7 +369,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	rv, err = mgc.Compile(broken)
 	if !rv && err != nil {
-		v := "magic: No current entry for continuation"
+		v = "magic: No current entry for continuation"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -380,12 +382,13 @@ func TestMagic_Check(t *testing.T) {
 
 	var rv bool
 	var err error
+	var v string
 
 	mgc, _ = New()
 
 	rv, err = mgc.Check("does/not/exist")
 	if !rv && err != nil {
-		v := "magic: could not find any magic files!"
+		v = "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -406,7 +409,7 @@ func TestMagic_Check(t *testing.T) {
 
 	rv, err = mgc.Check(broken)
 	if !rv && err != nil {
-		v := "magic: No current entry for continuation"
+		v = "magic: No current entry for continuation"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -711,6 +714,7 @@ func TestOpen(t *testing.T) {
 func TestCompile(t *testing.T) {
 	var rv bool
 	var err error
+	var v string
 
 	clean := func() {
 		files, _ := filepath.Glob("*.mgc")
@@ -720,7 +724,7 @@ func TestCompile(t *testing.T) {
 	}
 
 	rv, err = Compile("does/not/exist")
-	v := "magic: could not find any magic files!"
+	v = "magic: could not find any magic files!"
 	if ok := CompareStrings(err.Error(), v); !ok && !rv {
 		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 			rv, err.Error(), false, v)
@@ -752,7 +756,7 @@ func TestCompile(t *testing.T) {
 
 	rv, err = Compile(broken)
 	if !rv && err != nil {
-		v := "magic: No current entry for continuation"
+		v = "magic: No current entry for continuation"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -763,10 +767,11 @@ func TestCompile(t *testing.T) {
 func TestCheck(t *testing.T) {
 	var rv bool
 	var err error
+	var v string
 
 	rv, err = Check("does/not/exist")
 	if !rv && err != nil {
-		v := "magic: could not find any magic files!"
+		v = "magic: could not find any magic files!"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -781,7 +786,7 @@ func TestCheck(t *testing.T) {
 
 	rv, err = Check(broken)
 	if !rv && err != nil {
-		v := "magic: No current entry for continuation"
+		v = "magic: No current entry for continuation"
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -811,12 +816,111 @@ func TestVersion(t *testing.T) {
 }
 
 func TestFileMime(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	rv, err = FileMime("does/not/exist", genuine)
+	if rv == "" && err != nil {
+		v = "magic: cannot open `does/not/exist' (No such file or directory)"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), "", v)
+		}
+	}
+
+	rv, err = FileMime(image, genuine)
+	v = "image/png; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileMime(image, fake)
+	v = "image/x-go-gopher; charset=binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileMime(image, broken)
+	if rv == "" && err != nil {
+		v = "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestFileEncoding(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	rv, err = FileEncoding("does/not/exist", genuine)
+	if rv == "" && err != nil {
+		v = "magic: cannot open `does/not/exist' (No such file or directory)"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), "", v)
+		}
+	}
+
+	rv, err = FileEncoding(image, genuine)
+	v = "binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileEncoding(image, fake)
+	v = "binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileEncoding(image, broken)
+	if rv == "" && err != nil {
+		v = "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestFileType(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	rv, err = FileType("does/not/exist", genuine)
+	if rv == "" && err != nil {
+		v = "magic: cannot open `does/not/exist' (No such file or directory)"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), "", v)
+		}
+	}
+
+	rv, err = FileType(image, genuine)
+	v = "image/png"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileType(image, fake)
+	v = "image/x-go-gopher"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileType(image, broken)
+	if rv == "" && err != nil {
+		v = "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestBufferMime(t *testing.T) {
