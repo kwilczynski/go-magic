@@ -42,6 +42,7 @@ const (
 	genuineMagicFile = "png.magic"
 	brokenMagicFile  = "png-broken.magic"
 	fakeMagicFile    = "png-fake.magic"
+	shellMagicFile   = "shell.magic"
 )
 
 var (
@@ -49,6 +50,7 @@ var (
 	genuine string
 	broken  string
 	fake    string
+	shell   string
 )
 
 func CompareStrings(this, other string) bool {
@@ -63,6 +65,7 @@ func init() {
 	genuine = path.Clean(path.Join(fixturesDirectory, genuineMagicFile))
 	broken = path.Clean(path.Join(fixturesDirectory, brokenMagicFile))
 	fake = path.Clean(path.Join(fixturesDirectory, fakeMagicFile))
+	shell = path.Clean(path.Join(fixturesDirectory, shellMagicFile))
 }
 
 func TestNew(t *testing.T) {
@@ -219,15 +222,6 @@ func TestMagic_Load(t *testing.T) {
 
 	mgc, _ = New()
 
-	// Will load default Magic database ...
-	rv, err = mgc.Load()
-	if !rv && err != nil {
-		if ok := CompareStrings(err.Error(), ""); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), true, "")
-		}
-	}
-
 	rv, err = mgc.Load("does/not/exist")
 	if rv && err != nil {
 		v := "magic: could not find any magic files!"
@@ -247,10 +241,8 @@ func TestMagic_Load(t *testing.T) {
 
 	rv, err = mgc.Load(genuine)
 	if !rv && err != nil {
-		if ok := CompareStrings(err.Error(), ""); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), true, "")
-		}
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), true, "")
 	}
 
 	// Current path should change accordingly ...
@@ -330,10 +322,8 @@ func TestMagic_Compile(t *testing.T) {
 
 	rv, err = mgc.Compile(genuine)
 	if !rv && err != nil {
-		if ok := CompareStrings(err.Error(), ""); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), true, "")
-		}
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), true, "")
 	}
 
 	stat, err := os.Stat(compiled)
@@ -393,15 +383,6 @@ func TestMagic_Check(t *testing.T) {
 
 	mgc, _ = New()
 
-	// Will check default Magic database ...
-	rv, err = mgc.Check()
-	if !rv && err != nil {
-		if ok := CompareStrings(err.Error(), ""); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), true, "")
-		}
-	}
-
 	rv, err = mgc.Check("does/not/exist")
 	if !rv && err != nil {
 		v := "magic: could not find any magic files!"
@@ -419,10 +400,8 @@ func TestMagic_Check(t *testing.T) {
 
 	rv, err = mgc.Check(genuine)
 	if !rv && err != nil {
-		if ok := CompareStrings(err.Error(), ""); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), true, "")
-		}
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), true, "")
 	}
 
 	rv, err = mgc.Check(broken)
@@ -493,18 +472,24 @@ func TestMagic_Buffer(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
 
+	var f *os.File
+
 	var ok bool
 	var err error
 	var v, rv string
 
 	buffer := &bytes.Buffer{}
 
-	f, err := os.Open(image)
-	if err != nil {
-		t.Fatalf("")
+	image := func() {
+		f, err = os.Open(image)
+		if err != nil {
+			t.Fatalf("")
+		}
+		io.Copy(buffer, f)
+		f.Close()
 	}
-	io.Copy(buffer, f)
-	f.Close()
+
+	image()
 
 	mgc.SetFlags(NONE)
 	mgc.Load(genuine)
@@ -569,12 +554,25 @@ func TestMagic_Buffer(t *testing.T) {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	// Re-load default Magic database ...
-	mgc.Load()
+	// Load two custom Magic databases now, one of which has
+	// correct magic to detect Bash shell scripts.
+	mgc.Load(genuine, shell)
 
 	rv, err = mgc.Buffer(buffer.Bytes())
 
 	v = "Bourne-Again shell script, ASCII text executable"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+
+	// Re-load Gopher PNG image ...
+	image()
+
+	rv, err = mgc.Buffer(buffer.Bytes())
+
+	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
@@ -711,9 +709,84 @@ func TestOpen(t *testing.T) {
 }
 
 func TestCompile(t *testing.T) {
+	var rv bool
+	var err error
+
+	clean := func() {
+		files, _ := filepath.Glob("*.mgc")
+		for _, f := range files {
+			os.Remove(f)
+		}
+	}
+
+	rv, err = Compile("does/not/exist")
+	v := "magic: could not find any magic files!"
+	if ok := CompareStrings(err.Error(), v); !ok && !rv {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal("unable to get current and/or working directory")
+	}
+
+	os.Chdir(path.Join(wd, fixturesDirectory))
+
+	// Re-define as we are no longer in top-level directory ...
+	genuine := path.Clean(path.Join(".", genuineMagicFile))
+	broken := path.Clean(path.Join(".", brokenMagicFile))
+
+	defer func() {
+		clean()
+		os.Chdir(wd)
+	}()
+
+	clean()
+
+	rv, err = Compile(genuine)
+	if !rv && err != nil {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), true, "")
+	}
+
+	rv, err = Compile(broken)
+	if !rv && err != nil {
+		v := "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestCheck(t *testing.T) {
+	var rv bool
+	var err error
+
+	rv, err = Check("does/not/exist")
+	if !rv && err != nil {
+		v := "magic: could not find any magic files!"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
+
+	rv, err = Check(genuine)
+	if !rv && err != nil {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), true, "")
+	}
+
+	rv, err = Check(broken)
+	if !rv && err != nil {
+		v := "magic: No current entry for continuation"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
 }
 
 func TestVersion(t *testing.T) {
