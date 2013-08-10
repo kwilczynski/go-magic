@@ -304,7 +304,7 @@ func Compile(files ...string) (bool, error) {
 
 	rv, err := mgc.Compile(files...)
 	if err != nil {
-		return rv, nil
+		return rv, err
 	}
 	return rv, nil
 }
