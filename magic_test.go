@@ -224,12 +224,15 @@ func TestMagic_Load(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Load("does/not/exist")
-	if rv && err != nil {
-		v = "magic: could not find any magic files!"
+	v = "magic: could not find any magic files!"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 
 	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
@@ -241,9 +244,9 @@ func TestMagic_Load(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Load(genuine)
-	if !rv && err != nil {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			rv, err.Error(), true, "")
+	if err != nil {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, true, "")
 	}
 
 	// Current path should change accordingly ...
@@ -254,12 +257,15 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	rv, err = mgc.Load(broken)
-	if !rv && err != nil {
-		v = "magic: No current entry for continuation"
+	v = "magic: No current entry for continuation"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 
 	// Since there was an error, path should remain the same.
@@ -288,12 +294,15 @@ func TestMagic_Compile(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Compile("does/not/exist")
-	if !rv && err != nil {
-		v = "magic: could not find any magic files!"
+	v = "magic: could not find any magic files!"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 
 	// See comment in TestMagic_Load() ...
@@ -323,9 +332,9 @@ func TestMagic_Compile(t *testing.T) {
 	clean()
 
 	rv, err = mgc.Compile(genuine)
-	if !rv && err != nil {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			rv, err.Error(), true, "")
+	if err != nil {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, true, "")
 	}
 
 	stat, err := os.Stat(compiled)
@@ -339,8 +348,7 @@ func TestMagic_Compile(t *testing.T) {
 	if stat != nil && err == nil {
 		x := os.IsNotExist(err)
 		if s := stat.Size(); s < 5 {
-			t.Errorf("value given {%v %d}, want {%v > 5}",
-				x, s, false)
+			t.Errorf("value given {%v %d}, want {%v > 5}", x, s, false)
 		}
 
 		buffer := make([]byte, 5)
@@ -368,12 +376,15 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	rv, err = mgc.Compile(broken)
-	if !rv && err != nil {
-		v = "magic: No current entry for continuation"
+	v = "magic: No current entry for continuation"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 }
 
@@ -387,12 +398,15 @@ func TestMagic_Check(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Check("does/not/exist")
-	if !rv && err != nil {
-		v = "magic: could not find any magic files!"
+	v = "magic: could not find any magic files!"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 
 	// See comment in TestMagic_Load() ...
@@ -402,18 +416,21 @@ func TestMagic_Check(t *testing.T) {
 	defer mgc.Close()
 
 	rv, err = mgc.Check(genuine)
-	if !rv && err != nil {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			rv, err.Error(), true, "")
+	if err != nil {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, true, "")
 	}
 
 	rv, err = mgc.Check(broken)
-	if !rv && err != nil {
-		v = "magic: No current entry for continuation"
+	v = "magic: No current entry for continuation"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 }
 
@@ -738,9 +755,14 @@ func TestCompile(t *testing.T) {
 
 	rv, err = Compile("does/not/exist")
 	v = "magic: could not find any magic files!"
-	if ok := CompareStrings(err.Error(), v); !ok && !rv {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			rv, err.Error(), false, v)
+	if err != nil {
+		if ok := CompareStrings(err.Error(), v); !ok && !rv {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 
 	wd, err := os.Getwd()
@@ -762,18 +784,21 @@ func TestCompile(t *testing.T) {
 	clean()
 
 	rv, err = Compile(genuine)
-	if !rv && err != nil {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			rv, err.Error(), true, "")
+	if err != nil {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, true, "")
 	}
 
 	rv, err = Compile(broken)
-	if !rv && err != nil {
-		v = "magic: No current entry for continuation"
+	v = "magic: No current entry for continuation"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 }
 
@@ -783,27 +808,33 @@ func TestCheck(t *testing.T) {
 	var v string
 
 	rv, err = Check("does/not/exist")
-	if !rv && err != nil {
-		v = "magic: could not find any magic files!"
+	v = "magic: could not find any magic files!"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 
 	rv, err = Check(genuine)
-	if !rv && err != nil {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-			rv, err.Error(), true, "")
+	if err != nil {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, true, "")
 	}
 
 	rv, err = Check(broken)
-	if !rv && err != nil {
-		v = "magic: No current entry for continuation"
+	v = "magic: No current entry for continuation"
+	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
+	} else {
+		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+			rv, err, false, v)
 	}
 }
 
