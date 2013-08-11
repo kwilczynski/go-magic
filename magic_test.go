@@ -726,18 +726,52 @@ func TestMagic_Descriptor(t *testing.T) {
 }
 
 func TestOpen(t *testing.T) {
-	var ok bool
-	var rv error
-	var v string
+	var mgc *Magic
 
-	rv = Open(func (mgc *Magic) error {
+	var ok bool
+	var err error
+	var rv, v string
+
+	err = Open(func (m *Magic) error {
+		m.Load(genuine)
+		a, b := m.File(image)
+		rv = a // Pass outside the closure for verification.
+		return b // Or return nil here ...
+	})
+
+	if err != nil {
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	} else {
+		v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+		if ok = CompareStrings(rv, v); !ok {
+			t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		}
+	}
+
+	err = Open(func (m *Magic) error {
 		// A canary value to test error propagation ...
 		panic("123abc456")
 	})
 
 	v = "magic: 123abc456"
-	if ok = CompareStrings(rv.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv.Error(), v)
+	if ok = CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	err = Open(func (m *Magic) error {
+		mgc = m // Pass outside the closure ...
+		return nil
+	})
+
+	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
+	cookie := magic.FieldByName("cookie").Elem()
+
+	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
+	if ok := cookie.IsValid(); ok {
+		t.Errorf("value given %v, want %v", ok, false)
 	}
 }
 
