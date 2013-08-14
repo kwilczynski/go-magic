@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef _GO_MAGIC_FUNCTION_WRAPPERS_H
-#define _GO_MAGIC_FUNCTION_WRAPPERS_H
+#if !defined(_FUNCTIONS_H)
+#define _FUNCTIONS_H 1
 
 #if !defined(_GNU_SOURCE)
 # define _GNU_SOURCE 1
@@ -80,4 +80,4 @@ extern int magic_version_wrapper(void);
 }
 #endif
 
-#endif /* _GO_MAGIC_FUNCTION_WRAPPERS_H */
+#endif /* _FUNCTIONS_H */
