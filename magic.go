@@ -89,7 +89,7 @@ func (mgc *Magic) Path() ([]string, error) {
 		return []string{}, mgc.error()
 	}
 
-	if len(mgc.path) != 0 && os.Getenv("MAGIC") == "" {
+	if len(mgc.path) > 0 && os.Getenv("MAGIC") == "" {
 		return mgc.path, nil
 	}
 	rv := C.GoString(C.magic_getpath_wrapper())
@@ -136,7 +136,7 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	var cfiles *C.char
 	defer C.free(unsafe.Pointer(cfiles))
 
-	if len(files) != 0 {
+	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
 	} else {
 		cfiles = C.magic_getpath_wrapper()
@@ -158,7 +158,7 @@ func (mgc *Magic) Compile(files ...string) (bool, error) {
 	}
 
 	var cfiles *C.char
-	if len(files) != 0 {
+	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
 		defer C.free(unsafe.Pointer(cfiles))
 	}
@@ -178,7 +178,7 @@ func (mgc *Magic) Check(files ...string) (bool, error) {
 	}
 
 	var cfiles *C.char
-	if len(files) != 0 {
+	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
 		defer C.free(unsafe.Pointer(cfiles))
 	}
