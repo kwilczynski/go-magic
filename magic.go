@@ -1,6 +1,3 @@
-// +build linux,cgo darwin,cgo !windows
-// +build 386 amd64
-
 /*
  * magic.go
  *
