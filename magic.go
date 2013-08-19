@@ -242,12 +242,13 @@ func (mgc *Magic) error() *MagicError {
 		return &MagicError{int(syscall.EINVAL), errno.Error()}
 	}
 
-	errno := int(C.magic_errno(mgc.cookie))
 	cstring := C.magic_error(mgc.cookie)
 	if cstring != nil {
+		errno := int(C.magic_errno(mgc.cookie))
 		return &MagicError{errno, C.GoString(cstring)}
 	}
-	return nil
+
+	return &MagicError{-1, "unknown error"}
 }
 
 func (mgc *Magic) destroy() {
