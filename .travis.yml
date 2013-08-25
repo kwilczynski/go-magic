@@ -2,6 +2,7 @@ language: go
 go:
   - 1.0
   - 1.1
+  - 1.1.2
   - tip
 matrix:
   allow_failures:
@@ -11,8 +12,8 @@ branches:
     - master
 install: true
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install --force-yes -y libmagic1 libmagic-dev
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get install --force-yes -y libmagic1 libmagic-dev
 before_script:
-  - go get -v -x github.com/kwilczynski/go-magic
+  - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script: go test -v -x ./... -run '^Test.*'
