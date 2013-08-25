@@ -54,15 +54,15 @@ extern "C" {
 # define ENOSYS 38
 #endif
 
-#define SUPPRESS_ERROR_OUTPUT(name, result, ...)                        \
-    do {                                                                \
-        int __##name##_result;                                          \
-        save_t __##name##_save;                                         \
-        __##name##_result = suppress_error_output(&(__##name##_save));  \
-        result = name(__VA_ARGS__);                                     \
-        if (!(__##name##_result)) {                                     \
-            restore_error_output(&__##name##_save);                     \
-        }                                                               \
+#define SUPPRESS_ERROR_OUTPUT(s, x, ...)            \
+    do {                                            \
+        int __##s;                                  \
+        save_t __s_##s;                             \
+        __##s = suppress_error_output(&(__s_##s));  \
+        x = s(__VA_ARGS__);                         \
+        if (!(__##s)) {                             \
+            restore_error_output(&__s_##s);         \
+        }                                           \
     } while(0)
 
 extern int errno;
