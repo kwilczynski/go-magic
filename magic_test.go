@@ -224,7 +224,13 @@ func TestMagic_Load(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Load("does/not/exist")
-	v = "magic: could not find any magic files!"
+
+	v = "magic: could not find any valid magic files!"
+	if rv := mgc.Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -257,7 +263,13 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	rv, err = mgc.Load(broken)
-	v = "magic: No current entry for continuation"
+
+	v = "magic: line 1: No current entry for continuation"
+	if rv := mgc.Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: No current entry for continuation"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
