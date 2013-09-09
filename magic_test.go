@@ -306,7 +306,13 @@ func TestMagic_Compile(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Compile("does/not/exist")
-	v = "magic: could not find any magic files!"
+
+	v = "magic: could not find any valid magic files!"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -388,7 +394,13 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	rv, err = mgc.Compile(broken)
-	v = "magic: No current entry for continuation"
+
+	v = "magic: line 1: No current entry for continuation"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: No current entry for continuation"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -410,7 +422,13 @@ func TestMagic_Check(t *testing.T) {
 	mgc, _ = New()
 
 	rv, err = mgc.Check("does/not/exist")
-	v = "magic: could not find any magic files!"
+
+	v = "magic: could not find any valid magic files!"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -434,7 +452,13 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	rv, err = mgc.Check(broken)
-	v = "magic: No current entry for continuation"
+
+	v = "magic: line 1: No current entry for continuation"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: No current entry for continuation"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -800,7 +824,13 @@ func TestCompile(t *testing.T) {
 	}
 
 	rv, err = Compile("does/not/exist")
-	v = "magic: could not find any magic files!"
+
+	v = "magic: could not find any valid magic files!"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok && !rv {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -836,7 +866,13 @@ func TestCompile(t *testing.T) {
 	}
 
 	rv, err = Compile(broken)
-	v = "magic: No current entry for continuation"
+
+	v = "magic: line 1: No current entry for continuation"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: No current entry for continuation"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -854,7 +890,13 @@ func TestCheck(t *testing.T) {
 	var v string
 
 	rv, err = Check("does/not/exist")
-	v = "magic: could not find any magic files!"
+
+	v = "magic: could not find any valid magic files!"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -872,7 +914,13 @@ func TestCheck(t *testing.T) {
 	}
 
 	rv, err = Check(broken)
-	v = "magic: No current entry for continuation"
+
+	v = "magic: line 1: No current entry for continuation"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: No current entry for continuation"
+	}
+
 	if err != nil {
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
