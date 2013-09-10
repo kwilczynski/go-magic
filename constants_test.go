@@ -31,7 +31,7 @@ func TestConstants(t *testing.T) {
 		NO_CHECK_CDF | NO_CHECK_TOKENS | NO_CHECK_ENCODING
 
 	// Older versions of libmagic have 0x3fb000 here historically ...
-	if rv, _ := Version(); rv < 0 && NO_CHECK_BUILTIN < 0x37b000 {
+	if rv, _ := Version(); rv < 0 && NO_CHECK_BUILTIN != 0x37b000 {
 		NO_CHECK_BUILTIN_override ^= 0x080000 // 0x37b000 ^ 0x080000 is 0x3fb000
 	}
 
