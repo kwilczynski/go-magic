@@ -981,7 +981,12 @@ func TestFileMime(t *testing.T) {
 
 	rv, err = FileMime(image, broken)
 	if rv == "" && err != nil {
-		v = "magic: No current entry for continuation"
+		v = "magic: line 1: No current entry for continuation"
+		if rv, _ := Version(); rv < 0 {
+			// Older version of libmagic reports same error differently.
+			v = "magic: No current entry for continuation"
+		}
+
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -1017,7 +1022,12 @@ func TestFileEncoding(t *testing.T) {
 
 	rv, err = FileEncoding(image, broken)
 	if rv == "" && err != nil {
-		v = "magic: No current entry for continuation"
+		v = "magic: line 1: No current entry for continuation"
+		if rv, _ := Version(); rv < 0 {
+			// Older version of libmagic reports same error differently.
+			v = "magic: No current entry for continuation"
+		}
+
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
@@ -1053,7 +1063,12 @@ func TestFileType(t *testing.T) {
 
 	rv, err = FileType(image, broken)
 	if rv == "" && err != nil {
-		v = "magic: No current entry for continuation"
+		v = "magic: line 1: No current entry for continuation"
+		if rv, _ := Version(); rv < 0 {
+			// Older version of libmagic reports same error differently.
+			v = "magic: No current entry for continuation"
+		}
+
 		if ok := CompareStrings(err.Error(), v); !ok {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
