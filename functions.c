@@ -97,30 +97,42 @@ magic_setflags_wrapper(struct magic_set *ms, int flags) {
 }
 
 inline int
-magic_load_wrapper(struct magic_set *ms, const char *magicfile)
+magic_load_wrapper(struct magic_set *ms, const char *magicfile, int flags)
 {
     int rv;
-    
+
+    if (flags & MAGIC_DEBUG) {
+        return magic_load(ms, magicfile);
+    }
+
     SUPPRESS_ERROR_OUTPUT(magic_load, rv, ms, magicfile);
 
     return rv;
 }
 
 inline int
-magic_compile_wrapper(struct magic_set *ms, const char *magicfile)
+magic_compile_wrapper(struct magic_set *ms, const char *magicfile, int flags)
 {
     int rv;
-    
+
+    if (flags & MAGIC_DEBUG) {
+        return magic_compile(ms, magicfile);
+    }
+
     SUPPRESS_ERROR_OUTPUT(magic_compile, rv, ms, magicfile);
 
     return rv;
 }
 
 inline int
-magic_check_wrapper(struct magic_set *ms, const char *magicfile)
+magic_check_wrapper(struct magic_set *ms, const char *magicfile, int flags)
 {
     int rv;
-    
+
+    if (flags & MAGIC_DEBUG) {
+        return magic_check(ms, magicfile);
+    }
+
     SUPPRESS_ERROR_OUTPUT(magic_check, rv, ms, magicfile);
 
     return rv;

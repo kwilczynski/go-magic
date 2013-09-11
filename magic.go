@@ -139,7 +139,7 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 		cfiles = C.magic_getpath_wrapper()
 	}
 
-	if rv := C.magic_load_wrapper(mgc.cookie, cfiles); rv < 0 {
+	if rv := C.magic_load_wrapper(mgc.cookie, cfiles, C.int(mgc.flags)); rv < 0 {
 		return false, mgc.error()
 	}
 	mgc.path = strings.Split(C.GoString(cfiles), ":")
@@ -160,7 +160,7 @@ func (mgc *Magic) Compile(files ...string) (bool, error) {
 		defer C.free(unsafe.Pointer(cfiles))
 	}
 
-	if rv := C.magic_compile_wrapper(mgc.cookie, cfiles); rv < 0 {
+	if rv := C.magic_compile_wrapper(mgc.cookie, cfiles, C.int(mgc.flags)); rv < 0 {
 		return false, mgc.error()
 	}
 	return true, nil
@@ -180,7 +180,7 @@ func (mgc *Magic) Check(files ...string) (bool, error) {
 		defer C.free(unsafe.Pointer(cfiles))
 	}
 
-	if rv := C.magic_check_wrapper(mgc.cookie, cfiles); rv < 0 {
+	if rv := C.magic_check_wrapper(mgc.cookie, cfiles, C.int(mgc.flags)); rv < 0 {
 		return false, mgc.error()
 	}
 	return true, nil
