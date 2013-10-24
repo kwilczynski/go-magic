@@ -26,9 +26,11 @@ import "C"
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"reflect"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"syscall"
@@ -63,7 +65,6 @@ func New(files ...string) (*Magic, error) {
 	if _, err := mgc.Load(files...); err != nil {
 		return nil, err
 	}
-
 	return mgc, nil
 }
 
@@ -102,6 +103,26 @@ func (mgc *Magic) Flags() (int, error) {
 		return -1, mgc.error()
 	}
 	return mgc.flags, nil
+}
+
+func (mgc *Magic) FlagsArray() ([]int, error) {
+	mgc.Lock()
+	defer mgc.Unlock()
+
+	if mgc.cookie == nil {
+		return "", mgc.error()
+	}
+
+	flags := make([]int, 0)
+
+	n := 0
+	for i := mgc.flags; i > 0; i = i - n {
+		n = int(math.Log2(float64(i)))
+		n = int(math.Pow(2, float64(n)))
+		flags = append(flags, n)
+	}
+	sort.Ints(flags)
+	return flags
 }
 
 func (mgc *Magic) SetFlags(flags int) error {
@@ -240,6 +261,10 @@ func (mgc *Magic) Version() (int, error) {
 	return Version()
 }
 
+func (mgc *Magic) VersionString() (string, error) {
+	return VersionString()
+}
+
 func (mgc *Magic) error() *MagicError {
 	if mgc.cookie == nil {
 		errno := syscall.EINVAL
@@ -251,7 +276,6 @@ func (mgc *Magic) error() *MagicError {
 		errno := int(C.magic_errno(mgc.cookie))
 		return &MagicError{errno, C.GoString(cstring)}
 	}
-
 	return &MagicError{-1, "unknown error"}
 }
 
@@ -332,6 +356,14 @@ func Version() (int, error) {
 		return -1, &MagicError{int(errno), errno.Error()}
 	}
 	return int(rv), nil
+}
+
+func VersionString() (string, error) {
+	rv, err := Version()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%d.%d", rv/100, rv%100)
 }
 
 func FileMime(filename string, files ...string) (string, error) {

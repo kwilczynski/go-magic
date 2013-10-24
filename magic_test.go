@@ -768,10 +768,10 @@ func TestOpen(t *testing.T) {
 	var err error
 	var rv, v string
 
-	err = Open(func (m *Magic) error {
+	err = Open(func(m *Magic) error {
 		m.Load(genuine)
 		a, b := m.File(image)
-		rv = a // Pass outside the closure for verification.
+		rv = a   // Pass outside the closure for verification.
 		return b // Or return nil here ...
 	})
 
@@ -787,7 +787,7 @@ func TestOpen(t *testing.T) {
 		}
 	}
 
-	err = Open(func (m *Magic) error {
+	err = Open(func(m *Magic) error {
 		// A canary value to test error propagation ...
 		panic("123abc456")
 	})
@@ -797,7 +797,7 @@ func TestOpen(t *testing.T) {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 
-	err = Open(func (m *Magic) error {
+	err = Open(func(m *Magic) error {
 		mgc = m // Pass outside the closure ...
 		return nil
 	})
