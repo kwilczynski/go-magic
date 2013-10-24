@@ -110,7 +110,7 @@ func (mgc *Magic) FlagsArray() ([]int, error) {
 	defer mgc.Unlock()
 
 	if mgc.cookie == nil {
-		return "", mgc.error()
+		return []int{}, mgc.error()
 	}
 
 	flags := make([]int, 0)
@@ -122,7 +122,7 @@ func (mgc *Magic) FlagsArray() ([]int, error) {
 		flags = append(flags, n)
 	}
 	sort.Ints(flags)
-	return flags
+	return flags, nil
 }
 
 func (mgc *Magic) SetFlags(flags int) error {
@@ -363,7 +363,7 @@ func VersionString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%d.%d", rv/100, rv%100)
+	return fmt.Sprintf("%d.%d", rv/100, rv%100), nil
 }
 
 func FileMime(filename string, files ...string) (string, error) {
