@@ -65,6 +65,15 @@ extern "C" {
         }                                           \
     } while(0)
 
+struct save {
+    int old_fd;
+    int new_fd;
+    int status;
+    fpos_t position;
+};
+
+typedef struct save save_t;
+
 extern int errno;
 
 extern const char* magic_getpath_wrapper(void);
