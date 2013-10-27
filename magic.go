@@ -363,7 +363,7 @@ func VersionString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%d.%d", rv/100, rv%100), nil
+	return fmt.Sprintf("%d.%02d", rv/100, rv%100), nil
 }
 
 func FileMime(filename string, files ...string) (string, error) {
