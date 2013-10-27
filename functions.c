@@ -18,6 +18,9 @@
 
 #include "functions.h"
 
+static int suppress_error_output(void *data);
+static void restore_error_output(void *data);
+
 struct save {
     int old_fd;
     int new_fd;
