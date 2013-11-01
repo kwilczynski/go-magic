@@ -257,14 +257,6 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 	return C.GoString(cstring), nil
 }
 
-func (mgc *Magic) Version() (int, error) {
-	return Version()
-}
-
-func (mgc *Magic) VersionString() (string, error) {
-	return VersionString()
-}
-
 func (mgc *Magic) error() *MagicError {
 	if mgc.cookie == nil {
 		errno := syscall.EINVAL
