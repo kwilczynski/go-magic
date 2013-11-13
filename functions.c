@@ -38,26 +38,26 @@ suppress_error_output(void *data)
 
     s->old_fd = dup(fileno(stderr));
     if (s->old_fd < 0) {
-        local_errno = errno;
-        goto out;
+	local_errno = errno;
+	goto out;
     }
 
     s->new_fd = open("/dev/null", O_WRONLY);
     if (s->new_fd < 0) {
-        local_errno = errno;
+	local_errno = errno;
 
-        if (dup2(s->old_fd, fileno(stderr)) < 0) {
-            local_errno = errno;
-            goto out;
-        }
+    if (dup2(s->old_fd, fileno(stderr)) < 0) {
+	    local_errno = errno;
+	    goto out;
+	}
 
-        close(s->old_fd);
-        goto out;
+	close(s->old_fd);
+	goto out;
     }
 
     if (dup2(s->new_fd, fileno(stderr)) < 0) {
-        local_errno = errno;
-        goto out;
+	local_errno = errno;
+	goto out;
     }
 
     close(s->new_fd);
@@ -77,14 +77,14 @@ restore_error_output(void *data)
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
     if (s->old_fd < 0 && s->status != 0) {
-        return -1;
+	return -1;
     }
 
     fflush(stderr);
 
     if (dup2(s->old_fd, fileno(stderr)) < 0) {
-        local_errno = errno;
-        goto out;
+	local_errno = errno;
+	goto out;
     }
 
     close(s->old_fd);
@@ -92,8 +92,8 @@ restore_error_output(void *data)
     fsetpos(stderr, &s->position);
 
     if (setvbuf(stderr, NULL, _IONBF, 0) != 0) {
-        local_errno = errno;
-        goto out;
+	local_errno = errno;
+	goto out;
     }
 
     return 0;
@@ -112,14 +112,14 @@ magic_getpath_wrapper(void)
 inline int
 magic_setflags_wrapper(struct magic_set *ms, int flags) {
     if (flags < MAGIC_NONE || flags > MAGIC_NO_CHECK_BUILTIN) {
-        errno = EINVAL;
-        return -EINVAL;
+	errno = EINVAL;
+	return -EINVAL;
     }
 
 #if !defined(HAVE_UTIME) && !defined(HAVE_UTIMES)
     if (flags & MAGIC_PRESERVE_ATIME) {
-        errno = ENOSYS;
-        return -ENOSYS;
+	errno = ENOSYS;
+	return -ENOSYS;
     }
 #endif
 
@@ -132,7 +132,7 @@ magic_load_wrapper(struct magic_set *ms, const char *magicfile, int flags)
     int rv;
 
     if (flags & MAGIC_DEBUG) {
-        return magic_load(ms, magicfile);
+	return magic_load(ms, magicfile);
     }
 
     SUPPRESS_ERROR_OUTPUT(magic_load, rv, ms, magicfile);
@@ -146,7 +146,7 @@ magic_compile_wrapper(struct magic_set *ms, const char *magicfile, int flags)
     int rv;
 
     if (flags & MAGIC_DEBUG) {
-        return magic_compile(ms, magicfile);
+	return magic_compile(ms, magicfile);
     }
 
     SUPPRESS_ERROR_OUTPUT(magic_compile, rv, ms, magicfile);
@@ -160,7 +160,7 @@ magic_check_wrapper(struct magic_set *ms, const char *magicfile, int flags)
     int rv;
 
     if (flags & MAGIC_DEBUG) {
-        return magic_check(ms, magicfile);
+	return magic_check(ms, magicfile);
     }
 
     SUPPRESS_ERROR_OUTPUT(magic_check, rv, ms, magicfile);
