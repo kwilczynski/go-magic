@@ -18,53 +18,89 @@
 
 #include "functions.h"
 
-static int suppress_error_output(void *data);
-static void restore_error_output(void *data);
+int suppress_error_output(void *data);
+int restore_error_output(void *data);
 
-static int
+int
 suppress_error_output(void *data)
 {
+    int local_errno;
+
     save_t *s = data;
+    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    s->old_fd = -1;
+    s->new_fd = -1;
+    s->status = -1;
 
     fflush(stderr);
     fgetpos(stderr, &s->position);
 
-    s->status = 0;
-
     s->old_fd = dup(fileno(stderr));
+    if (s->old_fd < 0) {
+        local_errno = errno;
+        goto out;
+    }
+
     s->new_fd = open("/dev/null", O_WRONLY);
     if (s->new_fd < 0) {
-        dup2(s->old_fd, fileno(stderr));
+        local_errno = errno;
+
+        if (dup2(s->old_fd, fileno(stderr)) < 0) {
+            local_errno = errno;
+            goto out;
+        }
+
         close(s->old_fd);
+        goto out;
+    }
 
-        s->old_fd = -1;
-        s->new_fd = s->old_fd;
-        s->status = errno;
+    if (dup2(s->new_fd, fileno(stderr)) < 0) {
+        local_errno = errno;
+        goto out;
+    }
 
+    close(s->new_fd);
+    return 0;
+
+out:
+    s->status = local_errno;
+    return -1;
+}
+
+int
+restore_error_output(void *data)
+{
+    int local_errno;
+
+    save_t *s = data;
+    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    if (s->old_fd < 0 && s->status != 0) {
         return -1;
     }
 
-    dup2(s->new_fd, fileno(stderr));
-    close(s->new_fd);
+    fflush(stderr);
 
-    return 0;
-}
-
-static void
-restore_error_output(void *data)
-{
-    save_t *s = data;
-
-    if (s->old_fd < 0 && s->status != 0) {
-        return;
+    if (dup2(s->old_fd, fileno(stderr)) < 0) {
+        local_errno = errno;
+        goto out;
     }
 
-    fflush(stderr);
-    dup2(s->old_fd, fileno(stderr));
     close(s->old_fd);
     clearerr(stderr);
     fsetpos(stderr, &s->position);
-    setvbuf(stderr, NULL, _IONBF, 0);
+
+    if (setvbuf(stderr, NULL, _IONBF, 0) != 0) {
+        local_errno = errno;
+        goto out;
+    }
+
+    return 0;
+
+out:
+    s->status = local_errno;
+    return -1;
 }
 
 inline const char*

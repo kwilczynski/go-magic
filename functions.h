@@ -19,39 +19,14 @@
 #if !defined(_FUNCTIONS_H)
 #define _FUNCTIONS_H 1
 
-#if !defined(_GNU_SOURCE)
-# define _GNU_SOURCE 1
-#endif
-
-#if !defined(_BSD_SOURCE)
-# define _BSD_SOURCE 1
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <magic.h>
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
-# define HAVE_WARNING 1
-#endif
+#include "common.h"
 
 #if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
 # define HAVE_MAGIC_VERSION 1
-#endif
-
-#if !defined(EINVAL)
-# define EINVAL 22
-#endif
-
-#if !defined(ENOSYS)
-# define ENOSYS 38
 #endif
 
 #define SUPPRESS_ERROR_OUTPUT(s, x, ...)            \
@@ -73,8 +48,6 @@ struct save {
 };
 
 typedef struct save save_t;
-
-extern int errno;
 
 extern const char* magic_getpath_wrapper(void);
 
