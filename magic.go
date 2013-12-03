@@ -47,6 +47,7 @@ type magic struct {
 func (m *magic) close() {
 	if m != nil && m.cookie != nil {
 		C.magic_close(m.cookie)
+		m.path = []string{}
 		m.cookie = nil
 	}
 	runtime.SetFinalizer(m, nil)
@@ -136,7 +137,14 @@ func (mgc *Magic) SetFlags(flags int) error {
 	rv, err := C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
 	if rv < 0 && err != nil {
 		errno := err.(syscall.Errno)
-		return &MagicError{int(errno), errno.Error()}
+		switch errno {
+		case syscall.EINVAL:
+			return &MagicError{int(errno), "unknown or invalid flag specified"}
+		case syscall.ENOSYS:
+			return &MagicError{int(errno), "flag is not implemented"}
+		default:
+			return mgc.error()
+		}
 	}
 
 	mgc.flags = flags
@@ -259,8 +267,8 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 
 func (mgc *Magic) error() *MagicError {
 	if mgc.cookie == nil {
-		errno := syscall.EINVAL
-		return &MagicError{int(syscall.EINVAL), errno.Error()}
+		errno := syscall.EFAULT
+		return &MagicError{int(errno), "Magic library is not open"}
 	}
 
 	cstring := C.magic_error(mgc.cookie)
@@ -278,8 +286,8 @@ func (mgc *Magic) destroy() {
 func open() (*Magic, error) {
 	rv := C.magic_open(C.int(NONE))
 	if rv == nil {
-		errno := syscall.ENOMEM
-		return nil, &MagicError{int(errno), errno.Error()}
+		errno := syscall.EPERM
+		return nil, &MagicError{int(errno), "failed to initialize Magic library"}
 	}
 
 	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
@@ -289,10 +297,9 @@ func open() (*Magic, error) {
 
 func Open(f func(magic *Magic) error, files ...string) (err error) {
 	var ok bool
-	errno := syscall.EINVAL
 
 	if f == nil || reflect.TypeOf(f).Kind() != reflect.Func {
-		return &MagicError{int(errno), errno.Error()}
+		return &MagicError{-1, "not a function or nil pointer"}
 	}
 
 	mgc, err := New(files...)
@@ -305,7 +312,7 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 		if r := recover(); r != nil {
 			err, ok = r.(error)
 			if !ok {
-				err = &MagicError{int(errno), fmt.Sprintf("%v", r)}
+				err = &MagicError{-1, fmt.Sprintf("%v", r)}
 			}
 		}
 	}()
@@ -343,9 +350,10 @@ func Check(files ...string) (bool, error) {
 
 func Version() (int, error) {
 	rv, err := C.magic_version_wrapper()
-	if rv < 0 && err != nil {
-		errno := err.(syscall.Errno)
-		return -1, &MagicError{int(errno), errno.Error()}
+
+	errno := err.(syscall.Errno)
+	if rv < 0 && errno == syscall.ENOSYS {
+		return -1, &MagicError{int(errno), "function is not implemented"}
 	}
 	return int(rv), nil
 }

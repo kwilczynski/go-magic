@@ -21,7 +21,8 @@ package magic_test
 import (
 	"testing"
 
-	. "github.com/kwilczynski/go-magic"
+	// TODO(krzysztof): Add implementation later.
+	// . "github.com/kwilczynski/go-magic"
 )
 
 func TestMagicError(t *testing.T) {
