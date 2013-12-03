@@ -761,6 +761,14 @@ func TestMagic_Descriptor(t *testing.T) {
 
 }
 
+func Test_open(t *testing.T) {
+	// TODO(kwilczynski): Add implementation later.
+}
+
+func Test_close(t *testing.T) {
+	// TODO(kwilczynski): Add implementation later.
+}
+
 func TestOpen(t *testing.T) {
 	var mgc *Magic
 
