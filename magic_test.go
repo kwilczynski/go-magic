@@ -762,11 +762,66 @@ func TestMagic_Descriptor(t *testing.T) {
 }
 
 func Test_open(t *testing.T) {
-	// TODO(kwilczynski): Add implementation later.
+	mgc, _ := ExportMagicOpen()
+
+	func(v interface{}) {
+		if _, ok := v.(*Magic); !ok {
+			t.Fatalf("not a Magic type: %s", reflect.TypeOf(mgc).String())
+		}
+	}(mgc)
+
+	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
+	path := magic.FieldByName("path")
+	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
+
+	if path.Kind() != reflect.Slice || path.Len() > 0 {
+		t.Errorf("value given {%v ?}, want {%v 0}",
+			path.Kind(), reflect.Slice)
+	}
+
+	if reflect.ValueOf(cookie).Kind() != reflect.Uintptr || cookie <= 0 {
+		t.Errorf("value given {%v 0x%x}, want {%v > 0}",
+			reflect.ValueOf(cookie).Kind(), cookie, reflect.Uintptr)
+	}
 }
 
 func Test_close(t *testing.T) {
-	// TODO(kwilczynski): Add implementation later.
+	mgc, _ := ExportMagicOpen()
+
+	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic")
+	ExportMagicClose(magic.Interface())
+
+	path := magic.Elem().FieldByName("path")
+	cookie := magic.Elem().FieldByName("cookie").Elem()
+
+	if path.Kind() != reflect.Slice || path.Len() > 0 {
+		t.Errorf("value given {%v ?}, want {%v 0}",
+			path.Kind(), reflect.Slice)
+	}
+
+	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
+	if ok := cookie.IsValid(); ok {
+		t.Errorf("value given %v, want %v", ok, false)
+	}
+}
+
+func Test_destroy(t *testing.T) {
+	mgc, _ := ExportMagicOpen()
+	ExportMagicDestroy(mgc)
+
+	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
+	path := magic.FieldByName("path")
+	cookie := magic.FieldByName("cookie").Elem()
+
+	if path.Kind() != reflect.Slice || path.Len() > 0 {
+		t.Errorf("value given {%v ?}, want {%v 0}",
+			path.Kind(), reflect.Slice)
+	}
+
+	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
+	if ok := cookie.IsValid(); ok {
+		t.Errorf("value given %v, want %v", ok, false)
+	}
 }
 
 func TestOpen(t *testing.T) {
