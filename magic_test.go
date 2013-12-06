@@ -1016,6 +1016,33 @@ func TestVersion(t *testing.T) {
 	}
 }
 
+func TestVersionString(t *testing.T) {
+	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
+	f := reflect.ValueOf(t).MethodByName("Skip")
+	if ok := f.IsValid(); !ok {
+		f = reflect.ValueOf(t).MethodByName("Log")
+	}
+
+	rv, err := Version()
+	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
+		f.Call([]reflect.Value{
+			reflect.ValueOf("function `int magic_version(void)' is not implemented"),
+		})
+		return // Should not me reachable on modern Go version.
+	}
+
+	s, _ := VersionString()
+	if reflect.ValueOf(s).Kind() != reflect.String || s == "" {
+		t.Errorf("value given {%v %d}, want {%v > 0}",
+			reflect.ValueOf(s).Kind(), len(s), reflect.String)
+	}
+
+	v := fmt.Sprintf("%d.%02d", rv/100, rv%100)
+	if ok := CompareStrings(s, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+}
+
 func TestFileMime(t *testing.T) {
 	var ok bool
 	var err error

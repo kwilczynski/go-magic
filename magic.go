@@ -350,9 +350,8 @@ func Check(files ...string) (bool, error) {
 
 func Version() (int, error) {
 	rv, err := C.magic_version_wrapper()
-
-	errno := err.(syscall.Errno)
-	if rv < 0 && errno == syscall.ENOSYS {
+	if rv < 0 && err != nil {
+		errno := syscall.ENOSYS
 		return -1, &MagicError{int(errno), "function is not implemented"}
 	}
 	return int(rv), nil
