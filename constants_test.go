@@ -16,13 +16,9 @@
  * limitations under the License.
  */
 
-package magic_test
+package magic
 
-import (
-	"testing"
-
-	. "github.com/kwilczynski/go-magic"
-)
+import "testing"
 
 func TestConstants(t *testing.T) {
 	// Any recent version of libmagic have 0x37b000 by default.

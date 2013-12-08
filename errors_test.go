@@ -16,27 +16,67 @@
  * limitations under the License.
  */
 
-package magic_test
+package magic
 
 import (
+	"reflect"
 	"testing"
-
-	// TODO(krzysztof): Add implementation later.
-	// . "github.com/kwilczynski/go-magic"
 )
 
 func TestMagicError(t *testing.T) {
-	// TODO(kwilczynski): Add implementation later.
+	mgc, err := New()
+	if err != nil {
+		t.Fatalf("unable to create new Magic type: %s", err.Error())
+	}
+	defer mgc.Close()
+
+	err = mgc.error()
+	func(v interface{}) {
+		if _, ok := v.(*MagicError); !ok {
+			t.Fatalf("not a MagicError type: %s", reflect.TypeOf(v).String())
+		}
+	}(err)
+}
+
+func TestMagicError_Error(t *testing.T) {
+	mgc, err := New()
+	if err != nil {
+		t.Fatalf("unable to create new Magic type: %s", err.Error())
+	}
+	defer mgc.Close()
+
+	err = mgc.error()
+
+	v := "magic: unknown error"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
 }
 
 func TestMagicError_Errno(t *testing.T) {
-	// TODO(kwilczynski): Add implementation later.
+	mgc, err := New()
+	if err != nil {
+		t.Fatalf("unable to create new Magic type: %s", err.Error())
+	}
+	defer mgc.Close()
+
+	e := mgc.error()
+	if e.Errno != -1 {
+		t.Errorf("value given %d, want %d", e.Errno, -1)
+	}
 }
 
 func TestMagicError_Message(t *testing.T) {
-	// TODO(kwilczynski): Add implementation later.
-}
+	mgc, err := New()
+	if err != nil {
+		t.Fatalf("unable to create new Magic type: %s", err.Error())
+	}
+	defer mgc.Close()
 
-func TestMagic_error(t *testing.T) {
-	// TODO(kwilczynski): Add implementation later.
+	e := mgc.error()
+
+	v := "unknown error"
+	if ok := CompareStrings(e.Message, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", e.Message, v)
+	}
 }

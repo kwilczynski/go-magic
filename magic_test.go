@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package magic_test
+package magic
 
 import (
 	"bytes"
@@ -28,45 +28,7 @@ import (
 	"reflect"
 	"syscall"
 	"testing"
-
-	. "github.com/kwilczynski/go-magic"
 )
-
-const (
-	fixturesDirectory = "fixtures"
-
-	// PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced
-	sampleImageFile = "gopher.png"
-
-	// Magic files for testing only ...
-	genuineMagicFile = "png.magic"
-	brokenMagicFile  = "png-broken.magic"
-	fakeMagicFile    = "png-fake.magic"
-	shellMagicFile   = "shell.magic"
-)
-
-var (
-	image   string
-	genuine string
-	broken  string
-	fake    string
-	shell   string
-)
-
-func CompareStrings(this, other string) bool {
-	if this == "" || other == "" {
-		return false
-	}
-	return bytes.Equal([]byte(this), []byte(other))
-}
-
-func init() {
-	image = path.Clean(path.Join(fixturesDirectory, sampleImageFile))
-	genuine = path.Clean(path.Join(fixturesDirectory, genuineMagicFile))
-	broken = path.Clean(path.Join(fixturesDirectory, brokenMagicFile))
-	fake = path.Clean(path.Join(fixturesDirectory, fakeMagicFile))
-	shell = path.Clean(path.Join(fixturesDirectory, shellMagicFile))
-}
 
 func TestNew(t *testing.T) {
 	mgc, err := New()
@@ -77,7 +39,7 @@ func TestNew(t *testing.T) {
 
 	func(v interface{}) {
 		if _, ok := v.(*Magic); !ok {
-			t.Fatalf("not a Magic type: %s", reflect.TypeOf(mgc).String())
+			t.Fatalf("not a Magic type: %s", reflect.TypeOf(v).String())
 		}
 	}(mgc)
 }
@@ -211,6 +173,12 @@ func TestMagic_SetFlags(t *testing.T) {
 		}
 	}
 
+	err = mgc.SetFlags(0xffffff)
+
+	v := "magic: unknown or invalid flag specified"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
 }
 
 func TestMagic_Load(t *testing.T) {
@@ -241,15 +209,15 @@ func TestMagic_Load(t *testing.T) {
 			rv, err, false, v)
 	}
 
-	// XXX(krzysztof): Currently, libmagic API will *never* clear an error once
-	// there is one, therefore a whole new session has to be created in order to
-	// clear it. Unless upstream fixes this bad design choice, there is nothing
-	// to do about it, sadly.
+	// XXX(krzysztof): Currently, certain versions of libmagic API will *never*
+	// clear an error once there is one, therefore a whole new session has to be
+	// created in order to clear it. Unless upstream fixes this bad design choice,
+	// there is nothing to do about it, sadly.
 	mgc.Close()
 
 	mgc, _ = New()
 
-	rv, err = mgc.Load(genuine)
+	rv, err = mgc.Load(genuineMagicFile)
 	if err != nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, true, "")
@@ -258,11 +226,11 @@ func TestMagic_Load(t *testing.T) {
 	// Current path should change accordingly ...
 	p, _ = mgc.Path()
 
-	if ok := CompareStrings(p[0], genuine); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuine)
+	if ok := CompareStrings(p[0], genuineMagicFile); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuineMagicFile)
 	}
 
-	rv, err = mgc.Load(broken)
+	rv, err = mgc.Load(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
 	if rv, _ := Version(); rv < 0 {
@@ -282,8 +250,8 @@ func TestMagic_Load(t *testing.T) {
 
 	// Since there was an error, path should remain the same.
 	p, _ = mgc.Path()
-	if ok := CompareStrings(p[0], genuine); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuine)
+	if ok := CompareStrings(p[0], genuineMagicFile); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuineMagicFile)
 	}
 
 	mgc.Close()
@@ -294,7 +262,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	var rv bool
 	var err error
-	var v string
+	var genuine, broken, v string
 
 	clean := func() {
 		files, _ := filepath.Glob("*.mgc")
@@ -335,13 +303,6 @@ func TestMagic_Compile(t *testing.T) {
 	defer mgc.Close()
 
 	os.Chdir(path.Join(wd, fixturesDirectory))
-
-	// Re-define as we are no longer in top-level directory ...
-	genuine := path.Clean(path.Join(".", genuineMagicFile))
-	broken := path.Clean(path.Join(".", brokenMagicFile))
-
-	compiled := fmt.Sprintf("%s.mgc", genuine)
-
 	defer func() {
 		clean()
 		os.Chdir(wd)
@@ -349,13 +310,22 @@ func TestMagic_Compile(t *testing.T) {
 
 	clean()
 
+	_, genuine = path.Split(genuineMagicFile)
+	_, broken = path.Split(brokenMagicFile)
+
+	// Re-define as we are no longer in top-level directory ...
+	genuine = path.Clean(path.Join(".", genuine))
+	broken = path.Clean(path.Join(".", broken))
+
 	rv, err = mgc.Compile(genuine)
 	if err != nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, true, "")
 	}
 
-	stat, err := os.Stat(compiled)
+	compiledMagicFile := fmt.Sprintf("%s.mgc", genuine)
+
+	stat, err := os.Stat(compiledMagicFile)
 	if stat == nil && err != nil {
 		x := os.IsNotExist(err)
 		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
@@ -366,7 +336,7 @@ func TestMagic_Compile(t *testing.T) {
 	if stat != nil && err == nil {
 		x := os.IsNotExist(err)
 		if s := stat.Size(); s < 5 {
-			t.Errorf("value given {%v %d}, want {%v > 5}", x, s, false)
+			t.Errorf("value given {%v %d}, want {%v > %d}", x, s, false, 5)
 		}
 
 		buffer := make([]byte, 5)
@@ -376,9 +346,9 @@ func TestMagic_Compile(t *testing.T) {
 		// of the Magic database is it.
 		expected := []byte{0x1c, 0x04, 0x1e, 0xf1}
 
-		f, err := os.Open(compiled)
+		f, err := os.Open(compiledMagicFile)
 		if err != nil {
-			t.Fatalf("unable to open file `%s'", compiled)
+			t.Fatalf("unable to open file `%s'", compiledMagicFile)
 		}
 		f.Read(buffer)
 		f.Close()
@@ -388,8 +358,8 @@ func TestMagic_Compile(t *testing.T) {
 
 		ok := bytes.Equal(buffer, expected)
 		if !ok || last <= 0 {
-			t.Errorf("value given {0x%x 0x%02x}, want {0x%x > 0x00}",
-				buffer, last, expected)
+			t.Errorf("value given {0x%x 0x%02x}, want {0x%x > 0x%02x}",
+				buffer, last, expected, 0)
 		}
 	}
 
@@ -445,13 +415,13 @@ func TestMagic_Check(t *testing.T) {
 	mgc, _ = New()
 	defer mgc.Close()
 
-	rv, err = mgc.Check(genuine)
+	rv, err = mgc.Check(genuineMagicFile)
 	if err != nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, true, "")
 	}
 
-	rv, err = mgc.Check(broken)
+	rv, err = mgc.Check(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
 	if rv, _ := Version(); rv < 0 {
@@ -479,9 +449,9 @@ func TestMagic_File(t *testing.T) {
 	var v, rv string
 
 	mgc.SetFlags(NONE)
-	mgc.Load(genuine)
+	mgc.Load(genuineMagicFile)
 
-	rv, err = mgc.File(image)
+	rv, err = mgc.File(sampleImageFile)
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = CompareStrings(rv, v); !ok {
@@ -490,7 +460,7 @@ func TestMagic_File(t *testing.T) {
 
 	mgc.SetFlags(MIME)
 
-	rv, err = mgc.File(image)
+	rv, err = mgc.File(sampleImageFile)
 
 	v = "image/png; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
@@ -498,9 +468,9 @@ func TestMagic_File(t *testing.T) {
 	}
 
 	mgc.SetFlags(NONE)
-	mgc.Load(fake)
+	mgc.Load(fakeMagicFile)
 
-	rv, err = mgc.File(image)
+	rv, err = mgc.File(sampleImageFile)
 
 	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = CompareStrings(rv, v); !ok {
@@ -509,7 +479,7 @@ func TestMagic_File(t *testing.T) {
 
 	mgc.SetFlags(MIME)
 
-	rv, err = mgc.File(image)
+	rv, err = mgc.File(sampleImageFile)
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
@@ -537,9 +507,9 @@ func TestMagic_Buffer(t *testing.T) {
 	buffer := &bytes.Buffer{}
 
 	image := func() {
-		f, err = os.Open(image)
+		f, err = os.Open(sampleImageFile)
 		if err != nil {
-			t.Fatalf("unable to open file `%s'", image)
+			t.Fatalf("unable to open file `%s'", sampleImageFile)
 		}
 		io.Copy(buffer, f)
 		f.Close()
@@ -548,7 +518,7 @@ func TestMagic_Buffer(t *testing.T) {
 	image()
 
 	mgc.SetFlags(NONE)
-	mgc.Load(genuine)
+	mgc.Load(genuineMagicFile)
 
 	rv, err = mgc.Buffer(buffer.Bytes())
 
@@ -567,7 +537,7 @@ func TestMagic_Buffer(t *testing.T) {
 	}
 
 	mgc.SetFlags(NONE)
-	mgc.Load(fake)
+	mgc.Load(fakeMagicFile)
 
 	rv, err = mgc.Buffer(buffer.Bytes())
 
@@ -612,7 +582,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	// Load two custom Magic databases now, one of which has
 	// correct magic to detect Bash shell scripts.
-	mgc.Load(genuine, shell)
+	mgc.Load(genuineMagicFile, shellMagicFile)
 
 	rv, err = mgc.Buffer(buffer.Bytes())
 
@@ -686,18 +656,20 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	// Sadly, the function `const char* magic_descriptor(struct magic_set*, int)',
 	// which is a part of libmagic will *kindly* close file referenced by given
-	// file-descriptor for us, and so we have to re-open each time ...
+	// file-descriptor for us, and so we have to re-open each time. This only
+	// concerns certain versions of libmagic, but its better to stay on the
+	// safe side ...
 	file := func() {
-		f, err = os.Open(image)
+		f, err = os.Open(sampleImageFile)
 		if err != nil {
-			t.Fatalf("unable to open file `%s'", image)
+			t.Fatalf("unable to open file `%s'", sampleImageFile)
 		}
 	}
 
 	file()
 
 	mgc.SetFlags(NONE)
-	mgc.Load(genuine)
+	mgc.Load(genuineMagicFile)
 
 	rv, err = mgc.Descriptor(f.Fd())
 
@@ -722,7 +694,7 @@ func TestMagic_Descriptor(t *testing.T) {
 	file()
 
 	mgc.SetFlags(NONE)
-	mgc.Load(fake)
+	mgc.Load(fakeMagicFile)
 
 	rv, err = mgc.Descriptor(f.Fd())
 
@@ -762,11 +734,11 @@ func TestMagic_Descriptor(t *testing.T) {
 }
 
 func Test_open(t *testing.T) {
-	mgc, _ := ExportMagicOpen()
+	mgc, _ := open()
 
 	func(v interface{}) {
 		if _, ok := v.(*Magic); !ok {
-			t.Fatalf("not a Magic type: %s", reflect.TypeOf(mgc).String())
+			t.Fatalf("not a Magic type: %s", reflect.TypeOf(v).String())
 		}
 	}(mgc)
 
@@ -775,28 +747,29 @@ func Test_open(t *testing.T) {
 	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v 0}",
-			path.Kind(), reflect.Slice)
+		t.Errorf("value given {%v ?}, want {%v %d}",
+			path.Kind(), reflect.Slice, 0)
 	}
 
 	if reflect.ValueOf(cookie).Kind() != reflect.Uintptr || cookie <= 0 {
-		t.Errorf("value given {%v 0x%x}, want {%v > 0}",
-			reflect.ValueOf(cookie).Kind(), cookie, reflect.Uintptr)
+		t.Errorf("value given {%v 0x%x}, want {%v > %d}",
+			reflect.ValueOf(cookie).Kind(),
+			cookie, reflect.Uintptr, 0)
 	}
 }
 
 func Test_close(t *testing.T) {
-	mgc, _ := ExportMagicOpen()
+	mgc, _ := open()
 
-	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic")
-	ExportMagicClose(magic.Interface())
+	value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
+	value.Interface().(*magic).close()
 
-	path := magic.Elem().FieldByName("path")
-	cookie := magic.Elem().FieldByName("cookie").Elem()
+	path := value.Elem().FieldByName("path")
+	cookie := value.Elem().FieldByName("cookie").Elem()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v 0}",
-			path.Kind(), reflect.Slice)
+		t.Errorf("value given {%v ?}, want {%v %d}",
+			path.Kind(), reflect.Slice, 0)
 	}
 
 	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
@@ -806,16 +779,16 @@ func Test_close(t *testing.T) {
 }
 
 func Test_destroy(t *testing.T) {
-	mgc, _ := ExportMagicOpen()
-	ExportMagicDestroy(mgc)
+	mgc, _ := open()
+	mgc.destroy()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
 	path := magic.FieldByName("path")
 	cookie := magic.FieldByName("cookie").Elem()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v 0}",
-			path.Kind(), reflect.Slice)
+		t.Errorf("value given {%v ?}, want {%v %d}",
+			path.Kind(), reflect.Slice, 0)
 	}
 
 	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
@@ -832,8 +805,8 @@ func TestOpen(t *testing.T) {
 	var rv, v string
 
 	err = Open(func(m *Magic) error {
-		m.Load(genuine)
-		a, b := m.File(image)
+		m.Load(genuineMagicFile)
+		a, b := m.File(sampleImageFile)
 		rv = a   // Pass outside the closure for verification.
 		return b // Or return nil here ...
 	})
@@ -877,7 +850,7 @@ func TestOpen(t *testing.T) {
 func TestCompile(t *testing.T) {
 	var rv bool
 	var err error
-	var v string
+	var genuine, broken, v string
 
 	clean := func() {
 		files, _ := filepath.Glob("*.mgc")
@@ -910,17 +883,19 @@ func TestCompile(t *testing.T) {
 	}
 
 	os.Chdir(path.Join(wd, fixturesDirectory))
-
-	// Re-define as we are no longer in top-level directory ...
-	genuine := path.Clean(path.Join(".", genuineMagicFile))
-	broken := path.Clean(path.Join(".", brokenMagicFile))
-
 	defer func() {
 		clean()
 		os.Chdir(wd)
 	}()
 
 	clean()
+
+	_, genuine = path.Split(genuineMagicFile)
+	_, broken = path.Split(brokenMagicFile)
+
+	// Re-define as we are no longer in top-level directory ...
+	genuine = path.Clean(path.Join(".", genuine))
+	broken = path.Clean(path.Join(".", broken))
 
 	rv, err = Compile(genuine)
 	if err != nil {
@@ -970,13 +945,13 @@ func TestCheck(t *testing.T) {
 			rv, err, false, v)
 	}
 
-	rv, err = Check(genuine)
+	rv, err = Check(genuineMagicFile)
 	if err != nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, true, "")
 	}
 
-	rv, err = Check(broken)
+	rv, err = Check(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
 	if rv, _ := Version(); rv < 0 {
@@ -1011,8 +986,8 @@ func TestVersion(t *testing.T) {
 	}
 
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
-		t.Errorf("value given {%v %d}, want {%v > 0}",
-			reflect.ValueOf(v).Kind(), v, reflect.Int)
+		t.Errorf("value given {%v %d}, want {%v > %d}",
+			reflect.ValueOf(v).Kind(), v, reflect.Int, 0)
 	}
 }
 
@@ -1033,8 +1008,8 @@ func TestVersionString(t *testing.T) {
 
 	s, _ := VersionString()
 	if reflect.ValueOf(s).Kind() != reflect.String || s == "" {
-		t.Errorf("value given {%v %d}, want {%v > 0}",
-			reflect.ValueOf(s).Kind(), len(s), reflect.String)
+		t.Errorf("value given {%v %d}, want {%v > %d}",
+			reflect.ValueOf(s).Kind(), len(s), reflect.String, 0)
 	}
 
 	v := fmt.Sprintf("%d.%02d", rv/100, rv%100)
@@ -1048,7 +1023,7 @@ func TestFileMime(t *testing.T) {
 	var err error
 	var v, rv string
 
-	rv, err = FileMime("does/not/exist", genuine)
+	rv, err = FileMime("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := CompareStrings(err.Error(), v); !ok {
@@ -1057,19 +1032,19 @@ func TestFileMime(t *testing.T) {
 		}
 	}
 
-	rv, err = FileMime(image, genuine)
+	rv, err = FileMime(sampleImageFile, genuineMagicFile)
 	v = "image/png; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileMime(image, fake)
+	rv, err = FileMime(sampleImageFile, fakeMagicFile)
 	v = "image/x-go-gopher; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileMime(image, broken)
+	rv, err = FileMime(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: line 1: No current entry for continuation"
 		if rv, _ := Version(); rv < 0 {
@@ -1089,7 +1064,7 @@ func TestFileEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
-	rv, err = FileEncoding("does/not/exist", genuine)
+	rv, err = FileEncoding("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := CompareStrings(err.Error(), v); !ok {
@@ -1098,19 +1073,19 @@ func TestFileEncoding(t *testing.T) {
 		}
 	}
 
-	rv, err = FileEncoding(image, genuine)
+	rv, err = FileEncoding(sampleImageFile, genuineMagicFile)
 	v = "binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileEncoding(image, fake)
+	rv, err = FileEncoding(sampleImageFile, fakeMagicFile)
 	v = "binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileEncoding(image, broken)
+	rv, err = FileEncoding(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: line 1: No current entry for continuation"
 		if rv, _ := Version(); rv < 0 {
@@ -1130,7 +1105,7 @@ func TestFileType(t *testing.T) {
 	var err error
 	var v, rv string
 
-	rv, err = FileType("does/not/exist", genuine)
+	rv, err = FileType("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := CompareStrings(err.Error(), v); !ok {
@@ -1139,19 +1114,19 @@ func TestFileType(t *testing.T) {
 		}
 	}
 
-	rv, err = FileType(image, genuine)
+	rv, err = FileType(sampleImageFile, genuineMagicFile)
 	v = "image/png"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileType(image, fake)
+	rv, err = FileType(sampleImageFile, fakeMagicFile)
 	v = "image/x-go-gopher"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileType(image, broken)
+	rv, err = FileType(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: line 1: No current entry for continuation"
 		if rv, _ := Version(); rv < 0 {
@@ -1173,21 +1148,21 @@ func TestBufferMime(t *testing.T) {
 
 	buffer := &bytes.Buffer{}
 
-	f, err := os.Open(image)
+	f, err := os.Open(sampleImageFile)
 	if err != nil {
-		t.Fatalf("unable to open file `%s'", image)
+		t.Fatalf("unable to open file `%s'", sampleImageFile)
 	}
 	io.Copy(buffer, f)
 	f.Close()
 
-	rv, err = BufferMime(buffer.Bytes(), genuine)
+	rv, err = BufferMime(buffer.Bytes(), genuineMagicFile)
 
 	v = "image/png; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = BufferMime(buffer.Bytes(), fake)
+	rv, err = BufferMime(buffer.Bytes(), fakeMagicFile)
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
@@ -1251,21 +1226,21 @@ func TestBufferEncoding(t *testing.T) {
 
 	buffer := &bytes.Buffer{}
 
-	f, err := os.Open(image)
+	f, err := os.Open(sampleImageFile)
 	if err != nil {
-		t.Fatalf("unable to open file `%s'", image)
+		t.Fatalf("unable to open file `%s'", sampleImageFile)
 	}
 	io.Copy(buffer, f)
 	f.Close()
 
-	rv, err = BufferEncoding(buffer.Bytes(), genuine)
+	rv, err = BufferEncoding(buffer.Bytes(), genuineMagicFile)
 
 	v = "binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = BufferEncoding(buffer.Bytes(), fake)
+	rv, err = BufferEncoding(buffer.Bytes(), fakeMagicFile)
 
 	v = "binary"
 	if ok = CompareStrings(rv, v); !ok {
@@ -1329,21 +1304,21 @@ func TestBufferType(t *testing.T) {
 
 	buffer := &bytes.Buffer{}
 
-	f, err := os.Open(image)
+	f, err := os.Open(sampleImageFile)
 	if err != nil {
-		t.Fatalf("unable to open file `%s'", image)
+		t.Fatalf("unable to open file `%s'", sampleImageFile)
 	}
 	io.Copy(buffer, f)
 	f.Close()
 
-	rv, err = BufferType(buffer.Bytes(), genuine)
+	rv, err = BufferType(buffer.Bytes(), genuineMagicFile)
 
 	v = "image/png"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = BufferType(buffer.Bytes(), fake)
+	rv, err = BufferType(buffer.Bytes(), fakeMagicFile)
 
 	v = "image/x-go-gopher"
 	if ok = CompareStrings(rv, v); !ok {
