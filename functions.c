@@ -65,6 +65,8 @@ suppress_error_output(void *data)
 
 out:
     s->status = local_errno;
+    errno = s->status;
+
     return -1;
 }
 
@@ -100,6 +102,8 @@ restore_error_output(void *data)
 
 out:
     s->status = local_errno;
+    errno = s->status;
+
     return -1;
 }
 
@@ -110,7 +114,8 @@ magic_getpath_wrapper(void)
 }
 
 inline int
-magic_setflags_wrapper(struct magic_set *ms, int flags) {
+magic_setflags_wrapper(struct magic_set *ms, int flags)
+{
     if (flags < MAGIC_NONE || flags > MAGIC_NO_CHECK_BUILTIN) {
 	errno = EINVAL;
 	return -EINVAL;
