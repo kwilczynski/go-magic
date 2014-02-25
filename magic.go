@@ -228,9 +228,27 @@ func (mgc *Magic) File(filename string) (string, error) {
 
 	cstring := C.magic_file(mgc.cookie, cfilename)
 	if cstring == nil {
-		return "", mgc.error()
+		rv, _ := Version()
+
+		if mgc.flags&ERROR != 0 {
+			return "", mgc.error()
+		} else if rv < 515 {
+			C.magic_errno(mgc.cookie)
+			cstring = C.magic_error(mgc.cookie)
+		} else {
+			panic("should be unreachable")
+		}
 	}
-	return C.GoString(cstring), nil
+
+	if cstring == nil {
+		return "", &MagicError{-1, "unknown or empty result"}
+	}
+
+	s := C.GoString(cstring)
+	if s == "" || s == "(null)" {
+		return "", &MagicError{-1, "unknown or invalid result"}
+	}
+	return s, nil
 }
 
 func (mgc *Magic) Buffer(buffer []byte) (string, error) {
