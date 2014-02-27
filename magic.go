@@ -291,8 +291,13 @@ func (mgc *Magic) error() *MagicError {
 
 	cstring := C.magic_error(mgc.cookie)
 	if cstring != nil {
-		errno := int(C.magic_errno(mgc.cookie))
-		return &MagicError{errno, C.GoString(cstring)}
+		s := C.GoString(cstring)
+		if s == "" || s == "(null)" {
+			return &MagicError{-1, "empty or invalid error message"}
+		} else {
+			errno := int(C.magic_errno(mgc.cookie))
+			return &MagicError{errno, s}
+		}
 	}
 	return &MagicError{-1, "unknown error"}
 }
