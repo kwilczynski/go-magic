@@ -235,18 +235,16 @@ func (mgc *Magic) File(filename string) (string, error) {
 		} else if rv < 515 {
 			C.magic_errno(mgc.cookie)
 			cstring = C.magic_error(mgc.cookie)
-		} else {
-			panic("should be unreachable")
 		}
 	}
 
 	if cstring == nil {
-		return "", &MagicError{-1, "unknown or empty result"}
+		return "", &MagicError{-1, "unknown result or nil pointer"}
 	}
 
 	s := C.GoString(cstring)
 	if s == "" || s == "(null)" {
-		return "", &MagicError{-1, "unknown or invalid result"}
+		return "", &MagicError{-1, "empty or invalid result"}
 	}
 	return s, nil
 }
