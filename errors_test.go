@@ -39,43 +39,63 @@ func TestMagicError(t *testing.T) {
 }
 
 func TestMagicError_Error(t *testing.T) {
+	var v string
+
 	mgc, err := New()
 	if err != nil {
 		t.Fatalf("unable to create new Magic type: %s", err.Error())
 	}
 	defer mgc.Close()
 
-	err = mgc.error()
+	v = "magic: no magic files loaded"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic behaves differently.
+		v = "magic: unknown error"
+	}
 
-	v := "magic: unknown error"
+	err = mgc.error()
 	if ok := CompareStrings(err.Error(), v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 }
 
 func TestMagicError_Errno(t *testing.T) {
+	var v int
+
 	mgc, err := New()
 	if err != nil {
 		t.Fatalf("unable to create new Magic type: %s", err.Error())
 	}
 	defer mgc.Close()
 
+	v = 0
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic behaves differently.
+		v = -1
+	}
+
 	e := mgc.error()
-	if e.Errno != -1 {
-		t.Errorf("value given %d, want %d", e.Errno, -1)
+	if e.Errno != v {
+		t.Errorf("value given %d, want %d", e.Errno, v)
 	}
 }
 
 func TestMagicError_Message(t *testing.T) {
+	var v string
+
 	mgc, err := New()
 	if err != nil {
 		t.Fatalf("unable to create new Magic type: %s", err.Error())
 	}
 	defer mgc.Close()
 
-	e := mgc.error()
+	v = "no magic files loaded"
+	if rv, _ := Version(); rv < 0 {
+		// Older version of libmagic behaves differently.
+		v = "unknown error"
+	}
 
-	v := "unknown error"
+	e := mgc.error()
 	if ok := CompareStrings(e.Message, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", e.Message, v)
 	}
