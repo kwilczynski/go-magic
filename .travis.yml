@@ -1,4 +1,6 @@
 language: go
+cache:
+  - apt
 go:
   - 1.0
   - 1.1
@@ -8,6 +10,7 @@ go:
 matrix:
   allow_failures:
     - go: tip
+  fast_finish: true
 branches:
   only:
     - master
