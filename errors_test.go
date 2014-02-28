@@ -19,6 +19,7 @@
 package magic
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -57,6 +58,13 @@ func TestMagicError_Error(t *testing.T) {
 	if ok := CompareStrings(err.Error(), v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
+
+	v = "the quick brown fox jumps over the lazy dog"
+
+	err = &MagicError{0, v}
+	if ok := CompareStrings(err.Error(), fmt.Sprintf("magic: %s", v)); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
 }
 
 func TestMagicError_Errno(t *testing.T) {
@@ -74,9 +82,16 @@ func TestMagicError_Errno(t *testing.T) {
 		v = -1
 	}
 
-	e := mgc.error()
-	if e.Errno != v {
-		t.Errorf("value given %d, want %d", e.Errno, v)
+	err = mgc.error()
+	if err.(*MagicError).Errno != v {
+		t.Errorf("value given %d, want %d", err.(*MagicError).Errno, v)
+	}
+
+	v = 42
+
+	err = &MagicError{v, ""}
+	if err.(*MagicError).Errno != v {
+		t.Errorf("value given %d, want %d", err.(*MagicError).Errno, v)
 	}
 }
 
@@ -95,8 +110,15 @@ func TestMagicError_Message(t *testing.T) {
 		v = "unknown error"
 	}
 
-	e := mgc.error()
-	if ok := CompareStrings(e.Message, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", e.Message, v)
+	err = mgc.error()
+	if ok := CompareStrings(err.(*MagicError).Message, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.(*MagicError).Message, v)
+	}
+
+	v = "the quick brown fox jumps over the lazy dog"
+
+	err = &MagicError{0, v}
+	if ok := CompareStrings(err.(*MagicError).Message, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.(*MagicError).Message, v)
 	}
 }
