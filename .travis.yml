@@ -6,6 +6,7 @@ go:
   - 1.1
   - 1.1.2
   - 1.2
+  - 1.2.1
   - tip
 env:
   - VERSION=5.09 CHECKSUM=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
