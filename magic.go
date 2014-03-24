@@ -114,6 +114,10 @@ func (mgc *Magic) FlagsArray() ([]int, error) {
 		return []int{}, mgc.error()
 	}
 
+	if mgc.flags == 0 {
+		return []int{0}, nil
+	}
+
 	flags := make([]int, 0)
 
 	n := 0

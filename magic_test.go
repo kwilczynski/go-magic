@@ -143,7 +143,8 @@ func TestMagic_FlagsArray(t *testing.T) {
                given    int
                expected []int
        }{
-               {0x000001, []int{0x000000, 0x000001}}, // Flag: NONE, DEBUG
+               {0x000000, []int{0x000000}},           // Flag: NONE
+               {0x000001, []int{0x000001}},           // Flag: DEBUG
                {0x000201, []int{0x000001, 0x000200}}, // Flag: DEBUG, ERROR
                {0x000022, []int{0x000002, 0x000020}}, // Flag: SYMLINK, CONTINUE
                {0x000410, []int{0x000010, 0x000400}}, // Flag: MIME_TTYPE, MIME_ENCODING
