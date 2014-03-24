@@ -34,7 +34,7 @@ func ExampleMagic() {
 	m.SetFlags(magic.MIME)
 	mime, err := m.File("fixtures/gopher.png")
 	if err != nil {
-		fmt.Printf("Unable to determine file MIME: %s\n", err)
+		panic(fmt.Sprintf("Unable to determine file MIME: %s\n", err))
 	}
 	fmt.Printf("File MIME type is: %s\n", mime)
 
