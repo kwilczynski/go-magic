@@ -568,7 +568,7 @@ func TestMagic_Buffer(t *testing.T) {
 	mgc.SetFlags(NONE)
 
 	buffer.Reset()
-	buffer.WriteString("#!/bin/bash\n")
+	buffer.WriteString("#!/bin/bash\n\n")
 
 	rv, err = mgc.Buffer(buffer.Bytes())
 
@@ -604,7 +604,7 @@ func TestMagic_Buffer(t *testing.T) {
 	}
 
 	buffer.Reset()
-	buffer.WriteString("#!/bin/sh\n")
+	buffer.WriteString("#!/bin/sh\n\n")
 
 	rv, err = mgc.Buffer(buffer.Bytes())
 
@@ -1180,7 +1180,7 @@ func TestBufferMime(t *testing.T) {
 	}
 
 	buffer.Reset()
-	buffer.WriteString("#!/bin/bash\n")
+	buffer.WriteString("#!/bin/bash\n\n")
 
 	rv, err = BufferMime(buffer.Bytes())
 
@@ -1258,7 +1258,7 @@ func TestBufferEncoding(t *testing.T) {
 	}
 
 	buffer.Reset()
-	buffer.WriteString("#!/bin/bash\n")
+	buffer.WriteString("#!/bin/bash\n\n")
 
 	rv, err = BufferEncoding(buffer.Bytes())
 
@@ -1336,7 +1336,7 @@ func TestBufferType(t *testing.T) {
 	}
 
 	buffer.Reset()
-	buffer.WriteString("#!/bin/bash\n")
+	buffer.WriteString("#!/bin/bash\n\n")
 
 	rv, err = BufferType(buffer.Bytes())
 
