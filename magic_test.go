@@ -133,6 +133,32 @@ func TestMagic_Flags(t *testing.T) {
 	}
 }
 
+func TestMagic_FlagsArray(t *testing.T) {
+       mgc, _ := New()
+       defer mgc.Close()
+
+       var actual []int
+
+       var flagsArrayTests = []struct {
+               given    int
+               expected []int
+       }{
+               {0x000001, []int{0x000000, 0x000001}}, // Flag: NONE, DEBUG
+               {0x000201, []int{0x000001, 0x000200}}, // Flag: DEBUG, ERROR
+               {0x000022, []int{0x000002, 0x000020}}, // Flag: SYMLINK, CONTINUE
+               {0x000410, []int{0x000010, 0x000400}}, // Flag: MIME_TTYPE, MIME_ENCODING
+       }
+
+       for _, tt := range flagsArrayTests {
+               mgc.SetFlags(tt.given)
+
+               actual, _ = mgc.FlagsArray()
+               if ok := reflect.DeepEqual(actual, tt.expected); !ok {
+                       t.Errorf("value given %v, want %v", actual, tt.expected)
+               }
+       }
+}
+
 func TestMagic_SetFlags(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
@@ -152,7 +178,7 @@ func TestMagic_SetFlags(t *testing.T) {
 		{false, 0, 0x000000, 0x000000}, // Flag: NONE
 		{false, 0, 0x000010, 0x000010}, // Flag: MIME_TYPE
 		{false, 0, 0x000400, 0x000400}, // Flag: MIME_ENCODING
-		{false, 0, 0x000410, 0x000410}, // Flag: MIME_TYPE | MIME_ENCODING
+		{false, 0, 0x000410, 0x000410}, // Flag: MIME_TYPE, MIME_ENCODING
 		// Test upper boundary limit.
 		{true, 22, 0x000410, 0xffffff},
 	}
