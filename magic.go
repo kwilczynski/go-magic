@@ -37,6 +37,8 @@ import (
 	"unsafe"
 )
 
+const Separator string = "\\012\055\040"
+
 type magic struct {
 	sync.Mutex
 	flags  int

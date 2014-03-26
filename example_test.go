@@ -20,6 +20,7 @@ package magic_test
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/kwilczynski/go-magic"
 )
@@ -41,6 +42,33 @@ func ExampleMagic() {
 	m.Close()
 	// Output:
 	// File MIME type is: image/png; charset=binary
+}
+
+func ExampleMagic_Continue() {
+	buffer := []byte("#!/bin/bash\n\n")
+
+	// Open and load default Magic database ...
+	m, err := magic.New()
+	if err != nil {
+		panic(fmt.Sprintf("An error occurred: %s\n", err))
+	}
+
+	m.SetFlags(magic.CONTINUE)
+	result, err := m.Buffer(buffer)
+	if err != nil {
+		panic(fmt.Sprintf("Unable to determine buffer data type: %s\n", err))
+	}
+
+	fmt.Println("Matches for data in the buffer are:")
+	for _, s := range strings.Split(result, magic.Separator) {
+		fmt.Printf("\t%s\n", s)
+	}
+
+	m.Close()
+	// Output:
+	// Matches for data in the buffer are:
+	//	Bourne-Again shell script text executable
+	//	a /bin/bash script, ASCII text executable
 }
 
 func ExampleFileType() {

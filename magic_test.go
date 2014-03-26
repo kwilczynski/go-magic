@@ -26,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"syscall"
 	"testing"
 )
@@ -758,6 +759,38 @@ func TestMagic_Descriptor(t *testing.T) {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
+}
+
+func TestMagic_Separator(t *testing.T) {
+	mgc, _ := New()
+	defer mgc.Close()
+
+	var rv string
+	var actual []string
+
+	var separatorTests = []struct {
+		flags    int
+		expected []string
+	}{
+		{0x000000, []string{"Bourne-Again shell script, ASCII text executable"}},
+		{0x000020, []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable"}},
+		{0x000400, []string{"us-ascii"}},
+		{0x000410, []string{"text/x-shellscript; charset=us-ascii"}},
+	}
+
+	buffer := []byte("#!/bin/bash\n\n")
+	mgc.Load(shellMagicFile)
+
+	for _, tt := range separatorTests {
+		mgc.SetFlags(tt.flags)
+
+		rv, _ = mgc.Buffer(buffer)
+
+		actual = strings.Split(rv, Separator)
+		if ok := reflect.DeepEqual(actual, tt.expected); !ok {
+			t.Errorf("value given {%d %v}, want {%d %v}", 0, actual, tt.flags, tt.expected)
+		}
+	}
 }
 
 func Test_open(t *testing.T) {
