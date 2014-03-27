@@ -134,33 +134,6 @@ func TestMagic_Flags(t *testing.T) {
 	}
 }
 
-func TestMagic_FlagsArray(t *testing.T) {
-       mgc, _ := New()
-       defer mgc.Close()
-
-       var actual []int
-
-       var flagsArrayTests = []struct {
-               given    int
-               expected []int
-       }{
-               {0x000000, []int{0x000000}},           // Flag: NONE
-               {0x000001, []int{0x000001}},           // Flag: DEBUG
-               {0x000201, []int{0x000001, 0x000200}}, // Flag: DEBUG, ERROR
-               {0x000022, []int{0x000002, 0x000020}}, // Flag: SYMLINK, CONTINUE
-               {0x000410, []int{0x000010, 0x000400}}, // Flag: MIME_TTYPE, MIME_ENCODING
-       }
-
-       for _, tt := range flagsArrayTests {
-               mgc.SetFlags(tt.given)
-
-               actual, _ = mgc.FlagsArray()
-               if ok := reflect.DeepEqual(actual, tt.expected); !ok {
-                       t.Errorf("value given %v, want %v", actual, tt.expected)
-               }
-       }
-}
-
 func TestMagic_SetFlags(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
@@ -209,32 +182,61 @@ func TestMagic_SetFlags(t *testing.T) {
 	}
 }
 
+func TestMagic_FlagsArray(t *testing.T) {
+	mgc, _ := New()
+	defer mgc.Close()
+
+	var actual []int
+
+	var flagsArrayTests = []struct {
+		given    int
+		expected []int
+	}{
+		{0x000000, []int{0x000000}},           // Flag: NONE
+		{0x000001, []int{0x000001}},           // Flag: DEBUG
+		{0x000201, []int{0x000001, 0x000200}}, // Flag: DEBUG, ERROR
+		{0x000022, []int{0x000002, 0x000020}}, // Flag: SYMLINK, CONTINUE
+		{0x000410, []int{0x000010, 0x000400}}, // Flag: MIME_TTYPE, MIME_ENCODING
+	}
+
+	for _, tt := range flagsArrayTests {
+		mgc.SetFlags(tt.given)
+
+		actual, _ = mgc.FlagsArray()
+		if ok := reflect.DeepEqual(actual, tt.expected); !ok {
+			t.Errorf("value given %v, want %v", actual, tt.expected)
+		}
+	}
+}
+
 func TestMagic_Load(t *testing.T) {
 	var mgc *Magic
 
+	var n int
 	var rv bool
 	var err error
 	var p []string
 	var v string
 
 	mgc, _ = New()
+	n, _ = Version()
 
 	rv, err = mgc.Load("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if rv, _ := Version(); rv < 0 {
+	if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 
 	// XXX(krzysztof): Currently, certain versions of libmagic API will *never*
@@ -261,19 +263,19 @@ func TestMagic_Load(t *testing.T) {
 	rv, err = mgc.Load(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
-	if rv, _ := Version(); rv < 0 {
+	if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: No current entry for continuation"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 
 	// Since there was an error, path should remain the same.
@@ -288,6 +290,7 @@ func TestMagic_Load(t *testing.T) {
 func TestMagic_Compile(t *testing.T) {
 	var mgc *Magic
 
+	var n int
 	var rv bool
 	var err error
 	var genuine, broken, v string
@@ -300,23 +303,24 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	mgc, _ = New()
+	n, _ = Version()
 
 	rv, err = mgc.Compile("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if rv, _ := Version(); rv < 0 {
+	if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 
 	// See comment in TestMagic_Load() ...
@@ -394,47 +398,52 @@ func TestMagic_Compile(t *testing.T) {
 	rv, err = mgc.Compile(broken)
 
 	v = "magic: line 1: No current entry for continuation"
-	if rv, _ := Version(); rv < 0 {
+	if n < 516 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: No current entry for continuation"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 }
 
 func TestMagic_Check(t *testing.T) {
 	var mgc *Magic
 
+	var n int
 	var rv bool
 	var err error
 	var v string
 
 	mgc, _ = New()
+	n, _ = Version()
 
 	rv, err = mgc.Check("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if rv, _ := Version(); rv < 0 {
+	if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 
 	// See comment in TestMagic_Load() ...
@@ -452,19 +461,22 @@ func TestMagic_Check(t *testing.T) {
 	rv, err = mgc.Check(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
-	if rv, _ := Version(); rv < 0 {
+	if n < 516 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: No current entry for continuation"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 }
 
@@ -473,13 +485,13 @@ func TestMagic_File(t *testing.T) {
 	defer mgc.Close()
 
 	var ok bool
-	var err error
+	//	var err error
 	var v, rv string
 
 	mgc.SetFlags(NONE)
 	mgc.Load(genuineMagicFile)
 
-	rv, err = mgc.File(sampleImageFile)
+	rv, _ = mgc.File(sampleImageFile)
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = CompareStrings(rv, v); !ok {
@@ -488,7 +500,7 @@ func TestMagic_File(t *testing.T) {
 
 	mgc.SetFlags(MIME)
 
-	rv, err = mgc.File(sampleImageFile)
+	rv, _ = mgc.File(sampleImageFile)
 
 	v = "image/png; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
@@ -498,7 +510,7 @@ func TestMagic_File(t *testing.T) {
 	mgc.SetFlags(NONE)
 	mgc.Load(fakeMagicFile)
 
-	rv, err = mgc.File(sampleImageFile)
+	rv, _ = mgc.File(sampleImageFile)
 
 	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = CompareStrings(rv, v); !ok {
@@ -507,19 +519,21 @@ func TestMagic_File(t *testing.T) {
 
 	mgc.SetFlags(MIME)
 
-	rv, err = mgc.File(sampleImageFile)
+	rv, _ = mgc.File(sampleImageFile)
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = mgc.File("does/not/exist")
+	// TODO(kwilczynski): Test MAGIC_ERROR flag!
 
-	v = "magic: cannot open `does/not/exist' (No such file or directory)"
-	if ok = CompareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
+	//	rv, err = mgc.File("does/not/exist")
+
+	//	v = "magic: cannot open `does/not/exist' (No such file or directory)"
+	//	if ok = CompareStrings(err.Error(), v); !ok {
+	//		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	//	}
 }
 
 func TestMagic_Buffer(t *testing.T) {
@@ -754,7 +768,12 @@ func TestMagic_Descriptor(t *testing.T) {
 	// Reading from standard input (0) will yield no data in this case.
 	rv, err = mgc.Descriptor(0)
 
-	v = "application/x-empty"
+	v = "application/x-empty; charset=binary"
+	if n, _ := Version(); n < 515 {
+		// Older version of libmagic reports same error differently.
+		v = "application/x-empty"
+	}
+
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
@@ -765,6 +784,7 @@ func TestMagic_Separator(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
 
+	var flags int
 	var rv string
 	var actual []string
 
@@ -772,9 +792,13 @@ func TestMagic_Separator(t *testing.T) {
 		flags    int
 		expected []string
 	}{
+		// Flag: MAGIC_NONE
 		{0x000000, []string{"Bourne-Again shell script, ASCII text executable"}},
+		// Flag: MAGIC_CONTINUE
 		{0x000020, []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable"}},
+		// Flag: MIME_ENCODING
 		{0x000400, []string{"us-ascii"}},
+		// Flag: MIME_TYPE, MIME_ENCODING
 		{0x000410, []string{"text/x-shellscript; charset=us-ascii"}},
 	}
 
@@ -785,10 +809,12 @@ func TestMagic_Separator(t *testing.T) {
 		mgc.SetFlags(tt.flags)
 
 		rv, _ = mgc.Buffer(buffer)
+		flags, _ = mgc.Flags()
 
 		actual = strings.Split(rv, Separator)
-		if ok := reflect.DeepEqual(actual, tt.expected); !ok {
-			t.Errorf("value given {%d %v}, want {%d %v}", 0, actual, tt.flags, tt.expected)
+		if ok := reflect.DeepEqual(actual, tt.expected); !ok || flags != tt.flags {
+			t.Errorf("value given {0x%x %v}, want {0x%x %v}", flags, actual,
+				tt.flags, tt.expected)
 		}
 	}
 }
@@ -876,11 +902,11 @@ func TestOpen(t *testing.T) {
 			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 				rv, err.Error(), false, v)
 		}
-	} else {
-		v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
-		if ok = CompareStrings(rv, v); !ok {
-			t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-		}
+	}
+
+	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
 	err = Open(func(m *Magic) error {
@@ -919,22 +945,27 @@ func TestCompile(t *testing.T) {
 		}
 	}
 
+	n, _ := Version()
+
 	rv, err = Compile("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if rv, _ := Version(); rv < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok && !rv {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok && !rv {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 
 	wd, err := os.Getwd()
@@ -966,19 +997,22 @@ func TestCompile(t *testing.T) {
 	rv, err = Compile(broken)
 
 	v = "magic: line 1: No current entry for continuation"
-	if rv, _ := Version(); rv < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: No current entry for continuation"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 }
 
@@ -987,22 +1021,27 @@ func TestCheck(t *testing.T) {
 	var err error
 	var v string
 
+	n, _ := Version()
+
 	rv, err = Check("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if rv, _ := Version(); rv < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 
 	rv, err = Check(genuineMagicFile)
@@ -1014,19 +1053,22 @@ func TestCheck(t *testing.T) {
 	rv, err = Check(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
-	if rv, _ := Version(); rv < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: No current entry for continuation"
 	}
 
-	if err != nil {
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	} else {
+	if err == nil {
 		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
 			rv, err, false, v)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			rv, err.Error(), false, v)
 	}
 }
 
@@ -1093,6 +1135,7 @@ func TestFileMime(t *testing.T) {
 	}
 
 	rv, err = FileMime(sampleImageFile, genuineMagicFile)
+
 	v = "image/png; charset=binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
@@ -1106,8 +1149,13 @@ func TestFileMime(t *testing.T) {
 
 	rv, err = FileMime(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
+		n, _ := Version()
+
 		v = "magic: line 1: No current entry for continuation"
-		if rv, _ := Version(); rv < 0 {
+		if n < 518 && n >= 514 {
+			// A few releases of libmagic were having issues.
+			v = "magic: no magic files loaded"
+		} else if n < 0 {
 			// Older version of libmagic reports same error differently.
 			v = "magic: No current entry for continuation"
 		}
@@ -1133,22 +1181,27 @@ func TestFileEncoding(t *testing.T) {
 		}
 	}
 
+	v = "binary" // Binary data will always have this encoding.
+
 	rv, err = FileEncoding(sampleImageFile, genuineMagicFile)
-	v = "binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
 	rv, err = FileEncoding(sampleImageFile, fakeMagicFile)
-	v = "binary"
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
 	rv, err = FileEncoding(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
+		n, _ := Version()
+
 		v = "magic: line 1: No current entry for continuation"
-		if rv, _ := Version(); rv < 0 {
+		if n < 518 && n >= 514 {
+			// A few releases of libmagic were having issues.
+			v = "magic: no magic files loaded"
+		} else if n < 0 {
 			// Older version of libmagic reports same error differently.
 			v = "magic: No current entry for continuation"
 		}
@@ -1188,8 +1241,13 @@ func TestFileType(t *testing.T) {
 
 	rv, err = FileType(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
+		n, _ := Version()
+
 		v = "magic: line 1: No current entry for continuation"
-		if rv, _ := Version(); rv < 0 {
+		if n < 518 && n >= 514 {
+			// A few releases of libmagic were having issues.
+			v = "magic: no magic files loaded"
+		} else if n < 0 {
 			// Older version of libmagic reports same error differently.
 			v = "magic: No current entry for continuation"
 		}
@@ -1254,7 +1312,12 @@ func TestBufferMime(t *testing.T) {
 
 	rv, err = BufferMime(buffer.Bytes())
 
-	v = "application/octet-stream"
+	v = "application/octet-stream; charset=binary"
+	if n, _ := Version(); n < 515 {
+		// A few releases of libmagic were having issues.
+		v = "application/octet-stream"
+	}
+
 	if ok = CompareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
@@ -1267,6 +1330,7 @@ func TestBufferMime(t *testing.T) {
 			t.Error("did not panic")
 			return
 		}
+
 		v = "runtime error: index out of range"
 		if ok := CompareStrings(r.(error).Error(), v); !ok {
 			t.Errorf("value given \"%s\", want \"%s\"",

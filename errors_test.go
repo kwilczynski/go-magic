@@ -48,10 +48,10 @@ func TestMagicError_Error(t *testing.T) {
 	}
 	defer mgc.Close()
 
-	v = "magic: no magic files loaded"
-	if rv, _ := Version(); rv < 0 {
-		// Older version of libmagic behaves differently.
-		v = "magic: unknown error"
+	v = "magic: unknown error"
+	if n, _ := Version(); n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
 	}
 
 	err = mgc.error()
@@ -76,10 +76,10 @@ func TestMagicError_Errno(t *testing.T) {
 	}
 	defer mgc.Close()
 
-	v = 0
-	if rv, _ := Version(); rv < 0 {
-		// Older version of libmagic behaves differently.
-		v = -1
+	v = -1
+	if n, _ := Version(); n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = 0
 	}
 
 	err = mgc.error()
@@ -104,10 +104,10 @@ func TestMagicError_Message(t *testing.T) {
 	}
 	defer mgc.Close()
 
-	v = "no magic files loaded"
-	if rv, _ := Version(); rv < 0 {
-		// Older version of libmagic behaves differently.
-		v = "unknown error"
+	v = "unknown error"
+	if n, _ := Version(); n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "no magic files loaded"
 	}
 
 	err = mgc.error()
