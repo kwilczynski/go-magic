@@ -24,7 +24,7 @@ branches:
     - master
 install: true
 before_script:
-  - travis_retry curl -L -s http://git.io/Zey2LA > libmagic.sh
+  - travis_retry curl -L -s http://git.io/vCCR6g > libmagic.sh
   - travis_retry sudo VERSION=$VERSION CHECKSUM=$CHECKSUM CC=$COMPILER bash libmagic.sh
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script: go test -v -x ./... -run '^Test.*'
