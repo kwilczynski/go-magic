@@ -392,6 +392,14 @@ func VersionString() (string, error) {
 	return fmt.Sprintf("%d.%02d", rv/100, rv%100), nil
 }
 
+func VersionSlice() ([]int, error) {
+	rv, err := Version()
+	if err != nil {
+		return []int{}, err
+	}
+	return []int{rv/100, rv%100}, nil
+}
+
 func FileMime(filename string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
