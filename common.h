@@ -1,7 +1,7 @@
 /*
  * common.h
  *
- * Copyright 2013 Krzysztof Wilczynski
+ * Copyright 2013-2014 Krzysztof Wilczynski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,14 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <locale.h>
+#include <sys/stat.h>
 #include <magic.h>
-
-#if defined(__GNUC__) || defined(__clang__)
-# define HAVE_WARNING 1
-#endif
 
 #if !defined(EINVAL)
 # define EINVAL 22
@@ -49,6 +48,14 @@ extern "C" {
 
 #if !defined(ENOSYS)
 # define ENOSYS 38
+#endif
+
+#if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
+# define HAVE_MAGIC_VERSION 1
+#endif
+
+#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 517
+# define HAVE_BROKEN_MAGIC 1
 #endif
 
 extern int errno;

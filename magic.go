@@ -1,7 +1,7 @@
 /*
  * magic.go
  *
- * Copyright 2013 Krzysztof Wilczynski
+ * Copyright 2013-2014 Krzysztof Wilczynski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 	cfilename := C.CString(filename)
 	defer C.free(unsafe.Pointer(cfilename))
 
-	cstring := C.magic_file(mgc.cookie, cfilename)
+	cstring := C.magic_file_wrapper(mgc.cookie, cfilename, C.int(mgc.flags))
 	if cstring == nil {
 		rv, _ := Version()
 
@@ -265,7 +265,7 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 
 	p, length := unsafe.Pointer(&buffer[0]), C.size_t(len(buffer))
 
-	cstring := C.magic_buffer(mgc.cookie, p, length)
+	cstring := C.magic_buffer_wrapper(mgc.cookie, p, length, C.int(mgc.flags))
 	if cstring == nil {
 		return "", mgc.error()
 	}
@@ -280,7 +280,7 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 		return "", mgc.error()
 	}
 
-	cstring := C.magic_descriptor(mgc.cookie, C.int(fd))
+	cstring := C.magic_descriptor_wrapper(mgc.cookie, C.int(fd), C.int(mgc.flags))
 	if cstring == nil {
 		return "", mgc.error()
 	}
