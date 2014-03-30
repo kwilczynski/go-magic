@@ -485,7 +485,7 @@ func TestMagic_File(t *testing.T) {
 	defer mgc.Close()
 
 	var ok bool
-	//	var err error
+	var err error
 	var v, rv string
 
 	mgc.SetFlags(NONE)
@@ -526,14 +526,29 @@ func TestMagic_File(t *testing.T) {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	// TODO(kwilczynski): Test MAGIC_ERROR flag!
+	mgc.SetFlags(NONE)
 
-	//	rv, err = mgc.File("does/not/exist")
+	// We expect no error to be risen at this time.
+	rv, err = mgc.File("does/not/exist")
+	if err != nil {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
 
-	//	v = "magic: cannot open `does/not/exist' (No such file or directory)"
-	//	if ok = CompareStrings(err.Error(), v); !ok {
-	//		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	//	}
+	// Return value contains the error message as per the IEEE 1003.1 standard.
+	v = "cannot open `does/not/exist' (No such file or directory)"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	// Now we expect an error to be risen.
+	mgc.SetFlags(ERROR)
+
+	rv, err = mgc.File("does/not/exist")
+
+	v = "magic: cannot stat `does/not/exist' (No such file or directory)"
+	if ok = CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err, v)
+	}
 }
 
 func TestMagic_Buffer(t *testing.T) {
