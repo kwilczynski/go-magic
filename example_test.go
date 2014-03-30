@@ -44,7 +44,7 @@ func ExampleMagic() {
 	// File MIME type is: image/png; charset=binary
 }
 
-func ExampleMagic_Continue() {
+func ExampleMagicWithSeparator() {
 	buffer := []byte("#!/bin/bash\n\n")
 
 	// Open and load default Magic database ...
