@@ -25,26 +25,7 @@ import (
 	"github.com/kwilczynski/go-magic"
 )
 
-func ExampleMagic() {
-	// Open and load default Magic database ...
-	m, err := magic.New()
-	if err != nil {
-		panic(fmt.Sprintf("An error occurred: %s\n", err))
-	}
-
-	m.SetFlags(magic.MIME)
-	mime, err := m.File("fixtures/gopher.png")
-	if err != nil {
-		panic(fmt.Sprintf("Unable to determine file MIME: %s\n", err))
-	}
-	fmt.Printf("File MIME type is: %s\n", mime)
-
-	m.Close()
-	// Output:
-	// File MIME type is: image/png; charset=binary
-}
-
-func ExampleMagicWithSeparator() {
+func Example() {
 	buffer := []byte("#!/bin/bash\n\n")
 
 	// Open and load default Magic database ...
@@ -69,6 +50,26 @@ func ExampleMagicWithSeparator() {
 	// Matches for data in the buffer are:
 	//	Bourne-Again shell script text executable
 	//	a /bin/bash script, ASCII text executable
+}
+
+
+func ExampleMagic() {
+	// Open and load default Magic database ...
+	m, err := magic.New()
+	if err != nil {
+		panic(fmt.Sprintf("An error occurred: %s\n", err))
+	}
+
+	m.SetFlags(magic.MIME)
+	mime, err := m.File("fixtures/gopher.png")
+	if err != nil {
+		panic(fmt.Sprintf("Unable to determine file MIME: %s\n", err))
+	}
+	fmt.Printf("File MIME type is: %s\n", mime)
+
+	m.Close()
+	// Output:
+	// File MIME type is: image/png; charset=binary
 }
 
 func ExampleFileType() {
