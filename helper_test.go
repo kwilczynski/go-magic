@@ -21,6 +21,8 @@ package magic
 import (
 	"bytes"
 	"path"
+	"reflect"
+	"testing"
 )
 
 var (
@@ -36,6 +38,17 @@ var (
 	fakeMagicFile    = path.Clean(path.Join(fixturesDirectory, "png-fake.magic"))
 	shellMagicFile   = path.Clean(path.Join(fixturesDirectory, "shell.magic"))
 )
+
+func Skip(t *testing.T, message string) {
+	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
+	f := reflect.ValueOf(t).MethodByName("Skip")
+	if ok := f.IsValid(); !ok {
+		f = reflect.ValueOf(t).MethodByName("Log")
+	}
+
+	f.Call([]reflect.Value{reflect.ValueOf(message)})
+	return // Should not me reachable on modern Go version.
+}
 
 func CompareStrings(this, other string) bool {
 	if this == "" || other == "" {

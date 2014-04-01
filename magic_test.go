@@ -1088,18 +1088,9 @@ func TestCheck(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
-	f := reflect.ValueOf(t).MethodByName("Skip")
-	if ok := f.IsValid(); !ok {
-		f = reflect.ValueOf(t).MethodByName("Log")
-	}
-
 	v, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		f.Call([]reflect.Value{
-			reflect.ValueOf("function `int magic_version(void)' is not implemented"),
-		})
-		return // Should not me reachable on modern Go version.
+		Skip(t, "function `int magic_version(void)' is not implemented")
 	}
 
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
@@ -1109,18 +1100,9 @@ func TestVersion(t *testing.T) {
 }
 
 func TestVersionString(t *testing.T) {
-	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
-	f := reflect.ValueOf(t).MethodByName("Skip")
-	if ok := f.IsValid(); !ok {
-		f = reflect.ValueOf(t).MethodByName("Log")
-	}
-
 	rv, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		f.Call([]reflect.Value{
-			reflect.ValueOf("function `int magic_version(void)' is not implemented"),
-		})
-		return // Should not me reachable on modern Go version.
+		Skip(t, "function `int magic_version(void)' is not implemented")
 	}
 
 	s, _ := VersionString()
@@ -1136,18 +1118,9 @@ func TestVersionString(t *testing.T) {
 }
 
 func TestVersionSlice(t *testing.T) {
-	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
-	f := reflect.ValueOf(t).MethodByName("Skip")
-	if ok := f.IsValid(); !ok {
-		f = reflect.ValueOf(t).MethodByName("Log")
-	}
-
 	rv, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		f.Call([]reflect.Value{
-			reflect.ValueOf("function `int magic_version(void)' is not implemented"),
-		})
-		return // Should not me reachable on modern Go version.
+		Skip(t, "function `int magic_version(void)' is not implemented")
 	}
 
 	s, _ := VersionSlice()
