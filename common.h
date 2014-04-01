@@ -54,7 +54,7 @@ extern "C" {
 # define HAVE_MAGIC_VERSION 1
 #endif
 
-#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 517
+#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
 # define HAVE_BROKEN_MAGIC 1
 #endif
 
