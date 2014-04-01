@@ -1091,6 +1091,7 @@ func TestVersion(t *testing.T) {
 	v, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
 		Skip(t, "function `int magic_version(void)' is not implemented")
+		return // Should not me reachable on modern Go version.
 	}
 
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
@@ -1103,6 +1104,7 @@ func TestVersionString(t *testing.T) {
 	rv, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
 		Skip(t, "function `int magic_version(void)' is not implemented")
+		return // Should not me reachable on modern Go version.
 	}
 
 	s, _ := VersionString()
@@ -1121,6 +1123,7 @@ func TestVersionSlice(t *testing.T) {
 	rv, err := Version()
 	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
 		Skip(t, "function `int magic_version(void)' is not implemented")
+		return // Should not me reachable on modern Go version.
 	}
 
 	s, _ := VersionSlice()

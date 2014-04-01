@@ -47,7 +47,6 @@ func Skip(t *testing.T, message string) {
 	}
 
 	f.Call([]reflect.Value{reflect.ValueOf(message)})
-	return // Should not me reachable on modern Go version.
 }
 
 func CompareStrings(this, other string) bool {
