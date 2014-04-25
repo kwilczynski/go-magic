@@ -23,7 +23,7 @@ package magic
 /*
 #cgo LDFLAGS: -lmagic
 #cgo !darwin LDFLAGS: -Wl,--as-needed -Wl,--no-undefined
-#cgo CFLAGS: -std=gnu99 -g -Wall -pedantic
+#cgo CFLAGS: -std=gnu99 -g -Wall
 
 #include "functions.h"
 */
