@@ -1115,7 +1115,7 @@ func TestVersionString(t *testing.T) {
 
 	v := fmt.Sprintf("%d.%02d", rv/100, rv%100)
 	if ok := CompareStrings(s, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given \"%s\", want \"%s\"", s, v)
 	}
 }
 
@@ -1132,9 +1132,9 @@ func TestVersionSlice(t *testing.T) {
 			reflect.ValueOf(s).Kind(), len(s), reflect.Slice, 0)
 	}
 
-	v := []int{rv/100, rv%100}
+	v := []int{rv / 100, rv % 100}
 	if ok := reflect.DeepEqual(s, v); !ok {
-		t.Errorf("value given %v, want %v", rv, v)
+		t.Errorf("value given %v, want %v", s, v)
 	}
 }
 

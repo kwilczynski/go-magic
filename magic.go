@@ -397,7 +397,7 @@ func VersionSlice() ([]int, error) {
 	if err != nil {
 		return []int{}, err
 	}
-	return []int{rv/100, rv%100}, nil
+	return []int{rv / 100, rv % 100}, nil
 }
 
 func FileMime(filename string, files ...string) (string, error) {

@@ -52,7 +52,6 @@ func Example() {
 	//	a /bin/bash script, ASCII text executable
 }
 
-
 func ExampleMagic() {
 	// Open and load default Magic database ...
 	m, err := magic.New()
