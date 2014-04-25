@@ -268,3 +268,5 @@ magic_version_wrapper(void)
     return -ENOSYS;
 #endif
 }
+
+/* vim: set ts=8 sw=4 sts=4 noet : */

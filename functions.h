@@ -94,3 +94,5 @@ extern int magic_version_wrapper(void);
 #endif
 
 #endif /* _FUNCTIONS_H */
+
+/* vim: set ts=8 sw=4 sts=4 noet : */
