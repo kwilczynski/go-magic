@@ -1,3 +1,5 @@
+// +build !windows
+
 /*
  * magic.go
  *
@@ -20,6 +22,9 @@ package magic
 
 /*
 #cgo LDFLAGS: -lmagic
+#cgo !darwin LDFLAGS: -Wl,--as-needed -Wl,--no-undefined
+#cgo CFLAGS: -std=c99 -g -Wall -pedantic
+
 #include "functions.h"
 */
 import "C"
