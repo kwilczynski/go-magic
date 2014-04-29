@@ -28,4 +28,6 @@ before_script:
   - travis_retry curl -L -s http://git.io/lJJQIw > libmagic.sh
   - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash libmagic.sh
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
-script: go test -v -x ./... -run '^Test.*'
+script:
+  - export CC=$COMPILER
+  - go test -v -x ./... -run '^Test.*'
