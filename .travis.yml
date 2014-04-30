@@ -30,4 +30,5 @@ before_script:
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script:
   - export CC=$COMPILER
+  - echo $CC
   - go test -v -x ./... -run '^Test.*'
