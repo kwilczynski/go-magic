@@ -25,10 +25,9 @@ branches:
 install: true
 before_script:
   - export CC=$COMPILER
-  - curl -L http://git.io/lJJQIw > libmagic.sh
-  - sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash -x libmagic.sh
-  - go get -v -x github.com/kwilczynski/go-magic
+  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/a2514e785a2cceafe41afc2607763c78ec954167/libmagic.sh"
+  - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
+  - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash -x libmagic.sh
+  - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script:
-  - export CC=$COMPILER
-  - echo $CC
   - go test -v -x ./... -run '^Test.*'
