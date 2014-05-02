@@ -25,7 +25,7 @@ branches:
 install: true
 before_script:
   - export GO_VERSION=$(go version | perl -ne 'print $1 if /^.+go([0-9]\.[0-9])/')
-  - [ "x$(echo "$GO_VERSION < 1.2" | bc)" == "x0" ] || COMPILER=gcc
+  - if [ ! "x$(echo "$GO_VERSION < 1.2" | bc)" == "x0" ]; then COMPILER=gcc; fi
   - export CC=$COMPILER
   - alias gcc=$COMPILER # Ugly hack for Go prior to 1.2 and clang.
   - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/a2514e785a2cceafe41afc2607763c78ec954167/libmagic.sh"
