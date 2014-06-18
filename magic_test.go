@@ -221,6 +221,16 @@ func TestMagic_Load(t *testing.T) {
 	mgc, _ = New()
 	n, _ = Version()
 
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
+
 	rv, err = mgc.Load("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
@@ -305,6 +315,16 @@ func TestMagic_Compile(t *testing.T) {
 	mgc, _ = New()
 	n, _ = Version()
 
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
+
 	rv, err = mgc.Compile("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
@@ -334,7 +354,7 @@ func TestMagic_Compile(t *testing.T) {
 	mgc, _ = New()
 	defer mgc.Close()
 
-	os.Chdir(path.Join(wd, fixturesDirectory))
+	os.Chdir(path.Join(wd, path.Join(fixturesDirectory, formatDirectory)))
 	defer func() {
 		clean()
 		os.Chdir(wd)
@@ -428,6 +448,16 @@ func TestMagic_Check(t *testing.T) {
 	mgc, _ = New()
 	n, _ = Version()
 
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
+
 	rv, err = mgc.Check("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
@@ -488,6 +518,16 @@ func TestMagic_File(t *testing.T) {
 	var err error
 	var v, rv string
 
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
+
 	mgc.SetFlags(NONE)
 	mgc.Load(genuineMagicFile)
 
@@ -547,7 +587,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "magic: cannot stat `does/not/exist' (No such file or directory)"
 	if ok = CompareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err, v)
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 }
 
@@ -560,6 +600,16 @@ func TestMagic_Buffer(t *testing.T) {
 	var ok bool
 	var err error
 	var v, rv string
+
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -707,9 +757,22 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	var f *os.File
 
+	var n int
 	var ok bool
 	var err error
 	var v, rv string
+
+	n, _ = Version()
+
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
 
 	// Sadly, the function `const char* magic_descriptor(struct magic_set*, int)',
 	// which is a part of libmagic will *kindly* close file referenced by given
@@ -776,8 +839,12 @@ func TestMagic_Descriptor(t *testing.T) {
 	rv, err = mgc.Descriptor(f.Fd())
 
 	v = "magic: cannot read `(null)' (Bad file descriptor)"
+	if n >= 519 {
+		v = "magic: cannot read fd -1 (Bad file descriptor)"
+	}
+
 	if ok = CompareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 
 	// Reading from standard input (0) will yield no data in this case.
@@ -905,6 +972,13 @@ func TestOpen(t *testing.T) {
 	var err error
 	var rv, v string
 
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
 	err = Open(func(m *Magic) error {
 		m.Load(genuineMagicFile)
 		a, b := m.File(sampleImageFile)
@@ -988,13 +1062,23 @@ func TestCompile(t *testing.T) {
 		t.Fatal("unable to get current and/or working directory")
 	}
 
-	os.Chdir(path.Join(wd, fixturesDirectory))
+	os.Chdir(path.Join(wd, path.Join(fixturesDirectory, formatDirectory)))
 	defer func() {
 		clean()
 		os.Chdir(wd)
 	}()
 
 	clean()
+
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
 
 	_, genuine = path.Split(genuineMagicFile)
 	_, broken = path.Split(brokenMagicFile)
@@ -1058,6 +1142,16 @@ func TestCheck(t *testing.T) {
 		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
 			rv, err.Error(), false, v)
 	}
+
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
 
 	rv, err = Check(genuineMagicFile)
 	if err != nil {
@@ -1143,6 +1237,19 @@ func TestFileMime(t *testing.T) {
 	var err error
 	var v, rv string
 
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
+
 	rv, err = FileMime("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
@@ -1190,6 +1297,19 @@ func TestFileEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
+
 	rv, err = FileEncoding("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
@@ -1236,6 +1356,19 @@ func TestFileType(t *testing.T) {
 	var err error
 	var v, rv string
 
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-broken.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
+
 	rv, err = FileType("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
@@ -1281,6 +1414,16 @@ func TestBufferMime(t *testing.T) {
 	var ok bool
 	var err error
 	var v, rv string
+
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -1366,6 +1509,16 @@ func TestBufferEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
+
 	buffer := &bytes.Buffer{}
 
 	f, err := os.Open(sampleImageFile)
@@ -1443,6 +1596,16 @@ func TestBufferType(t *testing.T) {
 	var ok bool
 	var err error
 	var v, rv string
+
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+				formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 

@@ -29,14 +29,14 @@ var (
 	// Auxiliary files for use in tests ...
 	fixturesDirectory = "fixtures"
 
+	// Default directory containing files using old-style Magic format.
+	formatDirectory = "old-format"
+
 	// PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced
 	sampleImageFile = path.Clean(path.Join(fixturesDirectory, "gopher.png"))
 
-	// Magic files for testing only ...
-	genuineMagicFile = path.Clean(path.Join(fixturesDirectory, "png.magic"))
-	brokenMagicFile  = path.Clean(path.Join(fixturesDirectory, "png-broken.magic"))
-	fakeMagicFile    = path.Clean(path.Join(fixturesDirectory, "png-fake.magic"))
-	shellMagicFile   = path.Clean(path.Join(fixturesDirectory, "shell.magic"))
+	// Magic file for testing only ...
+	shellMagicFile = path.Clean(path.Join(fixturesDirectory, "shell.magic"))
 )
 
 func Skip(t *testing.T, message string) {
