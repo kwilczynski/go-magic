@@ -75,7 +75,7 @@ func TestMagic_String(t *testing.T) {
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
 	path := magic.FieldByName("path")
-	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
+	cookie := magic.FieldByName("cookie").Elem().UnsafeAddr()
 
 	// Get whatever the underlying default path is ...
 	paths := make([]string, path.Len())
@@ -912,7 +912,7 @@ func Test_open(t *testing.T) {
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
 	path := magic.FieldByName("path")
-	cookie := magic.FieldByName("cookie").Elem().Index(0).UnsafeAddr()
+	cookie := magic.FieldByName("cookie").Elem().UnsafeAddr()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
 		t.Errorf("value given {%v ?}, want {%v %d}",
