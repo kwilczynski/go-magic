@@ -20,47 +20,58 @@ package magic_test
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/kwilczynski/go-magic"
 )
 
-func Example_basic() {
+func Example_separator() {
+	buffer := []byte("#!/bin/bash\n\n")
+
 	// Open and load default Magic database ...
 	m, err := magic.New()
 	if err != nil {
 		panic(fmt.Sprintf("An error occurred: %s\n", err))
 	}
 
-	m.SetFlags(magic.MIME)
-	mime, err := m.File("fixtures/gopher.png")
+	m.SetFlags(magic.CONTINUE)
+	result, err := m.Buffer(buffer)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to determine file MIME: %s\n", err))
+		panic(fmt.Sprintf("Unable to determine buffer data type: %s\n", err))
 	}
-	fmt.Printf("File MIME type is: %s\n", mime)
+
+	fmt.Println("Matches for data in the buffer are:")
+	for _, s := range strings.Split(result, magic.Separator) {
+		fmt.Printf("\t%s\n", s)
+	}
 
 	m.Close()
 	// Output:
+	// Matches for data in the buffer are:
+	//	Bourne-Again shell script text executable
+	//	a /bin/bash script, ASCII text executable
+}
+
+func Example_closure() {
+	var s string
+
+	// When magic.Open you don't have to worry about
+	// closing the underlying Magic database.
+	err := magic.Open(func (m *magic.Magic) error {
+		m.SetFlags(magic.MIME)
+		mime, err := m.File("fixtures/gopher.png")
+		if err != nil {
+			return err // Propagate error outside of the closure.
+		}
+		s = mime // Pass results outside ...
+		return nil
+	})
+
+	if err != nil {
+		panic(fmt.Sprintf("An error occurred: %s\n", err))
+	}
+
+	fmt.Printf("File MIME type is: %s\n", s)
+	// Output:
 	// File MIME type is: image/png; charset=binary
-}
-
-func ExampleFileType() {
-	mime, err := magic.FileType("fixtures/gopher.png")
-	if err != nil {
-		panic(fmt.Sprintf("An error occurred: %s\n", err))
-	}
-	fmt.Printf("File type is: %s\n", mime)
-	// Output:
-	// File type is: image/png
-}
-
-func ExampleBufferEncoding() {
-	buffer := []byte("Hello, 世界")
-
-	mime, err := magic.BufferEncoding(buffer)
-	if err != nil {
-		panic(fmt.Sprintf("An error occurred: %s\n", err))
-	}
-	fmt.Printf("Data in the buffer is enconded as: %s\n", mime)
-	// Output:
-	// Data in the buffer is enconded as: utf-8
 }
