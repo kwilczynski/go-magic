@@ -226,10 +226,10 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	rv, err = mgc.Load("does/not/exist")
 
@@ -320,10 +320,10 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	rv, err = mgc.Compile("does/not/exist")
 
@@ -453,10 +453,10 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	rv, err = mgc.Check("does/not/exist")
 
@@ -523,10 +523,10 @@ func TestMagic_File(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	mgc.SetFlags(NONE)
 	mgc.Load(genuineMagicFile)
@@ -606,10 +606,10 @@ func TestMagic_Buffer(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -769,10 +769,10 @@ func TestMagic_Descriptor(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	// Sadly, the function `const char* magic_descriptor(struct magic_set*, int)',
 	// which is a part of libmagic will *kindly* close file referenced by given
@@ -977,7 +977,7 @@ func TestOpen(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	err = Open(func(m *Magic) error {
 		m.Load(genuineMagicFile)
@@ -1075,10 +1075,10 @@ func TestCompile(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	_, genuine = path.Split(genuineMagicFile)
 	_, broken = path.Split(brokenMagicFile)
@@ -1148,10 +1148,10 @@ func TestCheck(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	rv, err = Check(genuineMagicFile)
 	if err != nil {
@@ -1242,13 +1242,13 @@ func TestFileMime(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	rv, err = FileMime("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
@@ -1302,13 +1302,13 @@ func TestFileEncoding(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	rv, err = FileEncoding("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
@@ -1361,13 +1361,13 @@ func TestFileType(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-broken.magic"))
+		formatDirectory, "png-broken.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	rv, err = FileType("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
@@ -1420,10 +1420,10 @@ func TestBufferMime(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -1514,10 +1514,10 @@ func TestBufferEncoding(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -1602,10 +1602,10 @@ func TestBufferType(t *testing.T) {
 	}
 
 	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png.magic"))
+		formatDirectory, "png.magic"))
 
 	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-				formatDirectory, "png-fake.magic"))
+		formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
