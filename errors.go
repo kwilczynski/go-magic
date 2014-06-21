@@ -22,11 +22,13 @@ import (
 	"fmt"
 )
 
+// MagicError represents an error originating from the underlying Magic database.
 type MagicError struct {
 	Errno   int
 	Message string
 }
 
+// Error returns a descriptive error message.
 func (me *MagicError) Error() string {
 	return fmt.Sprintf("magic: %s", me.Message)
 }

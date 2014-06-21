@@ -31,6 +31,29 @@ import (
 	"testing"
 )
 
+// Reference original functions.
+var (
+	version       = Version
+	versionString = VersionString
+	versionSlice  = VersionSlice
+)
+
+func init() {
+	_, err := version()
+	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
+		// Mock return values by replacing original functions.
+		version = func() (int, error) {
+			return 518, nil
+		}
+		versionString = func() (string, error) {
+			return "5.18", nil
+		}
+		versionSlice = func() ([]int, error) {
+			return []int{5, 18}, nil
+		}
+	}
+}
+
 func TestNew(t *testing.T) {
 	mgc, err := New()
 	if err != nil {
@@ -1182,12 +1205,7 @@ func TestCheck(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	v, err := Version()
-	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		Skip(t, "function `int magic_version(void)' is not implemented")
-		return // Should not me reachable on modern Go version.
-	}
-
+	v, _ := version()
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
 		t.Errorf("value given {%v %d}, want {%v > %d}",
 			reflect.ValueOf(v).Kind(), v, reflect.Int, 0)
@@ -1195,13 +1213,9 @@ func TestVersion(t *testing.T) {
 }
 
 func TestVersionString(t *testing.T) {
-	rv, err := Version()
-	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		Skip(t, "function `int magic_version(void)' is not implemented")
-		return // Should not me reachable on modern Go version.
-	}
+	rv, _ := version()
 
-	s, _ := VersionString()
+	s, _ := versionString()
 	if reflect.ValueOf(s).Kind() != reflect.String || s == "" {
 		t.Errorf("value given {%v %d}, want {%v > %d}",
 			reflect.ValueOf(s).Kind(), len(s), reflect.String, 0)
@@ -1214,13 +1228,9 @@ func TestVersionString(t *testing.T) {
 }
 
 func TestVersionSlice(t *testing.T) {
-	rv, err := Version()
-	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
-		Skip(t, "function `int magic_version(void)' is not implemented")
-		return // Should not me reachable on modern Go version.
-	}
+	rv, _ := version()
 
-	s, _ := VersionSlice()
+	s, _ := versionSlice()
 	if reflect.ValueOf(s).Kind() != reflect.Slice || len(s) == 0 {
 		t.Errorf("value given {%v %d}, want {%v > %d}",
 			reflect.ValueOf(s).Kind(), len(s), reflect.Slice, 0)

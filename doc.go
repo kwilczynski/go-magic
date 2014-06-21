@@ -16,4 +16,8 @@
  * limitations under the License.
  */
 
+/*
+ Package magic implements
+ See: http://www.darwinsys.com/file/
+*/
 package magic
