@@ -22,7 +22,7 @@ import (
 	"fmt"
 )
 
-// MagicError represents an error originating from the underlying Magic database.
+// MagicError represents an error originating from the underlying Magic library.
 type MagicError struct {
 	Errno   int
 	Message string

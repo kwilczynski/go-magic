@@ -205,13 +205,13 @@ func TestMagic_SetFlags(t *testing.T) {
 	}
 }
 
-func TestMagic_FlagsArray(t *testing.T) {
+func TestMagic_FlagsSlice(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()
 
 	var actual []int
 
-	var flagsArrayTests = []struct {
+	var flagsSliceTests = []struct {
 		given    int
 		expected []int
 	}{
@@ -222,10 +222,10 @@ func TestMagic_FlagsArray(t *testing.T) {
 		{0x000410, []int{0x000010, 0x000400}}, // Flag: MIME_TTYPE, MIME_ENCODING
 	}
 
-	for _, tt := range flagsArrayTests {
+	for _, tt := range flagsSliceTests {
 		mgc.SetFlags(tt.given)
 
-		actual, _ = mgc.FlagsArray()
+		actual, _ = mgc.FlagsSlice()
 		if ok := reflect.DeepEqual(actual, tt.expected); !ok {
 			t.Errorf("value given %v, want %v", actual, tt.expected)
 		}
@@ -799,7 +799,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	// Sadly, the function `const char* magic_descriptor(struct magic_set*, int)',
 	// which is a part of libmagic will *kindly* close file referenced by given
-	// file-descriptor for us, and so we have to re-open each time. This only
+	// file descriptor for us, and so we have to re-open each time. This only
 	// concerns certain versions of libmagic, but its better to stay on the
 	// safe side ...
 	file := func() {
@@ -1302,65 +1302,6 @@ func TestFileMime(t *testing.T) {
 	}
 }
 
-func TestFileEncoding(t *testing.T) {
-	var ok bool
-	var err error
-	var v, rv string
-
-	if n, _ := Version(); n >= 519 {
-		formatDirectory = "new-format"
-	}
-
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
-
-	rv, err = FileEncoding("does/not/exist", genuineMagicFile)
-	if rv == "" && err != nil {
-		v = "magic: cannot open `does/not/exist' (No such file or directory)"
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), "", v)
-		}
-	}
-
-	v = "binary" // Binary data will always have this encoding.
-
-	rv, err = FileEncoding(sampleImageFile, genuineMagicFile)
-	if ok = CompareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	rv, err = FileEncoding(sampleImageFile, fakeMagicFile)
-	if ok = CompareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	rv, err = FileEncoding(sampleImageFile, brokenMagicFile)
-	if rv == "" && err != nil {
-		n, _ := Version()
-
-		v = "magic: line 1: No current entry for continuation"
-		if n < 518 && n >= 514 {
-			// A few releases of libmagic were having issues.
-			v = "magic: no magic files loaded"
-		} else if n < 0 {
-			// Older version of libmagic reports same error differently.
-			v = "magic: No current entry for continuation"
-		}
-
-		if ok := CompareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
-				rv, err.Error(), false, v)
-		}
-	}
-}
-
 func TestFileType(t *testing.T) {
 	var ok bool
 	var err error
@@ -1401,6 +1342,65 @@ func TestFileType(t *testing.T) {
 	}
 
 	rv, err = FileType(sampleImageFile, brokenMagicFile)
+	if rv == "" && err != nil {
+		n, _ := Version()
+
+		v = "magic: line 1: No current entry for continuation"
+		if n < 518 && n >= 514 {
+			// A few releases of libmagic were having issues.
+			v = "magic: no magic files loaded"
+		} else if n < 0 {
+			// Older version of libmagic reports same error differently.
+			v = "magic: No current entry for continuation"
+		}
+
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), false, v)
+		}
+	}
+}
+
+func TestFileEncoding(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png-broken.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png-fake.magic"))
+
+	rv, err = FileEncoding("does/not/exist", genuineMagicFile)
+	if rv == "" && err != nil {
+		v = "magic: cannot open `does/not/exist' (No such file or directory)"
+		if ok := CompareStrings(err.Error(), v); !ok {
+			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+				rv, err.Error(), "", v)
+		}
+	}
+
+	v = "binary" // Binary data will always have this encoding.
+
+	rv, err = FileEncoding(sampleImageFile, genuineMagicFile)
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileEncoding(sampleImageFile, fakeMagicFile)
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = FileEncoding(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
 		n, _ := Version()
 
@@ -1514,94 +1514,6 @@ func TestBufferMime(t *testing.T) {
 	BufferMime(buffer.Bytes())
 }
 
-func TestBufferEncoding(t *testing.T) {
-	var ok bool
-	var err error
-	var v, rv string
-
-	if n, _ := Version(); n >= 519 {
-		formatDirectory = "new-format"
-	}
-
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
-
-	buffer := &bytes.Buffer{}
-
-	f, err := os.Open(sampleImageFile)
-	if err != nil {
-		t.Fatalf("unable to open file `%s'", sampleImageFile)
-	}
-	io.Copy(buffer, f)
-	f.Close()
-
-	rv, err = BufferEncoding(buffer.Bytes(), genuineMagicFile)
-
-	v = "binary"
-	if ok = CompareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	rv, err = BufferEncoding(buffer.Bytes(), fakeMagicFile)
-
-	v = "binary"
-	if ok = CompareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	buffer.Reset()
-	buffer.WriteString("Hello, 世界")
-
-	rv, err = BufferEncoding(buffer.Bytes())
-
-	v = "utf-8"
-	if ok = CompareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	buffer.Reset()
-	buffer.WriteString("#!/bin/bash\n\n")
-
-	rv, err = BufferEncoding(buffer.Bytes())
-
-	v = "us-ascii"
-	if ok = CompareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	buffer.Reset()
-	buffer.Write([]byte{0x0})
-
-	rv, err = BufferEncoding(buffer.Bytes())
-
-	v = "" // Should be empty ...
-	if ok = CompareStrings(rv, v); ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
-	}
-
-	buffer.Reset()
-
-	defer func() {
-		r := recover()
-		if r == nil {
-			t.Error("did not panic")
-			return
-		}
-		v = "runtime error: index out of range"
-		if ok := CompareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given \"%s\", want \"%s\"",
-				r.(error).Error(), v)
-			return
-		}
-	}()
-
-	// Will panic ...
-	BufferEncoding(buffer.Bytes())
-}
-
 func TestBufferType(t *testing.T) {
 	var ok bool
 	var err error
@@ -1688,4 +1600,92 @@ func TestBufferType(t *testing.T) {
 
 	// Will panic ...
 	BufferType(buffer.Bytes())
+}
+
+func TestBufferEncoding(t *testing.T) {
+	var ok bool
+	var err error
+	var v, rv string
+
+	if n, _ := Version(); n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png.magic"))
+
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png-fake.magic"))
+
+	buffer := &bytes.Buffer{}
+
+	f, err := os.Open(sampleImageFile)
+	if err != nil {
+		t.Fatalf("unable to open file `%s'", sampleImageFile)
+	}
+	io.Copy(buffer, f)
+	f.Close()
+
+	rv, err = BufferEncoding(buffer.Bytes(), genuineMagicFile)
+
+	v = "binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	rv, err = BufferEncoding(buffer.Bytes(), fakeMagicFile)
+
+	v = "binary"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("Hello, 世界")
+
+	rv, err = BufferEncoding(buffer.Bytes())
+
+	v = "utf-8"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.WriteString("#!/bin/bash\n\n")
+
+	rv, err = BufferEncoding(buffer.Bytes())
+
+	v = "us-ascii"
+	if ok = CompareStrings(rv, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+	buffer.Write([]byte{0x0})
+
+	rv, err = BufferEncoding(buffer.Bytes())
+
+	v = "" // Should be empty ...
+	if ok = CompareStrings(rv, v); ok {
+		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+	}
+
+	buffer.Reset()
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("did not panic")
+			return
+		}
+		v = "runtime error: index out of range"
+		if ok := CompareStrings(r.(error).Error(), v); !ok {
+			t.Errorf("value given \"%s\", want \"%s\"",
+				r.(error).Error(), v)
+			return
+		}
+	}()
+
+	// Will panic ...
+	BufferEncoding(buffer.Bytes())
 }

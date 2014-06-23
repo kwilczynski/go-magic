@@ -42,7 +42,9 @@ import (
 	"unsafe"
 )
 
-// Separator
+// Separator is a field separator that can be used to split
+// results when the CONTINUE flag is set causing all valid
+// matches found by the Magic library to be returned.
 const Separator string = "\x5c\x30\x31\x32\x2d\x20"
 
 type magic struct {
@@ -54,6 +56,7 @@ type magic struct {
 
 func (m *magic) close() {
 	if m != nil && m.cookie != nil {
+		// This will free resources on the Magic library side.
 		C.magic_close(m.cookie)
 		m.path = []string{}
 		m.cookie = nil
@@ -61,12 +64,22 @@ func (m *magic) close() {
 	runtime.SetFinalizer(m, nil)
 }
 
-// Magic represents underlying Magic database.
+// Magic represents the underlying Magic library.
 type Magic struct {
 	*magic
 }
 
-// New opens and initializes underlying Magic database.
+// New opens and initializes Magic library.  Optionally,
+// a multiple distinct Magic database files can be provided
+// to load, otherwise a default database (usually available
+// system-wide) will be loaded.  Alternatively, the "MAGIC"
+// environment variable can be used to name any desired Magic
+// database files to be loaded, but it must be set prior to
+// calling this function for it to take effect.  Remember
+// to call Close in order to release initialized resources
+// and close currently open Magic library.  Alternatively,
+// use Open which will ensure that Close is called once
+// the closure finishes.
 func New(files ...string) (*Magic, error) {
 	mgc, err := open()
 	if err != nil {
@@ -79,7 +92,8 @@ func New(files ...string) (*Magic, error) {
 	return mgc, nil
 }
 
-// Close closes underlying Magic database.
+// Close releases all initialized resources and closes
+// currently open Magic library.
 func (mgc *Magic) Close() {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -92,7 +106,11 @@ func (mgc *Magic) String() string {
 		mgc.flags, mgc.path, mgc.cookie)
 }
 
-// Path returns
+// Path returns a slice containing fully-qualified path for each
+// of Magic database files that was loaded and is currently in use.
+// If the "MAGIC" environment variable is present, then each path
+// from it will be taken into the account and the value that this
+// function returns will be updated accordingly.
 func (mgc *Magic) Path() ([]string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -101,6 +119,7 @@ func (mgc *Magic) Path() ([]string, error) {
 		return []string{}, mgc.error()
 	}
 
+	// Respect the "MAGIC" environment variable, if present.
 	if len(mgc.path) > 0 && os.Getenv("MAGIC") == "" {
 		return mgc.path, nil
 	}
@@ -109,7 +128,7 @@ func (mgc *Magic) Path() ([]string, error) {
 	return mgc.path, nil
 }
 
-// Flags returns
+// Flags returns a value (bitmask) representing current flags set.
 func (mgc *Magic) Flags() (int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -120,8 +139,10 @@ func (mgc *Magic) Flags() (int, error) {
 	return mgc.flags, nil
 }
 
-// FlagsArray returns
-func (mgc *Magic) FlagsArray() ([]int, error) {
+// FlagsSlice returns a slice containing each distinct flag that
+// is currently set and included as a part of the current value
+// (bitmask) of flags.  Results are sorted in an ascending order.
+func (mgc *Magic) FlagsSlice() ([]int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
 
@@ -145,7 +166,9 @@ func (mgc *Magic) FlagsArray() ([]int, error) {
 	return flags, nil
 }
 
-// SetFlags
+// SetFlags sets the flags to the new value (bitmask).  Depending
+// on which flags are current set the results and/or behavior of
+// the Magic library will change accordingly.
 func (mgc *Magic) SetFlags(flags int) error {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -254,6 +277,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 	if cstring == nil {
 		rv, _ := Version()
 
+		// Handle the case when the "ERROR" flag is set.
 		if mgc.flags&ERROR != 0 {
 			return "", mgc.error()
 		} else if rv < 515 {
@@ -398,7 +422,9 @@ func Check(files ...string) (bool, error) {
 	return rv, nil
 }
 
-// Version returns
+// Version returns the underlying Magic library version as in integer
+// value in the format "XYY", where X is the major version and Y is
+// the minor version number.
 func Version() (int, error) {
 	rv, err := C.magic_version_wrapper()
 	if rv < 0 && err != nil {
@@ -408,7 +434,8 @@ func Version() (int, error) {
 	return int(rv), nil
 }
 
-// VersionString returns
+// VersionString returns the underlying Magic library version as string
+// in the format "X.YY".
 func VersionString() (string, error) {
 	rv, err := Version()
 	if err != nil {
@@ -417,7 +444,8 @@ func VersionString() (string, error) {
 	return fmt.Sprintf("%d.%02d", rv/100, rv%100), nil
 }
 
-// VersionSlice returns
+// VersionSlice returns a slice containing values of both the major
+// and minor version numbers separated from one another.
 func VersionSlice() ([]int, error) {
 	rv, err := Version()
 	if err != nil {
@@ -438,18 +466,6 @@ func FileMime(filename string, files ...string) (string, error) {
 	return mgc.File(filename)
 }
 
-// FileEncoding
-func FileEncoding(filename string, files ...string) (string, error) {
-	mgc, err := New(files...)
-	if err != nil {
-		return "", err
-	}
-	defer mgc.Close()
-
-	mgc.SetFlags(MIME_ENCODING)
-	return mgc.File(filename)
-}
-
 // FileType
 func FileType(filename string, files ...string) (string, error) {
 	mgc, err := New(files...)
@@ -462,7 +478,21 @@ func FileType(filename string, files ...string) (string, error) {
 	return mgc.File(filename)
 }
 
-// BufferMime
+// FileEncoding
+func FileEncoding(filename string, files ...string) (string, error) {
+	mgc, err := New(files...)
+	if err != nil {
+		return "", err
+	}
+	defer mgc.Close()
+
+	mgc.SetFlags(MIME_ENCODING)
+	return mgc.File(filename)
+}
+
+// BufferMime returns MIME identification (both the MIME type
+// and MIME encoding), rather than a textual description,
+// for the content of the buffer.
 func BufferMime(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -474,19 +504,8 @@ func BufferMime(buffer []byte, files ...string) (string, error) {
 	return mgc.Buffer(buffer)
 }
 
-// BufferEncoding
-func BufferEncoding(buffer []byte, files ...string) (string, error) {
-	mgc, err := New(files...)
-	if err != nil {
-		return "", err
-	}
-	defer mgc.Close()
-
-	mgc.SetFlags(MIME_ENCODING)
-	return mgc.Buffer(buffer)
-}
-
-// BufferType
+// BufferType returns MIME type only, rather than a textual
+// description, for the content of the buffer.
 func BufferType(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -495,5 +514,18 @@ func BufferType(buffer []byte, files ...string) (string, error) {
 	defer mgc.Close()
 
 	mgc.SetFlags(MIME_TYPE)
+	return mgc.Buffer(buffer)
+}
+
+// BufferEncoding returns MIME encoding only, rather than a textual
+// description, for the content of the buffer.
+func BufferEncoding(buffer []byte, files ...string) (string, error) {
+	mgc, err := New(files...)
+	if err != nil {
+		return "", err
+	}
+	defer mgc.Close()
+
+	mgc.SetFlags(MIME_ENCODING)
 	return mgc.Buffer(buffer)
 }
