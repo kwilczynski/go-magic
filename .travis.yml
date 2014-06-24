@@ -10,8 +10,8 @@ go:
   - 1.3
   - tip
 env:
-#  global:
-#    - secure: "XQqZEEe/8ReX+skXY6igttJOKXBSDvmdohA3WJTFUDLcrpp/Wiob1O0yI8RQIh7QYd8uFQfIpF9ZrEG1L4QTMHHXS3CrPBP3kFZ3uC4Xk8Uf2PXP0HhSetB1nELSb9TXCB3r80GXHQ7yoqjcgbek5G61n2R6UOXm7vE0z8J0WtM="
+  global:
+    - secure: "XQqZEEe/8ReX+skXY6igttJOKXBSDvmdohA3WJTFUDLcrpp/Wiob1O0yI8RQIh7QYd8uFQfIpF9ZrEG1L4QTMHHXS3CrPBP3kFZ3uC4Xk8Uf2PXP0HhSetB1nELSb9TXCB3r80GXHQ7yoqjcgbek5G61n2R6UOXm7vE0z8J0WtM="
   matrix:
     - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
     - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=clang
@@ -28,23 +28,21 @@ matrix:
 branches:
   only:
     - master
-#before_install:
-#  # TODO(kwilczynski): Possibly a good candidate for https://github.com/tools/godep.
-#  - travis_retry go get -v -x code.google.com/p/go.tools/cmd/cover
-#  - travis_retry go get -v -x github.com/axw/gocov/gocov
-#  - travis_retry go get -v -x github.com/mattn/goveralls
 install: true
 before_script:
   - export PATH=${PATH}:${HOME}/gopath/bin:${GOPATH}
   - travis_retry sudo apt-get install -y --force-yes bc
   - export GO_VERSION=$(go version | perl -ne 'print $1 if /^.+go([0-9]\.[0-9])/')
-  - if [ ! "x$(echo "$GO_VERSION < 1.2" | bc)" == "x0" ]; then COMPILER=gcc; fi
+  - export FRESH_VERSION=$(go version | perl -ne 'print "true" if /^.+go(1\.(2(\.[23])?|3))/')
+  - if [ "x$(echo "$GO_VERSION < 1.2" | bc)" != "x0" ]; then COMPILER=gcc; fi
   - export CC=$COMPILER
   - alias gcc=$COMPILER # XXX(kwilczynski): Ugly hack for Go prior to 1.2 and clang.
   - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/fd864e8ed83889faba251f298bf28dd0de6b3962/libmagic.sh"
   - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
   - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash libmagic.sh
+  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then travis_retry go get -v -x code.google.com/p/go.tools/cmd/cover; fi
+  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then travis_retry go get -v -x github.com/axw/gocov/gocov; fi
+  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then travis_retry go get -v -x github.com/mattn/goveralls; fi
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script:
-#  - goveralls -v -repotoken $REPOSITORY_TOKEN
-  - go test -v -x ./...
+  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then goveralls -v -repotoken $REPOSITORY_TOKEN; else go test -v -x ./...; fi
