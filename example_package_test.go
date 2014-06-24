@@ -25,6 +25,9 @@ import (
 	"github.com/kwilczynski/go-magic"
 )
 
+// This example shows how to use the Separator to split results
+// when the CONTINUE flag is set and more than one match was
+// returned by the Magic library.
 func Example_separator() {
 	buffer := []byte("#!/bin/bash\n\n")
 
@@ -52,6 +55,7 @@ func Example_separator() {
 	//	a /bin/bash script, ASCII text executable
 }
 
+// This example shows how to use Open together with a closure.
 func Example_closure() {
 	var s string
 

@@ -24,6 +24,10 @@ import (
 	"github.com/kwilczynski/go-magic"
 )
 
+// This example show the basic usage of the package: Open and initialize
+// Magic library, set appropriate flags, for a given file find its MIME
+// identification (as per the flag set), print the results and close
+// releasing all initialized resources.
 func Example_basic() {
 	// Open and load default Magic database ...
 	m, err := magic.New()
@@ -36,23 +40,25 @@ func Example_basic() {
 	if err != nil {
 		panic(fmt.Sprintf("Unable to determine file MIME: %s\n", err))
 	}
-	fmt.Printf("File MIME type is: %s\n", mime)
+	fmt.Printf("File MIME is: %s\n", mime)
 
 	m.Close()
 	// Output:
-	// File MIME type is: image/png; charset=binary
+	// File MIME is: image/png; charset=binary
 }
 
+// This example shows how to quickly find MIME type for a file.
 func ExampleFileType() {
 	mime, err := magic.FileType("fixtures/gopher.png")
 	if err != nil {
 		panic(fmt.Sprintf("An error occurred: %s\n", err))
 	}
-	fmt.Printf("File type is: %s\n", mime)
+	fmt.Printf("File MIME type is: %s\n", mime)
 	// Output:
-	// File type is: image/png
+	// File MIME type is: image/png
 }
 
+// This example show how to identify encoding type of a buffer.
 func ExampleBufferEncoding() {
 	buffer := []byte("Hello, 世界")
 
@@ -60,7 +66,7 @@ func ExampleBufferEncoding() {
 	if err != nil {
 		panic(fmt.Sprintf("An error occurred: %s\n", err))
 	}
-	fmt.Printf("Data in the buffer is enconded as: %s\n", mime)
+	fmt.Printf("Data in the buffer is encoded as: %s\n", mime)
 	// Output:
-	// Data in the buffer is enconded as: utf-8
+	// Data in the buffer is encoded as: utf-8
 }
