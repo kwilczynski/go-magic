@@ -1,3 +1,4 @@
+secure: "XQqZEEe/8ReX+skXY6igttJOKXBSDvmdohA3WJTFUDLcrpp/Wiob1O0yI8RQIh7QYd8uFQfIpF9ZrEG1L4QTMHHXS3CrPBP3kFZ3uC4Xk8Uf2PXP0HhSetB1nELSb9TXCB3r80GXHQ7yoqjcgbek5G61n2R6UOXm7vE0z8J0WtM="
 language: go
 cache:
   - apt
@@ -42,4 +43,4 @@ before_script:
   - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash libmagic.sh
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script:
-  - goveralls -v
+  - goveralls -v -repotoken $REPOSITORY_TOKEN
