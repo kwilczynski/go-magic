@@ -25,8 +25,13 @@ matrix:
 branches:
   only:
     - master
+before_install:
+  - travis_retry go get -v -x code.google.com/p/go.tools/cmd/cover
+  - travis_retry go get -v -x github.com/axw/gocov/gocov
+  - travis_retry go get -v -x github.com/mattn/goveralls
 install: true
 before_script:
+  - export PATH=${PATH}:${HOME}/gopath/bin:${GOPATH}
   - travis_retry sudo apt-get install -y --force-yes bc
   - export GO_VERSION=$(go version | perl -ne 'print $1 if /^.+go([0-9]\.[0-9])/')
   - if [ ! "x$(echo "$GO_VERSION < 1.2" | bc)" == "x0" ]; then COMPILER=gcc; fi
@@ -37,4 +42,4 @@ before_script:
   - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash libmagic.sh
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
 script:
-  - go test -v -x ./... -run '^Test.*'
+  - goveralls -v
