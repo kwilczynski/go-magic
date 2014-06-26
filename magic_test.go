@@ -1362,7 +1362,21 @@ func TestFileMime(t *testing.T) {
 	var err error
 	var v, rv string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ := Version()
+
+	_, err = BufferEncoding([]byte{}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -1422,7 +1436,21 @@ func TestFileType(t *testing.T) {
 	var err error
 	var v, rv string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ := Version()
+
+	_, err = BufferEncoding([]byte{}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -1481,7 +1509,21 @@ func TestFileEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ := Version()
+
+	_, err = BufferEncoding([]byte{}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -1540,7 +1582,21 @@ func TestBufferMime(t *testing.T) {
 	var err error
 	var v, rv string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ := Version()
+
+	_, err = BufferEncoding([]byte{}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -1634,7 +1690,21 @@ func TestBufferType(t *testing.T) {
 	var err error
 	var v, rv string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ := Version()
+
+	_, err = BufferEncoding([]byte{}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -1722,7 +1792,21 @@ func TestBufferEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ := Version()
+
+	_, err = BufferEncoding([]byte{}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
