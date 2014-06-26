@@ -113,12 +113,24 @@ func TestMagic_String(t *testing.T) {
 }
 
 func TestMagic_Path(t *testing.T) {
-	mgc, _ := New()
+	var mgc *Magic
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err := mgc.Path()
+
+	v := "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
 	defer mgc.Close()
 
-	v, _ := mgc.Path()
-	if len(v) == 0 {
-		t.Fatalf("value given \"%T\", should not be empty", v)
+	s, _ := mgc.Path()
+	if len(s) == 0 {
+		t.Fatalf("value given \"%T\", should not be empty", s)
 	}
 
 	// XXX(krzysztof): Setting "MAGIC" here breaks tests later as it will
@@ -146,7 +158,19 @@ func TestMagic_Path(t *testing.T) {
 }
 
 func TestMagic_Flags(t *testing.T) {
-	mgc, _ := New()
+	var mgc *Magic
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err := mgc.Flags()
+
+	v := "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
 	defer mgc.Close()
 
 	mgc.SetFlags(MIME)
@@ -158,11 +182,24 @@ func TestMagic_Flags(t *testing.T) {
 }
 
 func TestMagic_SetFlags(t *testing.T) {
-	mgc, _ := New()
-	defer mgc.Close()
+	var mgc *Magic
 
 	var err error
 	var actual, errno int
+	var v string
+
+	mgc, _ = New()
+	mgc.Close()
+
+	err = mgc.SetFlags(0)
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
+	defer mgc.Close()
 
 	var flagsTests = []struct {
 		broken   bool
@@ -199,14 +236,26 @@ func TestMagic_SetFlags(t *testing.T) {
 
 	err = mgc.SetFlags(0xffffff)
 
-	v := "magic: unknown or invalid flag specified"
+	v = "magic: unknown or invalid flag specified"
 	if ok := CompareStrings(err.Error(), v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 }
 
 func TestMagic_FlagsSlice(t *testing.T) {
-	mgc, _ := New()
+	var mgc *Magic
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err := mgc.FlagsSlice()
+
+	v := "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
 	defer mgc.Close()
 
 	var actual []int
@@ -240,6 +289,16 @@ func TestMagic_Load(t *testing.T) {
 	var err error
 	var p []string
 	var v string
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err = mgc.Load("does/not/exist")
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
 
 	mgc, _ = New()
 	n, _ = Version()
@@ -327,6 +386,16 @@ func TestMagic_Compile(t *testing.T) {
 	var rv bool
 	var err error
 	var genuine, broken, v string
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err = mgc.Compile("does/not/exist")
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
 
 	clean := func() {
 		files, _ := filepath.Glob("*.mgc")
@@ -469,6 +538,16 @@ func TestMagic_Check(t *testing.T) {
 	var v string
 
 	mgc, _ = New()
+	mgc.Close()
+
+	_, err = mgc.Check("does/not/exist")
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
 	n, _ = Version()
 
 	if n >= 519 {
@@ -534,12 +613,24 @@ func TestMagic_Check(t *testing.T) {
 }
 
 func TestMagic_File(t *testing.T) {
-	mgc, _ := New()
-	defer mgc.Close()
+	var mgc *Magic
 
 	var ok bool
 	var err error
 	var v, rv string
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err = mgc.File("does/not/exist")
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
+	defer mgc.Close()
 
 	if n, _ := Version(); n >= 519 {
 		formatDirectory = "new-format"
@@ -615,14 +706,26 @@ func TestMagic_File(t *testing.T) {
 }
 
 func TestMagic_Buffer(t *testing.T) {
-	mgc, _ := New()
-	defer mgc.Close()
+	var mgc *Magic
 
 	var f *os.File
 
 	var ok bool
 	var err error
 	var v, rv string
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err = mgc.Buffer([]byte{})
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
+	defer mgc.Close()
 
 	if n, _ := Version(); n >= 519 {
 		formatDirectory = "new-format"
@@ -775,8 +878,7 @@ func TestMagic_Buffer(t *testing.T) {
 }
 
 func TestMagic_Descriptor(t *testing.T) {
-	mgc, _ := New()
-	defer mgc.Close()
+	var mgc *Magic
 
 	var f *os.File
 
@@ -784,6 +886,19 @@ func TestMagic_Descriptor(t *testing.T) {
 	var ok bool
 	var err error
 	var v, rv string
+
+	mgc, _ = New()
+	mgc.Close()
+
+	_, err = mgc.Descriptor(0)
+
+	v = "magic: Magic library is not open"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	mgc, _ = New()
+	defer mgc.Close()
 
 	n, _ = Version()
 
