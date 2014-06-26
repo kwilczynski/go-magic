@@ -317,7 +317,7 @@ func TestMagic_Load(t *testing.T) {
 
 	v = "magic: could not find any valid magic files!"
 	if n < 0 {
-		// Older version of libmagic reports same error differently.
+		// A few releases of libmagic were having issues.
 		v = "magic: could not find any magic files!"
 	}
 
@@ -421,7 +421,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	v = "magic: could not find any valid magic files!"
 	if n < 0 {
-		// Older version of libmagic reports same error differently.
+		// A few releases of libmagic were having issues.
 		v = "magic: could not find any magic files!"
 	}
 
@@ -510,7 +510,7 @@ func TestMagic_Compile(t *testing.T) {
 	rv, err = mgc.Compile(broken)
 
 	v = "magic: line 1: No current entry for continuation"
-	if n < 516 && n >= 514 {
+	if n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = "magic: no magic files loaded"
 	} else if n < 0 {
@@ -564,7 +564,7 @@ func TestMagic_Check(t *testing.T) {
 
 	v = "magic: could not find any valid magic files!"
 	if n < 0 {
-		// Older version of libmagic reports same error differently.
+		// A few releases of libmagic were having issues.
 		v = "magic: could not find any magic files!"
 	}
 
@@ -593,7 +593,7 @@ func TestMagic_Check(t *testing.T) {
 	rv, err = mgc.Check(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
-	if n < 516 && n >= 514 {
+	if n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = "magic: no magic files loaded"
 	} else if n < 0 {
@@ -1106,11 +1106,40 @@ func Test_destroy(t *testing.T) {
 func TestOpen(t *testing.T) {
 	var mgc *Magic
 
+	var n int
 	var ok bool
 	var err error
 	var rv, v string
 
-	if n, _ := Version(); n >= 519 {
+	n, _ = Version()
+
+	err = Open(nil)
+
+	v = "magic: not a function or nil pointer"
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	err = Open(func (m *Magic) error {
+		// There should be an error originating from magic.New()
+		// which is wrapped inside magic.Open().
+		return nil
+	}, "does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: could not find any magic files!"
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+	}
+
+	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -1174,7 +1203,7 @@ func TestCompile(t *testing.T) {
 
 	n, _ := Version()
 
-	rv, err = Compile("does/not/exist")
+	_, err = Compile("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
 	if n < 518 && n >= 514 {
@@ -1260,7 +1289,7 @@ func TestCheck(t *testing.T) {
 
 	n, _ := Version()
 
-	rv, err = Check("does/not/exist")
+	_, err = Check("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
 	if n < 518 && n >= 514 {
@@ -1364,10 +1393,13 @@ func TestFileMime(t *testing.T) {
 
 	n, _ := Version()
 
-	_, err = BufferEncoding([]byte{}, "does/not/exist")
+	_, err = FileMime(sampleImageFile, "does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
@@ -1438,10 +1470,13 @@ func TestFileType(t *testing.T) {
 
 	n, _ := Version()
 
-	_, err = BufferEncoding([]byte{}, "does/not/exist")
+	_, err = FileType(sampleImageFile, "does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
@@ -1511,10 +1546,13 @@ func TestFileEncoding(t *testing.T) {
 
 	n, _ := Version()
 
-	_, err = BufferEncoding([]byte{}, "does/not/exist")
+	_, err = FileEncoding(sampleImageFile, "does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
@@ -1584,10 +1622,13 @@ func TestBufferMime(t *testing.T) {
 
 	n, _ := Version()
 
-	_, err = BufferEncoding([]byte{}, "does/not/exist")
+	_, err = BufferMime([]byte{}, "does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
@@ -1692,10 +1733,13 @@ func TestBufferType(t *testing.T) {
 
 	n, _ := Version()
 
-	_, err = BufferEncoding([]byte{}, "does/not/exist")
+	_, err = BufferType([]byte{}, "does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
@@ -1797,7 +1841,10 @@ func TestBufferEncoding(t *testing.T) {
 	_, err = BufferEncoding([]byte{}, "does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
