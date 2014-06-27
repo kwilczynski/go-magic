@@ -105,7 +105,8 @@ Vagrant.configure("2") do |config|
       vb.customize ['modifyvm', :id,
         '--memory', '256',
         '--cpus', '1',
-        '--rtcuseutc', 'on'
+        '--rtcuseutc', 'on',
+        '--natdnshostresolver1', 'on'
       ]
     end
     machine.vm.provision :shell, inline: script
