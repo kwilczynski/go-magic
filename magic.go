@@ -49,9 +49,9 @@ const Separator string = "\x5c\x30\x31\x32\x2d\x20"
 
 type magic struct {
 	sync.Mutex
-	flags  int
-	path   []string
-	cookie C.magic_t
+	flags  int       // Current flags set (bitmask).
+	path   []string  // List of Magic database files currently in-use.
+	cookie C.magic_t // Magic database session cookie (a "magic_set" struct on the C side).
 }
 
 func (m *magic) close() {
@@ -69,17 +69,21 @@ type Magic struct {
 	*magic
 }
 
-// New opens and initializes Magic library.  Optionally,
-// a multiple distinct Magic database files can be provided
-// to load, otherwise a default database (usually available
-// system-wide) will be loaded.  Alternatively, the "MAGIC"
-// environment variable can be used to name any desired Magic
-// database files to be loaded, but it must be set prior to
-// calling this function for it to take effect.  Remember
-// to call Close in order to release initialized resources
-// and close currently open Magic library.  Alternatively,
-// use Open which will ensure that Close is called once
-// the closure finishes.
+// New opens and initializes Magic library.
+//
+// Optionally, a multiple distinct Magic database files can
+// be provided to load, otherwise a default database (usually
+// available system-wide) will be loaded.  Alternatively, the
+// "MAGIC" environment variable can be used to name any desired
+// Magic database files to be loaded, but it must be set prior
+// to calling this function for it to take effect.
+//
+// Remember to call Close to release initialized resources
+// and close currently opened Magic library, or use Open which
+// will ensure that Close is called once the closure finishes.
+//
+// If there is an error originating from the underlying Magic
+// library, it will be of type *MagicError.
 func New(files ...string) (*Magic, error) {
 	mgc, err := open()
 	if err != nil {
@@ -108,9 +112,11 @@ func (mgc *Magic) String() string {
 
 // Path returns a slice containing fully-qualified path for each
 // of Magic database files that was loaded and is currently in use.
-// If the "MAGIC" environment variable is present, then each path
-// from it will be taken into the account and the value that this
-// function returns will be updated accordingly.
+// If there is an error, it will be of type *MagicError.
+//
+// Optionally, if the "MAGIC" environment variable is present,
+// then each path from it will be taken into the account and the
+// value that this function returns will be updated accordingly.
 func (mgc *Magic) Path() ([]string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -129,6 +135,7 @@ func (mgc *Magic) Path() ([]string, error) {
 }
 
 // Flags returns a value (bitmask) representing current flags set.
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) Flags() (int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -142,6 +149,7 @@ func (mgc *Magic) Flags() (int, error) {
 // FlagsSlice returns a slice containing each distinct flag that
 // is currently set and included as a part of the current value
 // (bitmask) of flags.  Results are sorted in an ascending order.
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) FlagsSlice() ([]int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -156,6 +164,7 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 
 	flags := make([]int, 0)
 
+	//
 	n := 0
 	for i := mgc.flags; i > 0; i = i - n {
 		n = int(math.Log2(float64(i)))
@@ -168,7 +177,8 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 
 // SetFlags sets the flags to the new value (bitmask).  Depending
 // on which flags are current set the results and/or behavior of
-// the Magic library will change accordingly.
+// the Magic library will change accordingly.  If there is an error,
+// it will be of type *MagicError.
 func (mgc *Magic) SetFlags(flags int) error {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -183,7 +193,7 @@ func (mgc *Magic) SetFlags(flags int) error {
 		switch errno {
 		case syscall.EINVAL:
 			return &MagicError{int(errno), "unknown or invalid flag specified"}
-		case syscall.ENOSYS:
+		case syscall.ENOSYS: // PRESERVE_ATIME
 			return &MagicError{int(errno), "flag is not implemented"}
 		default:
 			return mgc.error()
@@ -195,6 +205,8 @@ func (mgc *Magic) SetFlags(flags int) error {
 }
 
 // Load
+//
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) Load(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -206,6 +218,7 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	var cfiles *C.char
 	defer C.free(unsafe.Pointer(cfiles))
 
+	//
 	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
 	} else {
@@ -220,6 +233,8 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 }
 
 // Compile
+//
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) Compile(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -241,6 +256,8 @@ func (mgc *Magic) Compile(files ...string) (bool, error) {
 }
 
 // Check
+//
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) Check(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -262,6 +279,8 @@ func (mgc *Magic) Check(files ...string) (bool, error) {
 }
 
 // File
+//
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) File(filename string) (string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -277,7 +296,17 @@ func (mgc *Magic) File(filename string) (string, error) {
 	if cstring == nil {
 		rv, _ := Version()
 
-		// Handle the case when the "ERROR" flag is set.
+		// Handle the case when the "ERROR" flag is set regardless
+		// of the current version of the underlying Magic library.
+		//
+		// Prior to version 5.15 the correct behaviour that concerns
+		// the following IEEE 1003.1 standards was broken:
+		//
+		//   http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
+		//   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
+		//
+		// This is an attempt to mitigate the problem and correct
+		// it to achieve the desired behaviour correct.
 		if mgc.flags&ERROR != 0 {
 			return "", mgc.error()
 		} else if rv < 515 {
@@ -286,10 +315,17 @@ func (mgc *Magic) File(filename string) (string, error) {
 		}
 	}
 
+	// XXX(kwilczynski): This case should not happen, ever.
 	if cstring == nil {
 		return "", &MagicError{-1, "unknown result or nil pointer"}
 	}
 
+	// Depending on the version of the underlying
+	// Magic library the magic_file() function can
+	// fail and either yield no results or return
+	// the "(null)" string instead.  Often this
+	// would indicate that an older version of
+	// the Magic library is in use.
 	s := C.GoString(cstring)
 	if s == "" || s == "(null)" {
 		return "", &MagicError{-1, "empty or invalid result"}
@@ -298,6 +334,8 @@ func (mgc *Magic) File(filename string) (string, error) {
 }
 
 // Buffer
+//
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -316,6 +354,8 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 }
 
 // Descriptor
+//
+// If there is an error, it will be of type *MagicError.
 func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -331,6 +371,7 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 	return C.GoString(cstring), nil
 }
 
+// error retrieves an error from the underlying Magic library.
 func (mgc *Magic) error() *MagicError {
 	if mgc.cookie == nil {
 		errno := syscall.EFAULT
@@ -339,6 +380,12 @@ func (mgc *Magic) error() *MagicError {
 
 	cstring := C.magic_error(mgc.cookie)
 	if cstring != nil {
+		// Depending on the version of the underlying
+		// Magic library, the error reporting facilities
+		// can fail and either yield no results or return
+		// the "(null)" string instead.  Often this would
+		// indicate that an older version of the Magic
+		// library is in use.
 		s := C.GoString(cstring)
 		if s == "" || s == "(null)" {
 			return &MagicError{-1, "empty or invalid error message"}
@@ -350,14 +397,18 @@ func (mgc *Magic) error() *MagicError {
 	return &MagicError{-1, "unknown error"}
 }
 
+// XXX(kwilczynski): Most likely not used under any modern version of Go.
 func (mgc *Magic) destroy() {
 	mgc.Close()
 }
 
+// open opens and initializes underlying Magic library and sets the
+// finalizer on the object accordingly.
 func open() (*Magic, error) {
+	// Can only fail allocating memory in this particular case.
 	rv := C.magic_open(C.int(NONE))
 	if rv == nil {
-		errno := syscall.EPERM
+		errno := syscall.NOMEM
 		return nil, &MagicError{int(errno), "failed to initialize Magic library"}
 	}
 
@@ -367,6 +418,8 @@ func open() (*Magic, error) {
 }
 
 // Open
+//
+// If there is an error, it will be of type *MagicError.
 func Open(f func(magic *Magic) error, files ...string) (err error) {
 	var ok bool
 
@@ -380,6 +433,7 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 	}
 	defer mgc.Close()
 
+	//
 	defer func() {
 		if r := recover(); r != nil {
 			err, ok = r.(error)
@@ -393,6 +447,8 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 }
 
 // Compile
+//
+// If there is an error, it will be of type *MagicError.
 func Compile(files ...string) (bool, error) {
 	mgc, err := open()
 	if err != nil {
@@ -408,6 +464,8 @@ func Compile(files ...string) (bool, error) {
 }
 
 // Check
+//
+// If there is an error, it will be of type *MagicError.
 func Check(files ...string) (bool, error) {
 	mgc, err := open()
 	if err != nil {
@@ -424,8 +482,10 @@ func Check(files ...string) (bool, error) {
 
 // Version returns the underlying Magic library version as in integer
 // value in the format "XYY", where X is the major version and Y is
-// the minor version number.
+// the minor version number.  If there is an error, it will be of
+// type *MagicError.
 func Version() (int, error) {
+	//
 	rv, err := C.magic_version_wrapper()
 	if rv < 0 && err != nil {
 		errno := syscall.ENOSYS
@@ -434,8 +494,9 @@ func Version() (int, error) {
 	return int(rv), nil
 }
 
-// VersionString returns the underlying Magic library version as string
-// in the format "X.YY".
+// VersionString returns the underlying Magic library version
+// as string in the format "X.YY".  If there is an error,
+// it will be of type *MagicError.
 func VersionString() (string, error) {
 	rv, err := Version()
 	if err != nil {
@@ -444,8 +505,9 @@ func VersionString() (string, error) {
 	return fmt.Sprintf("%d.%02d", rv/100, rv%100), nil
 }
 
-// VersionSlice returns a slice containing values of both the major
-// and minor version numbers separated from one another.
+// VersionSlice returns a slice containing values of both the
+// major and minor version numbers separated from one another.
+// If there is an error, it will be of type *MagicError.
 func VersionSlice() ([]int, error) {
 	rv, err := Version()
 	if err != nil {
@@ -454,8 +516,11 @@ func VersionSlice() ([]int, error) {
 	return []int{rv / 100, rv % 100}, nil
 }
 
-// FileMime
-func FileMime(filename string, files ...string) (string, error) {
+// FileMime returns MIME identification (both the MIME type
+// and MIME encoding), rather than a textual description,
+// for the named file.  If there is an error, it will be
+// of type *MagicError.
+func FileMime(name string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
 		return "", err
@@ -463,11 +528,13 @@ func FileMime(filename string, files ...string) (string, error) {
 	defer mgc.Close()
 
 	mgc.SetFlags(MIME)
-	return mgc.File(filename)
+	return mgc.File(name)
 }
 
-// FileType
-func FileType(filename string, files ...string) (string, error) {
+// FileType returns MIME type only, rather than a textual
+// description, for the named file.  If there is an error,
+// it will be of type *MagicError.
+func FileType(name string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
 		return "", err
@@ -475,11 +542,13 @@ func FileType(filename string, files ...string) (string, error) {
 	defer mgc.Close()
 
 	mgc.SetFlags(MIME_TYPE)
-	return mgc.File(filename)
+	return mgc.File(name)
 }
 
-// FileEncoding
-func FileEncoding(filename string, files ...string) (string, error) {
+// FileEncoding returns MIME encoding only, rather than a textual
+// description, for the content of the buffer.  If there is an error,
+// it will be of type *MagicError.
+func FileEncoding(name string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
 		return "", err
@@ -487,12 +556,13 @@ func FileEncoding(filename string, files ...string) (string, error) {
 	defer mgc.Close()
 
 	mgc.SetFlags(MIME_ENCODING)
-	return mgc.File(filename)
+	return mgc.File(name)
 }
 
 // BufferMime returns MIME identification (both the MIME type
 // and MIME encoding), rather than a textual description,
-// for the content of the buffer.
+// for the content of the buffer.  If there is an error,
+// it will be of type *MagicError.
 func BufferMime(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -505,7 +575,8 @@ func BufferMime(buffer []byte, files ...string) (string, error) {
 }
 
 // BufferType returns MIME type only, rather than a textual
-// description, for the content of the buffer.
+// description, for the content of the buffer.  If there is
+// an error, it will be of type *MagicError.
 func BufferType(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -518,7 +589,8 @@ func BufferType(buffer []byte, files ...string) (string, error) {
 }
 
 // BufferEncoding returns MIME encoding only, rather than a textual
-// description, for the content of the buffer.
+// description, for the content of the buffer.  If there is an error,
+// it will be of type *MagicError.
 func BufferEncoding(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {

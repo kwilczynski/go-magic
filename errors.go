@@ -24,8 +24,8 @@ import (
 
 // MagicError represents an error originating from the underlying Magic library.
 type MagicError struct {
-	Errno   int
-	Message string
+	Errno   int    // The value of errno, if any.
+	Message string // The actual error message.
 }
 
 // Error returns a descriptive error message.
