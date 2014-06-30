@@ -407,8 +407,8 @@ func (mgc *Magic) destroy() {
 func open() (*Magic, error) {
 	// Can only fail allocating memory in this particular case.
 	rv := C.magic_open(C.int(NONE))
-	if rv == nil {
-		errno := syscall.NOMEM
+	if rv == nil { 
+		errno := syscall.ENOMEM
 		return nil, &MagicError{int(errno), "failed to initialize Magic library"}
 	}
 
