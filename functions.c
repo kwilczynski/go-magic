@@ -118,16 +118,10 @@ out:
 int
 override_current_locale(void *data)
 {
-#if !defined(HAVE_SAFE_LOCALE)
-    char *current_locale = NULL;
-#endif
-
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
     s->status = -1;
-
-#if defined(HAVE_SAFE_LOCALE)
     s->data.locale.old_locale = NULL;
     s->data.locale.new_locale = NULL;
 
@@ -146,26 +140,7 @@ override_current_locale(void *data)
 
     assert(s->data.locale.old_locale != NULL && \
 	    "Must be a valid pointer to `locale_t' type");
-#else
-    s->data.locale.old_locale = NULL;
 
-    current_locale = setlocale(LC_ALL, NULL);
-    if (!current_locale) {
-	goto out;
-    }
-
-    s->data.locale.old_locale = strndup(current_locale, strlen(current_locale));
-    if (!s->data.locale.old_locale) {
-	goto out;
-    }
-
-    if (!setlocale(LC_ALL, "C")) {
-	goto out;
-    }
-
-    assert(s->data.locale.old_locale != NULL && \
-	    "Must be a valid pointer to `char' type");
-#endif
     s->status = 0;
 
 out:
@@ -178,7 +153,6 @@ restore_current_locale(void *data)
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
-#if defined(HAVE_SAFE_LOCALE)
     if (!s->data.locale.new_locale && !s->data.locale.old_locale && s->status != 0) {
 	return -1;
     }
@@ -191,31 +165,13 @@ restore_current_locale(void *data)
 	    "Must be a valid pointer to `locale_t' type");
 
     freelocale(s->data.locale.new_locale);
-#else
-    if (!s->data.locale.old_locale && s->status != 0) {
-	return -1;
-    }
-
-    if (!setlocale(LC_ALL, s->data.locale.old_locale)) {
-	goto out;
-    }
-
-    assert(s->data.locale.old_locale != NULL && \
-	    "Must be a valid pointer to `char' type");
-
-    free(s->data.locale.old_locale);
-#endif
 
     return 0;
 
 out:
-#if defined(HAVE_SAFE_LOCALE)
+    s->status = -1;
     s->data.locale.old_locale = NULL;
     s->data.locale.new_locale = NULL;
-#else
-    s->data.locale.old_locale = NULL;
-#endif
-    s->status = -1;
 
     return -1;
 }

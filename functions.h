@@ -67,12 +67,8 @@ struct file_data {
 typedef struct file_data file_data_t;
 
 struct locale_data {
-#if defined(HAVE_SAFE_LOCALE)
-  locale_t old_locale;
-  locale_t new_locale;
-#else
-  char *old_locale;
-#endif
+    locale_t old_locale;
+    locale_t new_locale;
 };
 
 typedef struct locale_data locale_data_t;
