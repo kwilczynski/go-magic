@@ -16,6 +16,10 @@
  * limitations under the License.
  */
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "functions.h"
 
 int suppress_error_output(void *data);
@@ -114,21 +118,44 @@ out:
 int
 override_current_locale(void *data)
 {
+#if !defined(HAVE_SAFE_LOCALE)
     char *current_locale = NULL;
+#endif
 
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
     s->status = -1;
-    s->data.locale = NULL;
+
+#if defined(HAVE_SAFE_LOCALE)
+    s->data.locale.old_locale = NULL;
+    s->data.locale.new_locale = NULL;
+
+    s->data.locale.new_locale = newlocale(LC_ALL_MASK, "C", NULL);
+    if (s->data.locale.new_locale == (locale_t)0) {
+	goto out;
+    }
+
+    assert(s->data.locale.new_locale != NULL && \
+	    "Must be a valid pointer to `locale_t' type");
+
+    s->data.locale.old_locale = uselocale(s->data.locale.new_locale);
+    if (s->data.locale.old_locale == (locale_t)0) {
+	goto out;
+    }
+
+    assert(s->data.locale.old_locale != NULL && \
+	    "Must be a valid pointer to `locale_t' type");
+#else
+    s->data.locale.old_locale = NULL;
 
     current_locale = setlocale(LC_ALL, NULL);
     if (!current_locale) {
 	goto out;
     }
 
-    s->data.locale = strndup(current_locale, strlen(current_locale));
-    if (!s->data.locale) {
+    s->data.locale.old_locale = strndup(current_locale, strlen(current_locale));
+    if (!s->data.locale.old_locale) {
 	goto out;
     }
 
@@ -136,7 +163,9 @@ override_current_locale(void *data)
 	goto out;
     }
 
-    assert(s->data.locale != NULL && "Must be a valid pointer to `char' type");
+    assert(s->data.locale.old_locale != NULL && \
+	    "Must be a valid pointer to `char' type");
+#endif
     s->status = 0;
 
 out:
@@ -149,21 +178,43 @@ restore_current_locale(void *data)
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
-    if (!s->data.locale && s->status != 0) {
+#if defined(HAVE_SAFE_LOCALE)
+    if (!s->data.locale.new_locale && !s->data.locale.old_locale && s->status != 0) {
 	return -1;
     }
 
-    if (!setlocale(LC_ALL, s->data.locale)) {
+    if (uselocale(s->data.locale.old_locale) == (locale_t)0) {
 	goto out;
     }
 
-    assert(s->data.locale != NULL && "Must be a valid pointer to `char' type");
-    free(s->data.locale);
+    assert(s->data.locale.new_locale != NULL && \
+	    "Must be a valid pointer to `locale_t' type");
+
+    freelocale(s->data.locale.new_locale);
+#else
+    if (!s->data.locale.old_locale && s->status != 0) {
+	return -1;
+    }
+
+    if (!setlocale(LC_ALL, s->data.locale.old_locale)) {
+	goto out;
+    }
+
+    assert(s->data.locale.old_locale != NULL && \
+	    "Must be a valid pointer to `char' type");
+
+    free(s->data.locale.old_locale);
+#endif
 
     return 0;
 
 out:
-    s->data.locale = NULL;
+#if defined(HAVE_SAFE_LOCALE)
+    s->data.locale.old_locale = NULL;
+    s->data.locale.new_locale = NULL;
+#else
+    s->data.locale.old_locale = NULL;
+#endif
     s->status = -1;
 
     return -1;
@@ -268,5 +319,9 @@ magic_version_wrapper(void)
     return -ENOSYS;
 #endif
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 /* vim: set ts=8 sw=4 sts=4 noet : */
