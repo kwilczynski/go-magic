@@ -190,13 +190,6 @@ magic_setflags_wrapper(struct magic_set *ms, int flags)
 	return -EINVAL;
     }
 
-#if !defined(HAVE_UTIME) && !defined(HAVE_UTIMES)
-    if (flags & MAGIC_PRESERVE_ATIME) {
-	errno = ENOSYS;
-	return -ENOSYS;
-    }
-#endif
-
     return magic_setflags(ms, flags);
 }
 

@@ -190,12 +190,9 @@ func (mgc *Magic) SetFlags(flags int) error {
 	rv, err := C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
 	if rv < 0 && err != nil {
 		errno := err.(syscall.Errno)
-		switch errno {
-		case syscall.EINVAL:
+		if errno == syscall.EINVAL {
 			return &MagicError{int(errno), "unknown or invalid flag specified"}
-		case syscall.ENOSYS: // PRESERVE_ATIME
-			return &MagicError{int(errno), "flag is not implemented"}
-		default:
+		} else {
 			return mgc.error()
 		}
 	}
@@ -488,8 +485,12 @@ func Version() (int, error) {
 	//
 	rv, err := C.magic_version_wrapper()
 	if rv < 0 && err != nil {
-		errno := syscall.ENOSYS
-		return -1, &MagicError{int(errno), "function is not implemented"}
+		errno := err.(syscall.Errno)
+		if errno == syscall.ENOSYS {
+			return -1, &MagicError{int(errno), "function is not implemented"}
+		} else {
+			return mgc.error()
+		}
 	}
 	return int(rv), nil
 }
