@@ -489,7 +489,7 @@ func Version() (int, error) {
 		if errno == syscall.ENOSYS {
 			return -1, &MagicError{int(errno), "function is not implemented"}
 		} else {
-			return -1, mgc.error()
+			return -1, &MagicError{-1, "unknown error"}
 		}
 	}
 	return int(rv), nil
