@@ -36,7 +36,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 echo 'Starting provisioning ...'
 
 # Avoid the configuration file questions ...
-cat <<'EOF' | tee /etc/apt/apt.conf.d/99vagrant &>/dev/null
+cat <<'EOF' | sudo tee /etc/apt/apt.conf.d/99vagrant &>/dev/null
 DPkg::options { "--force-confdef"; "--force-confnew"; }
 EOF
 
@@ -44,10 +44,10 @@ EOF
 export DEBIAN_FRONTEND=noninteractive
 
 # Update package repositories ...
-apt-get update &> /dev/null
+sudo apt-get update &> /dev/null
 
 # Install needed build time dependencies ...
-apt-get install --force-yes -y \
+sudo apt-get install --force-yes -y \
   curl             \
   git              \
   mercurial        \
@@ -64,13 +64,13 @@ apt-get install --force-yes -y \
   libtool-doc &> /dev/null
 
 # Remove existing "libmagic-dev" package.
-apt-get remove --purge --force-yes -y libmagic-dev &> /dev/null
+sudo apt-get remove --purge --force-yes -y libmagic-dev &> /dev/null
 
 # Clean up unneeded packages ...
 {
-  apt-get autoremove --force-yes -y
-  apt-get autoclean --force-yes -y
-  apt-get clean --force-yes -y
+  sudo apt-get autoremove --force-yes -y
+  sudo apt-get autoclean --force-yes -y
+  sudo apt-get clean --force-yes -y
 } &> /dev/null
 
 # Select appropriate "godeb" package.
@@ -83,6 +83,11 @@ esac
 # Download and unpack "godeb" package.
 {
   curl -s https://godeb.s3.amazonaws.com/${godeb_package} | tar zxvf - -C .
+} &> /dev/null
+
+# Run "godeb" and install Go Language interpreter.
+{
+  sudo ./godeb install
 } &> /dev/null
 
 echo 'All done!'
@@ -111,7 +116,7 @@ Vagrant.configure("2") do |config|
         '--natdnsproxy1', 'on'
       ]
     end
-    machine.vm.provision :shell, inline: script
+    machine.vm.provision :shell, privileged: false, inline: script
   end
 end
 
