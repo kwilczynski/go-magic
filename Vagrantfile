@@ -52,6 +52,7 @@ apt-get install --force-yes -y \
   git              \
   mercurial        \
   make             \
+  patch            \
   bison            \
   flex             \
   build-essential  \
