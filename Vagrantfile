@@ -103,10 +103,11 @@ Vagrant.configure("2") do |config|
       vb.name = name
       vb.gui = false
       vb.customize ['modifyvm', :id,
-        '--memory', '256',
+        '--memory', '384',
         '--cpus', '1',
         '--rtcuseutc', 'on',
-        '--natdnshostresolver1', 'on'
+        '--natdnshostresolver1', 'on',
+        '--natdnsproxy1', 'on'
       ]
     end
     machine.vm.provision :shell, inline: script
