@@ -114,6 +114,7 @@ func TestMagic_String(t *testing.T) {
 
 func TestMagic_Path(t *testing.T) {
 	var mgc *Magic
+	var rv string
 
 	mgc, _ = New()
 	mgc.Close()
@@ -126,12 +127,13 @@ func TestMagic_Path(t *testing.T) {
 	}
 
 	mgc, _ = New()
-	defer mgc.Close()
 
-	s, _ := mgc.Path()
-	if len(s) == 0 {
-		t.Fatalf("value given \"%T\", should not be empty", s)
+	rv, _ = mgc.Path()
+	if len(rv) == 0 {
+		t.Fatalf("value given \"%T\", should not be empty", rv)
 	}
+
+	mgc.Close()
 
 	// XXX(krzysztof): Setting "MAGIC" here breaks tests later as it will
 	// be persistent between different tests, sadly needed to be disabled
@@ -155,6 +157,17 @@ func TestMagic_Path(t *testing.T) {
 	// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
 	// that requires working os.Clearenv() which is yet to be implemented as
 	// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
+
+	mgc, _ := open()
+	defer func() {
+		value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
+		value.Interface().(*magic).close()
+	}()
+
+	rv, _ := mgc.Path()
+	if len(rv) == 0 {
+		t.Fatalf("value given \"%T\", should not be empty", rv)
+	}
 }
 
 func TestMagic_Flags(t *testing.T) {
@@ -1041,6 +1054,10 @@ func TestMagic_Separator(t *testing.T) {
 
 func Test_open(t *testing.T) {
 	mgc, _ := open()
+	defer func() {
+		value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
+		value.Interface().(*magic).close()
+	}()
 
 	func(v interface{}) {
 		if _, ok := v.(*Magic); !ok {
