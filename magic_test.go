@@ -114,7 +114,7 @@ func TestMagic_String(t *testing.T) {
 
 func TestMagic_Path(t *testing.T) {
 	var mgc *Magic
-	var rv string
+	var rv []string
 
 	mgc, _ = New()
 	mgc.Close()
@@ -158,13 +158,13 @@ func TestMagic_Path(t *testing.T) {
 	// that requires working os.Clearenv() which is yet to be implemented as
 	// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
 
-	mgc, _ := open()
+	mgc, _ = open()
 	defer func() {
 		value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
 		value.Interface().(*magic).close()
 	}()
 
-	rv, _ := mgc.Path()
+	rv, _ = mgc.Path()
 	if len(rv) == 0 {
 		t.Fatalf("value given \"%T\", should not be empty", rv)
 	}
