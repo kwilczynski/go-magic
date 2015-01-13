@@ -59,8 +59,8 @@ func Example_separator() {
 func Example_closure() {
 	var s string
 
-	// When magic.Open you don't have to worry about
-	// closing the underlying Magic database.
+	// When using magic.Open you don't have to worry
+	// about closing the underlying Magic database.
 	err := magic.Open(func(m *magic.Magic) error {
 		m.SetFlags(magic.MIME)
 		mime, err := m.File("fixtures/gopher.png")
