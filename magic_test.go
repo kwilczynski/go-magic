@@ -1021,6 +1021,14 @@ func TestMagic_Separator(t *testing.T) {
 	var rv string
 	var actual []string
 
+	n, _ := Version()
+
+	v := []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable", "data"}
+	if n < 524 {
+		// Older version of libmagic reports the results differently.
+		v = []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable"}
+	}
+
 	var separatorTests = []struct {
 		flags    int
 		expected []string
@@ -1028,7 +1036,7 @@ func TestMagic_Separator(t *testing.T) {
 		// Flag: MAGIC_NONE
 		{0x000000, []string{"Bourne-Again shell script, ASCII text executable"}},
 		// Flag: MAGIC_CONTINUE
-		{0x000020, []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable"}},
+		{0x000020, v},
 		// Flag: MIME_ENCODING
 		{0x000400, []string{"us-ascii"}},
 		// Flag: MIME_TYPE, MIME_ENCODING

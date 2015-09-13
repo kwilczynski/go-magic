@@ -49,10 +49,6 @@ func Example_separator() {
 	}
 
 	m.Close()
-	// Output:
-	// Matches for data in the buffer are:
-	//	Bourne-Again shell script text executable
-	//	a /bin/bash script, ASCII text executable
 }
 
 // This example shows how to use Open together with a closure.
