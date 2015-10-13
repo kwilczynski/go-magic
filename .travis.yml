@@ -10,8 +10,6 @@ go:
   - 1.5.1
   - tip
 env:
-  global:
-    - secure: "XQqZEEe/8ReX+skXY6igttJOKXBSDvmdohA3WJTFUDLcrpp/Wiob1O0yI8RQIh7QYd8uFQfIpF9ZrEG1L4QTMHHXS3CrPBP3kFZ3uC4Xk8Uf2PXP0HhSetB1nELSb9TXCB3r80GXHQ7yoqjcgbek5G61n2R6UOXm7vE0z8J0WtM="
   matrix:
     - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
     - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=clang
@@ -53,7 +51,8 @@ before_script:
       travis_retry go get -v -x $URL
     fi
   - if [ "x${FRESH_VERSION}" == "xtrue" ]; then travis_retry go get -v -x github.com/axw/gocov/gocov; fi
-  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then travis_retry go get -v -x github.com/mattn/goveralls; fi
-  - travis_retry go get -v -x github.com/kwilczynski/go-magic
+  - export COVER_PROFILE=$(mktemp "${TMPDIR}/tmp/cover.XXXXXXXX")
 script:
-  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then goveralls -v -repotoken $REPOSITORY_TOKEN; else go test -v -x ./...; fi
+  - travis_retry go get -v -x github.com/kwilczynski/go-magic
+  - go test -v -x -covermode=count -coverprofile=${COVER_PROFILE} $(go list ./...)
+  - go tool cover -func $COVER_PROFILE
