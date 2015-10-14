@@ -1145,7 +1145,7 @@ func TestOpen(t *testing.T) {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 
-	err = Open(func (m *Magic) error {
+	err = Open(func(m *Magic) error {
 		// There should be an error originating from magic.New()
 		// which is wrapped inside magic.Open().
 		return nil
