@@ -54,5 +54,5 @@ before_script:
   - export COVER_PROFILE=$(mktemp "${TMPDIR}/tmp/cover.XXXXXXXX")
 script:
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
-  - go test -v -x -covermode=count -coverprofile=${COVER_PROFILE} $(go list ./...)
-  - go tool cover -func $COVER_PROFILE
+  - go test -v -x $(go list ./...)
+  - if [ "x${FRESH_VERSION}" == "xtrue" ]; then gocov test $(go list ./...) | gocov report; fi
