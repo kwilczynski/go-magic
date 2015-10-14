@@ -162,7 +162,7 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 		return []int{0}, nil
 	}
 
-	flags := make([]int, 0)
+	var flags []int
 
 	//
 	n := 0
@@ -192,9 +192,8 @@ func (mgc *Magic) SetFlags(flags int) error {
 		errno := err.(syscall.Errno)
 		if errno == syscall.EINVAL {
 			return &MagicError{int(errno), "unknown or invalid flag specified"}
-		} else {
-			return mgc.error()
 		}
+		return mgc.error()
 	}
 
 	mgc.flags = flags
@@ -386,10 +385,9 @@ func (mgc *Magic) error() *MagicError {
 		s := C.GoString(cstring)
 		if s == "" || s == "(null)" {
 			return &MagicError{-1, "empty or invalid error message"}
-		} else {
-			errno := int(C.magic_errno(mgc.cookie))
-			return &MagicError{errno, s}
 		}
+		errno := int(C.magic_errno(mgc.cookie))
+		return &MagicError{errno, s}
 	}
 	return &MagicError{-1, "unknown error"}
 }
@@ -488,9 +486,8 @@ func Version() (int, error) {
 		errno := err.(syscall.Errno)
 		if errno == syscall.ENOSYS {
 			return -1, &MagicError{int(errno), "function is not implemented"}
-		} else {
-			return -1, &MagicError{-1, "unknown error"}
 		}
+		return -1, &MagicError{-1, "unknown error"}
 	}
 	return int(rv), nil
 }
