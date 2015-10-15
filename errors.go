@@ -29,6 +29,6 @@ type MagicError struct {
 }
 
 // Error returns a descriptive error message.
-func (me *MagicError) Error() string {
-	return fmt.Sprintf("magic: %s", me.Message)
+func (mge *MagicError) Error() string {
+	return fmt.Sprintf("magic: %s", mge.Message)
 }
