@@ -17,7 +17,6 @@
  */
 
 /*
- Package magic implements
- See: http://www.darwinsys.com/file/
+Package magic implements simple interface to libmagic for Go Programming Language.
 */
 package magic
