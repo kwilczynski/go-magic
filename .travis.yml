@@ -41,7 +41,7 @@ before_script:
   - if [ "x$(echo "$GO_VERSION < 1.2" | bc)" != "x0" ]; then COMPILER=gcc; fi
   - export CC=$COMPILER
   - alias gcc=$COMPILER # XXX(kwilczynski): Ugly hack for Go prior to 1.2 and clang.
-  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/7b73e7e679556bc357d2db6360672086400d55ab/libmagic.sh"
+  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/ba0e5a8b00f8897d4bf47c1e670137f34df009b3/libmagic.sh"
   - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
   - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH bash libmagic.sh
   - |
