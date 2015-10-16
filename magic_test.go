@@ -40,7 +40,7 @@ var (
 
 func init() {
 	_, err := version()
-	if err != nil && err.(*MagicError).Errno == int(syscall.ENOSYS) {
+	if err != nil && err.(*Error).Errno == int(syscall.ENOSYS) {
 		// Mock return values by replacing original functions.
 		version = func() (int, error) {
 			return 518, nil
@@ -235,7 +235,7 @@ func TestMagic_SetFlags(t *testing.T) {
 		err = mgc.SetFlags(tt.given)
 		actual, _ = mgc.Flags()
 		if err != nil && tt.broken {
-			errno = err.(*MagicError).Errno
+			errno = err.(*Error).Errno
 			if actual != tt.expected || errno != tt.errno {
 				t.Errorf("value given {0x%06x %d}, want {0x%06x %d}",
 					actual, errno, tt.expected, tt.errno)

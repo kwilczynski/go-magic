@@ -24,7 +24,7 @@ import (
 	"testing"
 )
 
-func TestMagicError(t *testing.T) {
+func TestError(t *testing.T) {
 	mgc, err := New()
 	if err != nil {
 		t.Fatalf("unable to create new Magic type: %s", err.Error())
@@ -33,13 +33,13 @@ func TestMagicError(t *testing.T) {
 
 	err = mgc.error()
 	func(v interface{}) {
-		if _, ok := v.(*MagicError); !ok {
-			t.Fatalf("not a MagicError type: %s", reflect.TypeOf(v).String())
+		if _, ok := v.(*Error); !ok {
+			t.Fatalf("not a Error type: %s", reflect.TypeOf(v).String())
 		}
 	}(err)
 }
 
-func TestMagicError_Error(t *testing.T) {
+func TestError_Error(t *testing.T) {
 	var v string
 
 	mgc, err := New()
@@ -61,13 +61,13 @@ func TestMagicError_Error(t *testing.T) {
 
 	v = "the quick brown fox jumps over the lazy dog"
 
-	err = &MagicError{0, v}
+	err = &Error{0, v}
 	if ok := CompareStrings(err.Error(), fmt.Sprintf("magic: %s", v)); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 }
 
-func TestMagicError_Errno(t *testing.T) {
+func TestError_Errno(t *testing.T) {
 	var v int
 
 	mgc, err := New()
@@ -83,19 +83,19 @@ func TestMagicError_Errno(t *testing.T) {
 	}
 
 	err = mgc.error()
-	if err.(*MagicError).Errno != v {
-		t.Errorf("value given %d, want %d", err.(*MagicError).Errno, v)
+	if err.(*Error).Errno != v {
+		t.Errorf("value given %d, want %d", err.(*Error).Errno, v)
 	}
 
 	v = 42
 
-	err = &MagicError{v, ""}
-	if err.(*MagicError).Errno != v {
-		t.Errorf("value given %d, want %d", err.(*MagicError).Errno, v)
+	err = &Error{v, ""}
+	if err.(*Error).Errno != v {
+		t.Errorf("value given %d, want %d", err.(*Error).Errno, v)
 	}
 }
 
-func TestMagicError_Message(t *testing.T) {
+func TestError_Message(t *testing.T) {
 	var v string
 
 	mgc, err := New()
@@ -111,14 +111,14 @@ func TestMagicError_Message(t *testing.T) {
 	}
 
 	err = mgc.error()
-	if ok := CompareStrings(err.(*MagicError).Message, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.(*MagicError).Message, v)
+	if ok := CompareStrings(err.(*Error).Message, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.(*Error).Message, v)
 	}
 
 	v = "the quick brown fox jumps over the lazy dog"
 
-	err = &MagicError{0, v}
-	if ok := CompareStrings(err.(*MagicError).Message, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.(*MagicError).Message, v)
+	err = &Error{0, v}
+	if ok := CompareStrings(err.(*Error).Message, v); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", err.(*Error).Message, v)
 	}
 }

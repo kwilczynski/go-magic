@@ -22,13 +22,13 @@ import (
 	"fmt"
 )
 
-// MagicError represents an error originating from the underlying Magic library.
-type MagicError struct {
+// Error represents an error originating from the underlying Magic library.
+type Error struct {
 	Errno   int    // The value of errno, if any.
 	Message string // The actual error message.
 }
 
 // Error returns a descriptive error message.
-func (mge *MagicError) Error() string {
-	return fmt.Sprintf("magic: %s", mge.Message)
+func (e *Error) Error() string {
+	return fmt.Sprintf("magic: %s", e.Message)
 }
