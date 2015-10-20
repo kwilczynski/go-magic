@@ -164,7 +164,8 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 
 	var flags []int
 
-	//
+	// Split current value (bitmask) into a list
+	// of distinct flags (bits) currently set.
 	n := 0
 	for i := mgc.flags; i > 0; i = i - n {
 		n = int(math.Log2(float64(i)))
@@ -214,7 +215,9 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	var cfiles *C.char
 	defer C.free(unsafe.Pointer(cfiles))
 
-	//
+	// Assemble the list of custom Magic files into a colon-separated
+	// list that is required by the underlying Magic library, otherwise
+	// defer to the default list of paths provided by the Magic library.
 	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
 	} else {
@@ -428,7 +431,8 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 	}
 	defer mgc.Close()
 
-	//
+	// Make sure to return a proper error should there
+	// be any failure originating from within the closure.
 	defer func() {
 		if r := recover(); r != nil {
 			err, ok = r.(error)
