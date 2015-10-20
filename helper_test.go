@@ -58,9 +58,15 @@ func CompareStrings(this, other string) bool {
 }
 
 func OldGoVersion() (bool, string) {
+	// Contains every release of Go prior to
+	// when the `os.Unsetenv()` function was
+	// added in the version 1.4.x and newer.
 	versions := []string{
 		"go1", "go1.0.1",
 		"go1.0.2", "go1.0.3",
+		"go1.1", "go1.1.1", "go1.1.2",
+		"go1.2", "go1.2.1", "go1.2.2",
+		"go1.3", "go1.3.1", "go1.3.2", "go1.3.3",
 	}
 
 	version := runtime.Version()
