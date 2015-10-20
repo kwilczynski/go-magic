@@ -172,7 +172,7 @@ func TestMagic_Path(t *testing.T) {
 
 func TestMagic_Path_Environment(t *testing.T) {
 	if ok, v := OldGoVersion(); ok {
-		Skip(t, "this version of the Go Language is too old: %s", v)
+		Skip(t, fmt.Sprintf("this version of the Go Language is too old: %s", v))
 		return // Should not me reachable on modern Go version.
 	}
 }
@@ -401,7 +401,7 @@ func TestMagic_Load(t *testing.T) {
 
 func TestMagic_Load_Environment(t *testing.T) {
 	if ok, v := OldGoVersion(); ok {
-		Skip(t, "this version of the Go Language is too old: %s", v)
+		Skip(t, fmt.Sprintf("this version of the Go Language is too old: %s", v))
 		return // Should not me reachable on modern Go version.
 	}
 }
