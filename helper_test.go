@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"path"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -54,4 +55,20 @@ func CompareStrings(this, other string) bool {
 		return false
 	}
 	return bytes.Equal([]byte(this), []byte(other))
+}
+
+func OldGoVersion() (bool, string) {
+	versions := []string{
+		"go1", "go1.0.1",
+		"go1.0.2", "go1.0.3",
+	}
+
+	version := runtime.Version()
+
+	for _, v := range versions {
+		if v == version {
+			return true, version
+		}
+	}
+	return false, version
 }

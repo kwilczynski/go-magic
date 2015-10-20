@@ -170,6 +170,13 @@ func TestMagic_Path(t *testing.T) {
 	}
 }
 
+func TestMagic_Path_Environment(t *testing.T) {
+	ok, v := OldGoVersion()
+	if ok {
+		t.Skip("this version of the Go Language is too old: %s", v)
+	}
+}
+
 func TestMagic_Flags(t *testing.T) {
 	var mgc *Magic
 
@@ -390,6 +397,13 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	mgc.Close()
+}
+
+func TestMagic_Load_Environment(t *testing.T) {
+	ok, v := OldGoVersion()
+	if ok {
+		t.Skip("this version of the Go Language is too old: %s", v)
+	}
 }
 
 func TestMagic_Compile(t *testing.T) {
