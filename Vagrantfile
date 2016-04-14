@@ -1,11 +1,7 @@
-# -*- encoding: utf-8 -*-
-
-# :enddoc:
-
 #
 # Vagrantfile
 #
-# Copyright 2013-2015 Krzysztof Wilczynski
+# Copyright 2013-2016 Krzysztof Wilczynski
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -119,6 +115,3 @@ Vagrant.configure("2") do |config|
     machine.vm.provision :shell, privileged: false, inline: script
   end
 end
-
-# vim: set ts=2 sw=2 sts=2 et :
-# encoding: utf-8
