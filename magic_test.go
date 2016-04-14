@@ -724,7 +724,7 @@ func TestMagic_File(t *testing.T) {
 	// Now we expect an error to be risen.
 	mgc.SetFlags(ERROR)
 
-	rv, err = mgc.File("does/not/exist")
+	_, err = mgc.File("does/not/exist")
 
 	v = "magic: cannot stat `does/not/exist' (No such file or directory)"
 	if ok = CompareStrings(err.Error(), v); !ok {
