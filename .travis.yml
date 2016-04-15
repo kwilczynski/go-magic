@@ -34,34 +34,20 @@ branches:
   only:
     - master
 
-install: true
+before_install:
+  - make tools
 
-before_script:
-  - export PATH=${PATH}:${HOME}/gopath/bin:${GOPATH}
-  - travis_retry sudo apt-get install -y --force-yes bc
-  - export GO_VERSION=$(go version | perl -ne 'print ($1 || 99.99) if /^.+go([0-9]\.[0-9])|devel/')
-  - export FRESH_VERSION=$(go version | perl -ne 'print "true" if /^.+go(1\.(2(\.[23])?|[345]))|devel/')
-  - if [ "x$(echo "$GO_VERSION < 1.2" | bc)" != "x0" ]; then COMPILER=gcc; fi
-  - export CC=$COMPILER
-  - alias gcc=$COMPILER # XXX(kwilczynski): Ugly hack for Go prior to 1.2 and clang.
+install:
   - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/ba0e5a8b00f8897d4bf47c1e670137f34df009b3/libmagic.sh"
   - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
-  - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH bash libmagic.sh
-  - |
-    if [ "x${FRESH_VERSION}" == "xtrue" ]; then
-      URL="golang.org/x/tools/cmd/cover"
-      if [ "x$(echo "$GO_VERSION < 1.4" | bc)" != "x0" ]; then URL="code.google.com/p/go.tools/cmd/cover"; fi
-      travis_retry go get -v -x $URL
-      travis_retry go get -v -x github.com/axw/gocov/gocov
-      export COVER_PROFILE=$(mktemp -t 'cover.XXXXXXXX')
-    fi
+  - CC=$COMPILER sudo -E bash libmagic.sh
+
+before_script:
+  - make clean
 
 script:
-  - travis_retry go get -v -x github.com/kwilczynski/go-magic
-  - |
-    if [ "x${FRESH_VERSION}" == "xtrue" ]; then
-      go test -v -x -covermode=count -coverprofile=${COVER_PROFILE} $(go list ./...)
-      gocov convert $COVER_PROFILE | gocov report
-    else
-      go test -v -x $(go list ./...)
-    fi
+  - export CC=$COMPILER
+  - make test
+
+after_success:
+  - make coverage
