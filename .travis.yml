@@ -1,5 +1,3 @@
-secure: "XQqZEEe/8ReX+skXY6igttJOKXBSDvmdohA3WJTFUDLcrpp/Wiob1O0yI8RQIh7QYd8uFQfIpF9ZrEG1L4QTMHHXS3CrPBP3kFZ3uC4Xk8Uf2PXP0HhSetB1nELSb9TXCB3r80GXHQ7yoqjcgbek5G61n2R6UOXm7vE0z8J0WtM="
-
 language: go
 
 cache:
@@ -57,7 +55,6 @@ before_script:
       travis_retry go get -v -x github.com/axw/gocov/gocov
       export COVER_PROFILE=$(mktemp -t 'cover.XXXXXXXX')
     fi
-  - travis_retry go get -v -x github.com/mattn/goveralls
 
 script:
   - travis_retry go get -v -x github.com/kwilczynski/go-magic
@@ -68,4 +65,3 @@ script:
     else
       go test -v -x $(go list ./...)
     fi
-  - goveralls -v -repotoken $REPOSITORY_TOKEN
