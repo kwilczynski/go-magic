@@ -38,7 +38,7 @@ before_install:
   - make tools
 
 install:
-  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/ba0e5a8b00f8897d4bf47c1e670137f34df009b3/libmagic.sh"
+  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/41985e5a7f9ca2254485b9ff78b46431ed709516/libmagic.sh"
   - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
   - CC=$COMPILER sudo -E bash libmagic.sh
 
