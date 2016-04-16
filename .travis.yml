@@ -9,8 +9,6 @@ go:
   - tip
 
 env:
-  global:
-    - PATH=${PATH}:/usr/local/clang/bin
   matrix:
     - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
     - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=clang
@@ -37,13 +35,14 @@ branches:
     - master
 
 before_install:
-  - export CC=$COMPILER
-  - export URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/b69136df4f4a2e6bec97ff40f0c5de7479935de1/libmagic.sh"
+  - export URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/2a4946c0b745b2bfdd124a14c1290d1290ebf64c/libmagic.sh"
+  - travis_retry curl -L -s $URL > libmagic.sh
   - make tools
 
 install:
-  - travis_retry curl -L -s $URL > libmagic.sh
-  - sudo -E bash libmagic.sh
+  - export PATH=${PATH}:/usr/local/clang/bin
+  - export VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH
+  - travis_retry sudo -E bash libmagic.sh
 
 before_script:
   - make clean
