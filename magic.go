@@ -293,7 +293,10 @@ func (mgc *Magic) File(filename string) (string, error) {
 
 	cstring := C.magic_file_wrapper(mgc.cookie, cfilename, C.int(mgc.flags))
 	if cstring == nil {
-		rv, _ := Version()
+		rv, err := Version()
+		if err != nil && err.(*Error).Errno > -1 {
+			return "", err
+		}
 
 		// Handle the case when the "ERROR" flag is set regardless
 		// of the current version of the underlying Magic library.
@@ -529,7 +532,9 @@ func FileMime(name string, files ...string) (string, error) {
 	}
 	defer mgc.Close()
 
-	mgc.SetFlags(MIME)
+	if err := mgc.SetFlags(MIME); err != nil {
+		return "", err
+	}
 	return mgc.File(name)
 }
 
@@ -543,7 +548,9 @@ func FileType(name string, files ...string) (string, error) {
 	}
 	defer mgc.Close()
 
-	mgc.SetFlags(MIME_TYPE)
+	if err := mgc.SetFlags(MIME_TYPE); err != nil {
+		return "", err
+	}
 	return mgc.File(name)
 }
 
@@ -557,7 +564,9 @@ func FileEncoding(name string, files ...string) (string, error) {
 	}
 	defer mgc.Close()
 
-	mgc.SetFlags(MIME_ENCODING)
+	if err := mgc.SetFlags(MIME_ENCODING); err != nil {
+		return "", err
+	}
 	return mgc.File(name)
 }
 
@@ -572,7 +581,9 @@ func BufferMime(buffer []byte, files ...string) (string, error) {
 	}
 	defer mgc.Close()
 
-	mgc.SetFlags(MIME)
+	if err := mgc.SetFlags(MIME); err != nil {
+		return "", err
+	}
 	return mgc.Buffer(buffer)
 }
 
@@ -586,7 +597,9 @@ func BufferType(buffer []byte, files ...string) (string, error) {
 	}
 	defer mgc.Close()
 
-	mgc.SetFlags(MIME_TYPE)
+	if err := mgc.SetFlags(MIME_TYPE); err != nil {
+		return "", err
+	}
 	return mgc.Buffer(buffer)
 }
 
@@ -600,6 +613,8 @@ func BufferEncoding(buffer []byte, files ...string) (string, error) {
 	}
 	defer mgc.Close()
 
-	mgc.SetFlags(MIME_ENCODING)
+	if err := mgc.SetFlags(MIME_ENCODING); err != nil {
+		return "", err
+	}
 	return mgc.Buffer(buffer)
 }
