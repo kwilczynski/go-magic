@@ -294,7 +294,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 	cstring := C.magic_file_wrapper(mgc.cookie, cfilename, C.int(mgc.flags))
 	if cstring == nil {
 		rv, err := Version()
-		if err != nil && err.(*Error).Errno > -1 {
+		if err != nil && err.(*Error).Errno != int(syscall.ENOSYS) {
 			return "", err
 		}
 
@@ -308,7 +308,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 		//   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
 		//
 		// This is an attempt to mitigate the problem and correct
-		// it to achieve the desired behaviour correct.
+		// it to achieve the desired behaviour as per the standards.
 		if mgc.flags&ERROR != 0 {
 			return "", mgc.error()
 		} else if rv < 515 {
