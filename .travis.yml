@@ -4,8 +4,8 @@ cache:
   - apt
 
 go:
-  - 1.5.3
-  - 1.6
+  - 1.5.4
+  - 1.6.2
   - tip
 
 env:
@@ -17,7 +17,9 @@ env:
     - VERSION=5.18 SHA1=8753e72097f2cc935608e3b1c57c4c4e31bd8d21 COMPILER=gcc
     - VERSION=5.18 SHA1=8753e72097f2cc935608e3b1c57c4c4e31bd8d21 COMPILER=clang
     - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=gcc
-    - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=clang
+    - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=gcc
+    - VERSION=5.28 SHA1=1b789a93bea54da3119d98986468cd90b1e571bf COMPILER=clang
+    - VERSION=5.28 SHA1=1b789a93bea54da3119d98986468cd90b1e571bf COMPILER=clang
 
 matrix:
   fast_finish: true
