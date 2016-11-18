@@ -528,7 +528,7 @@ func TestMagic_Compile(t *testing.T) {
 		buffer = buffer[:len(buffer)-1]
 
 		ok := bytes.Equal(buffer, expected)
-		if !ok || last <= 0 {
+		if !ok || last == 0 {
 			t.Errorf("value given {0x%x 0x%02x}, want {0x%x > 0x%02x}",
 				buffer, last, expected, 0)
 		}
@@ -1096,7 +1096,7 @@ func Test_open(t *testing.T) {
 			path.Kind(), reflect.Slice, 0)
 	}
 
-	if reflect.ValueOf(cookie).Kind() != reflect.Uintptr || cookie <= 0 {
+	if reflect.ValueOf(cookie).Kind() != reflect.Uintptr || cookie == 0 {
 		t.Errorf("value given {%v 0x%x}, want {%v > %d}",
 			reflect.ValueOf(cookie).Kind(),
 			cookie, reflect.Uintptr, 0)
@@ -1214,7 +1214,7 @@ func TestOpen(t *testing.T) {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}
 
-	err = Open(func(m *Magic) error {
+	_ = Open(func(m *Magic) error {
 		mgc = m // Pass outside the closure ...
 		return nil
 	})
