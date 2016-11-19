@@ -71,6 +71,7 @@ func New(files ...string) (*Magic, error) {
 	if err != nil {
 		return nil, err
 	}
+	runtime.KeepAlive(mgc.magic)
 
 	if _, err := mgc.Load(files...); err != nil {
 		return nil, err
@@ -102,6 +103,7 @@ func (mgc *Magic) String() string {
 func (mgc *Magic) Path() ([]string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return []string{}, mgc.error()
@@ -121,6 +123,7 @@ func (mgc *Magic) Path() ([]string, error) {
 func (mgc *Magic) Flags() (int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return -1, mgc.error()
@@ -135,6 +138,7 @@ func (mgc *Magic) Flags() (int, error) {
 func (mgc *Magic) FlagsSlice() ([]int, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return []int{}, mgc.error()
@@ -165,6 +169,7 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 func (mgc *Magic) SetFlags(flags int) error {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return mgc.error()
@@ -189,12 +194,14 @@ func (mgc *Magic) SetFlags(flags int) error {
 func (mgc *Magic) Load(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return false, mgc.error()
 	}
 
 	var cfiles *C.char
+	runtime.KeepAlive(cfiles)
 	defer C.free(unsafe.Pointer(cfiles))
 
 	// Assemble the list of custom Magic files into a colon-separated
@@ -219,15 +226,18 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 func (mgc *Magic) Compile(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return false, mgc.error()
 	}
 
 	var cfiles *C.char
+	runtime.KeepAlive(cfiles)
+	defer C.free(unsafe.Pointer(cfiles))
+
 	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
-		defer C.free(unsafe.Pointer(cfiles))
 	}
 
 	if rv := C.magic_compile_wrapper(mgc.cookie, cfiles, C.int(mgc.flags)); rv < 0 {
@@ -242,15 +252,18 @@ func (mgc *Magic) Compile(files ...string) (bool, error) {
 func (mgc *Magic) Check(files ...string) (bool, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return false, mgc.error()
 	}
 
 	var cfiles *C.char
+	runtime.KeepAlive(cfiles)
+	defer C.free(unsafe.Pointer(cfiles))
+
 	if len(files) > 0 {
 		cfiles = C.CString(strings.Join(files, ":"))
-		defer C.free(unsafe.Pointer(cfiles))
 	}
 
 	if rv := C.magic_check_wrapper(mgc.cookie, cfiles, C.int(mgc.flags)); rv < 0 {
@@ -265,12 +278,14 @@ func (mgc *Magic) Check(files ...string) (bool, error) {
 func (mgc *Magic) File(filename string) (string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return "", mgc.error()
 	}
 
 	cfilename := C.CString(filename)
+	runtime.KeepAlive(cfilename)
 	defer C.free(unsafe.Pointer(cfilename))
 
 	cstring := C.magic_file_wrapper(mgc.cookie, cfilename, C.int(mgc.flags))
@@ -323,6 +338,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return "", mgc.error()
@@ -343,6 +359,7 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
 
 	if mgc.cookie == nil {
 		return "", mgc.error()
@@ -361,6 +378,7 @@ func (mgc *Magic) error() *Error {
 		errno := syscall.EFAULT
 		return &Error{int(errno), "Magic library is not open"}
 	}
+	runtime.KeepAlive(mgc.magic)
 
 	cstring := C.magic_error(mgc.cookie)
 	if cstring != nil {
@@ -397,6 +415,7 @@ func open() (*Magic, error) {
 
 	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
 	runtime.SetFinalizer(mgc.magic, (*magic).close)
+	runtime.KeepAlive(mgc.magic)
 	return mgc, nil
 }
 
