@@ -1,27 +1,4 @@
-#
-# Vagrantfile
-#
-# Copyright 2013-2016 Krzysztof Wilczynski
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-# A little helper to determine underlying platform ...
-def platform_bits
-  ['x'].pack('P').size * 8
-end
-
-# Simple provisioning elements ...
+# Provisioning script which installs development dependencies.
 script = %{
 #!/bin/bash
 
@@ -90,28 +67,40 @@ echo 'All done!'
 }
 
 # Select appropriate Vagrant box per underlying architecture.
-box = "precise#{platform_bits}"
+box = "precise#{lambda { ['x'].pack('P').size * 8 }.()}"
 
 # Virtual Machine name et al.
 name = "go-magic-#{box}"
 
 Vagrant.configure("2") do |config|
   config.ssh.forward_agent = true
+
+  if config.vm.respond_to? :box_check_update
+    config.vm.box_check_update = true
+  end
+
+  if config.vm.respond_to? :use_linked_clone
+    config.use_linked_clone = true
+  end
+
   config.vm.define name.to_sym do |machine|
     machine.vm.box = "hashicorp/#{box}"
-    machine.vm.box_check_update = false
     machine.vm.hostname = name
+
     machine.vm.provider :virtualbox do |vb|
+      vb.linked_clone = true if Vagrant::VERSION =~ /^1.8/
       vb.name = name
       vb.gui = false
       vb.customize ['modifyvm', :id,
-        '--memory', '384',
+        '--memory', '512',
         '--cpus', '1',
         '--rtcuseutc', 'on',
         '--natdnshostresolver1', 'on',
-        '--natdnsproxy1', 'on'
+        '--natdnsproxy1', 'on',
+        '--nictype1', 'virtio'
       ]
     end
+
     machine.vm.provision :shell, privileged: false, inline: script
   end
 end
