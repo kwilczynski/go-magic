@@ -983,7 +983,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	f.Close()
 
-	rv, err = mgc.Descriptor(f.Fd())
+	_, err = mgc.Descriptor(f.Fd())
 
 	v = "magic: cannot read `(null)' (Bad file descriptor)"
 	if n >= 519 {

@@ -148,11 +148,11 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 		return []int{0}, nil
 	}
 
+	var n int
 	var flags []int
 
 	// Split current value (bitmask) into a list
 	// of distinct flags (bits) currently set.
-	n := 0
 	for i := mgc.flags; i > 0; i = i - n {
 		n = int(math.Log2(float64(i)))
 		n = int(math.Pow(2, float64(n)))
