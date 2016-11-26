@@ -72,8 +72,11 @@ func TestNew(t *testing.T) {
 	mgc, err = New("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
-	if n < 0 {
+	if n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
+		// Older version of libmagic reports same error differently.
 		v = "magic: could not find any magic files!"
 	}
 
@@ -100,8 +103,12 @@ func TestNew(t *testing.T) {
 	mgc.Close()
 
 	mgc, err = New(brokenMagicFile)
+
 	v = "magic: line 1: No current entry for continuation"
-	if n < 0 {
+	if n < 518 && n >= 514 {
+		// A few releases of libmagic were having issues.
+		v = "magic: no magic files loaded"
+	} else if n < 0 {
 		// Older version of libmagic reports same error differently.
 		v = "magic: No current entry for continuation"
 	}
