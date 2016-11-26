@@ -37,17 +37,82 @@ func init() {
 }
 
 func TestNew(t *testing.T) {
-	mgc, err := New()
+	var mgc *Magic
+
+	var n int
+	var err error
+	var p []string
+	var v string
+
+	mgc, err = New()
 	if err != nil {
 		t.Fatalf("unable to create new Magic type: %s", err.Error())
 	}
-	defer mgc.Close()
 
 	func(v interface{}) {
 		if _, ok := v.(*Magic); !ok {
 			t.Fatalf("not a Magic type: %s", reflect.TypeOf(v).String())
 		}
 	}(mgc)
+
+	n, _ = Version()
+
+	if n >= 519 {
+		formatDirectory = "new-format"
+	}
+
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png.magic"))
+
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
+		formatDirectory, "png-broken.magic"))
+
+	mgc.Close()
+
+	mgc, err = New("does/not/exist")
+
+	v = "magic: could not find any valid magic files!"
+	if n < 0 {
+		// A few releases of libmagic were having issues.
+		v = "magic: could not find any magic files!"
+	}
+
+	if err == nil {
+		t.Errorf("value given {%v}, want {%v}", err.Error(), nil)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {\"%s\"}, want {\"%s\"}", err.Error(), v)
+	}
+
+	mgc, err = New(genuineMagicFile)
+	if err != nil {
+		t.Errorf("value given \"%T\", should be empty", err)
+	}
+
+	// Current path should change accordingly ...
+	p, _ = mgc.Path()
+
+	if ok := CompareStrings(p[0], genuineMagicFile); !ok {
+		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuineMagicFile)
+	}
+
+	mgc.Close()
+
+	mgc, err = New(brokenMagicFile)
+	v = "magic: line 1: No current entry for continuation"
+	if n < 0 {
+		// Older version of libmagic reports same error differently.
+		v = "magic: No current entry for continuation"
+	}
+
+	if err == nil {
+		t.Errorf("value given \"%T\", should not be empty", err)
+	}
+
+	if ok := CompareStrings(err.Error(), v); !ok {
+		t.Errorf("value given {\"%s\"}, want {\"%s\"}", err.Error(), v)
+	}
 }
 
 func TestMagic_Close(t *testing.T) {
