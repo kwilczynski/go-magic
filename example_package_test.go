@@ -45,7 +45,7 @@ func Example_closure() {
 	// about closing the underlying Magic database.
 	err := magic.Open(func(m *magic.Magic) error {
 		m.SetFlags(magic.MIME)
-		mime, err := m.File("fixtures/gopher.png")
+		mime, err := m.File("test/fixtures/gopher.png")
 		if err != nil {
 			return err // Propagate error outside of the closure.
 		}

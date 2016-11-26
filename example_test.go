@@ -18,7 +18,7 @@ func Example_basic() {
 	}
 
 	m.SetFlags(magic.MIME)
-	mime, err := m.File("fixtures/gopher.png")
+	mime, err := m.File("test/fixtures/gopher.png")
 	if err != nil {
 		panic(fmt.Sprintf("Unable to determine file MIME: %s\n", err))
 	}
@@ -31,7 +31,7 @@ func Example_basic() {
 
 // This example shows how to quickly find MIME type for a file.
 func ExampleFileType() {
-	mime, err := magic.FileType("fixtures/gopher.png")
+	mime, err := magic.FileType("test/fixtures/gopher.png")
 	if err != nil {
 		panic(fmt.Sprintf("An error occurred: %s\n", err))
 	}

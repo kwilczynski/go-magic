@@ -9,8 +9,11 @@ import (
 )
 
 var (
+	// Directory containing test fixtures, etc.
+	testDirectory = "test"
+
 	// Auxiliary files for use in tests ...
-	fixturesDirectory = "fixtures"
+	fixturesDirectory = path.Clean(path.Join(testDirectory, "fixtures"))
 
 	// Default directory containing files using old-style Magic format.
 	formatDirectory = "old-format"
