@@ -25,7 +25,7 @@ var (
 	shellMagicFile = path.Clean(path.Join(fixturesDirectory, "shell.magic"))
 )
 
-func Skip(t *testing.T, message string) {
+func skip(t *testing.T, message string) {
 	// XXX(krzysztof): Attempt to circumvent lack of T.Skip() prior to Go version go1.1 ...
 	f := reflect.ValueOf(t).MethodByName("Skip")
 	if ok := f.IsValid(); !ok {
@@ -35,14 +35,14 @@ func Skip(t *testing.T, message string) {
 	f.Call([]reflect.Value{reflect.ValueOf(message)})
 }
 
-func CompareStrings(this, other string) bool {
+func compareStrings(this, other string) bool {
 	if this == "" || other == "" {
 		return false
 	}
 	return bytes.Equal([]byte(this), []byte(other))
 }
 
-func OldGoVersion() (bool, string) {
+func oldGoVersion() (bool, string) {
 	// Contains every release of Go prior to
 	// when the `os.Unsetenv()` function was
 	// added in the version 1.4.x and newer.
