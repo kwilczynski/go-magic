@@ -52,25 +52,25 @@ print-%:
 	@echo $* = $($*)
 
 clean:
-	@go clean -i ./...
-	@rm -f $(CURDIR)/coverage.*
+	go clean -i ./...
+	rm -f $(CURDIR)/coverage.*
 
 tools:
-	@go get github.com/axw/gocov/gocov
-	@go get github.com/golang/lint/golint
-	@go get github.com/gordonklaus/ineffassign
-	@go get github.com/kisielk/errcheck
-	@go get github.com/matm/gocov-html
-	@go get golang.org/x/tools/cmd/goimports
-	@go get honnef.co/go/tools/cmd/staticcheck
+	go get github.com/axw/gocov/gocov
+	go get github.com/golang/lint/golint
+	go get github.com/gordonklaus/ineffassign
+	go get github.com/kisielk/errcheck
+	go get github.com/matm/gocov-html
+	go get golang.org/x/tools/cmd/goimports
+	go get honnef.co/go/tools/cmd/staticcheck
 
 test:
-	@go test -v ./...
+	go test -v ./...
 
 coverage:
-	@gocov test ./... > $(CURDIR)/coverage.out 2>/dev/null
-	@gocov report $(CURDIR)/coverage.out
-	@if [[ -z "$$CI" ]]; then \
+	gocov test ./... > $(CURDIR)/coverage.out 2>/dev/null
+	gocov report $(CURDIR)/coverage.out
+	if [[ -z "$$CI" ]]; then \
 		gocov-html $(CURDIR)/coverage.out > $(CURDIR)/coverage.html; \
 	  	if which open &>/dev/null; then \
 	    		open $(CURDIR)/coverage.html; \
@@ -158,11 +158,10 @@ env:
 	@go env
 
 build:
-	@go build ./...
+	go build ./...
 
 doc:
-	@echo 'godoc available at http://localhost:8080'
-	@godoc -http=:8080 -index
+	godoc -http=:8080 -index
 
 version:
 	@go version
