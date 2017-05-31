@@ -69,7 +69,7 @@ func TestNew(t *testing.T) {
 
 	mgc.Close()
 
-	mgc, err = New("does/not/exist")
+	_, err = New("does/not/exist")
 
 	v = "magic: could not find any valid magic files!"
 	if n < 518 && n >= 514 {
@@ -102,7 +102,7 @@ func TestNew(t *testing.T) {
 
 	mgc.Close()
 
-	mgc, err = New(brokenMagicFile)
+	_, err = New(brokenMagicFile)
 
 	v = "magic: line 1: No current entry for continuation"
 	if n < 518 && n >= 514 {
@@ -1523,14 +1523,14 @@ func TestFileMime(t *testing.T) {
 		}
 	}
 
-	rv, err = FileMime(sampleImageFile, genuineMagicFile)
+	rv, _ = FileMime(sampleImageFile, genuineMagicFile)
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileMime(sampleImageFile, fakeMagicFile)
+	rv, _ = FileMime(sampleImageFile, fakeMagicFile)
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
@@ -1600,19 +1600,19 @@ func TestFileType(t *testing.T) {
 		}
 	}
 
-	rv, err = FileType(sampleImageFile, genuineMagicFile)
+	rv, _ = FileType(sampleImageFile, genuineMagicFile)
 	v = "image/png"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileType(sampleImageFile, fakeMagicFile)
+	rv, _ = FileType(sampleImageFile, fakeMagicFile)
 	v = "image/x-go-gopher"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileType(sampleImageFile, brokenMagicFile)
+	rv, _ = FileType(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
 		n, _ := Version()
 
@@ -1678,17 +1678,17 @@ func TestFileEncoding(t *testing.T) {
 
 	v = "binary" // Binary data will always have this encoding.
 
-	rv, err = FileEncoding(sampleImageFile, genuineMagicFile)
+	rv, _ = FileEncoding(sampleImageFile, genuineMagicFile)
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileEncoding(sampleImageFile, fakeMagicFile)
+	rv, _ = FileEncoding(sampleImageFile, fakeMagicFile)
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = FileEncoding(sampleImageFile, brokenMagicFile)
+	rv, _ = FileEncoding(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
 		n, _ := Version()
 
@@ -1749,14 +1749,14 @@ func TestBufferMime(t *testing.T) {
 	io.Copy(buffer, f)
 	f.Close()
 
-	rv, err = BufferMime(buffer.Bytes(), genuineMagicFile)
+	rv, _ = BufferMime(buffer.Bytes(), genuineMagicFile)
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = BufferMime(buffer.Bytes(), fakeMagicFile)
+	rv, _ = BufferMime(buffer.Bytes(), fakeMagicFile)
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
@@ -1766,7 +1766,7 @@ func TestBufferMime(t *testing.T) {
 	buffer.Reset()
 	buffer.WriteString("Hello, 世界")
 
-	rv, err = BufferMime(buffer.Bytes())
+	rv, _ = BufferMime(buffer.Bytes())
 
 	v = "text/plain; charset=utf-8"
 	if ok = compareStrings(rv, v); !ok {
@@ -1776,7 +1776,7 @@ func TestBufferMime(t *testing.T) {
 	buffer.Reset()
 	buffer.WriteString("#!/bin/bash\n\n")
 
-	rv, err = BufferMime(buffer.Bytes())
+	rv, _ = BufferMime(buffer.Bytes())
 
 	v = "text/x-shellscript; charset=us-ascii"
 	if ok = compareStrings(rv, v); !ok {
@@ -1786,7 +1786,7 @@ func TestBufferMime(t *testing.T) {
 	buffer.Reset()
 	buffer.Write([]byte{0x0})
 
-	rv, err = BufferMime(buffer.Bytes())
+	rv, _ = BufferMime(buffer.Bytes())
 
 	v = "application/octet-stream; charset=binary"
 	if n, _ := Version(); n < 515 {
@@ -1860,14 +1860,14 @@ func TestBufferType(t *testing.T) {
 	io.Copy(buffer, f)
 	f.Close()
 
-	rv, err = BufferType(buffer.Bytes(), genuineMagicFile)
+	rv, _ = BufferType(buffer.Bytes(), genuineMagicFile)
 
 	v = "image/png"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = BufferType(buffer.Bytes(), fakeMagicFile)
+	rv, _ = BufferType(buffer.Bytes(), fakeMagicFile)
 
 	v = "image/x-go-gopher"
 	if ok = compareStrings(rv, v); !ok {
@@ -1877,7 +1877,7 @@ func TestBufferType(t *testing.T) {
 	buffer.Reset()
 	buffer.WriteString("Hello, 世界")
 
-	rv, err = BufferType(buffer.Bytes())
+	rv, _ = BufferType(buffer.Bytes())
 
 	v = "text/plain"
 	if ok = compareStrings(rv, v); !ok {
@@ -1887,7 +1887,7 @@ func TestBufferType(t *testing.T) {
 	buffer.Reset()
 	buffer.WriteString("#!/bin/bash\n\n")
 
-	rv, err = BufferType(buffer.Bytes())
+	rv, _ = BufferType(buffer.Bytes())
 
 	v = "text/x-shellscript"
 	if ok = compareStrings(rv, v); !ok {
@@ -1897,7 +1897,7 @@ func TestBufferType(t *testing.T) {
 	buffer.Reset()
 	buffer.Write([]byte{0x0})
 
-	rv, err = BufferType(buffer.Bytes())
+	rv, _ = BufferType(buffer.Bytes())
 
 	v = "application/octet-stream"
 	if ok = compareStrings(rv, v); !ok {
@@ -1965,14 +1965,14 @@ func TestBufferEncoding(t *testing.T) {
 	io.Copy(buffer, f)
 	f.Close()
 
-	rv, err = BufferEncoding(buffer.Bytes(), genuineMagicFile)
+	rv, _ = BufferEncoding(buffer.Bytes(), genuineMagicFile)
 
 	v = "binary"
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
 	}
 
-	rv, err = BufferEncoding(buffer.Bytes(), fakeMagicFile)
+	rv, _ = BufferEncoding(buffer.Bytes(), fakeMagicFile)
 
 	v = "binary"
 	if ok = compareStrings(rv, v); !ok {
@@ -1982,7 +1982,7 @@ func TestBufferEncoding(t *testing.T) {
 	buffer.Reset()
 	buffer.WriteString("Hello, 世界")
 
-	rv, err = BufferEncoding(buffer.Bytes())
+	rv, _ = BufferEncoding(buffer.Bytes())
 
 	v = "utf-8"
 	if ok = compareStrings(rv, v); !ok {
@@ -1992,7 +1992,7 @@ func TestBufferEncoding(t *testing.T) {
 	buffer.Reset()
 	buffer.WriteString("#!/bin/bash\n\n")
 
-	rv, err = BufferEncoding(buffer.Bytes())
+	rv, _ = BufferEncoding(buffer.Bytes())
 
 	v = "us-ascii"
 	if ok = compareStrings(rv, v); !ok {
@@ -2002,7 +2002,7 @@ func TestBufferEncoding(t *testing.T) {
 	buffer.Reset()
 	buffer.Write([]byte{0x0})
 
-	rv, err = BufferEncoding(buffer.Bytes())
+	rv, _ = BufferEncoding(buffer.Bytes())
 
 	v = "" // Should be empty ...
 	if ok = compareStrings(rv, v); ok {
