@@ -2,6 +2,8 @@ SHELL := /bin/bash
 
 FILES ?= $(shell find . -type f -name '*.go')
 
+.SUFFIXES:
+
 .PHONY: \
 	help \
 	default \
