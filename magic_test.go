@@ -214,8 +214,7 @@ func TestMagic_Path(t *testing.T) {
 
 	mgc, _ = open()
 	defer func() {
-		value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
-		value.Interface().(*magic).close()
+		mgc.close()
 	}()
 
 	rv, _ = mgc.Path()
@@ -1131,8 +1130,7 @@ func TestMagic_Separator(t *testing.T) {
 func Test_open(t *testing.T) {
 	mgc, _ := open()
 	defer func() {
-		value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
-		value.Interface().(*magic).close()
+		mgc.close()
 	}()
 
 	func(v interface{}) {
@@ -1159,10 +1157,9 @@ func Test_open(t *testing.T) {
 
 func Test_close(t *testing.T) {
 	mgc, _ := open()
+	mgc.close()
 
 	value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
-	value.Interface().(*magic).close()
-
 	path := value.Elem().FieldByName("path")
 	cookie := value.Elem().FieldByName("cookie").Elem()
 
