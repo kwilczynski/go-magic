@@ -43,8 +43,7 @@ rm -Rf \
     "file-${VERSION}.tar.gz"
 
 MIRRORS=(
-    'https://fossies.org/linux/misc'
-    'http://ftp.clfs.org/pub/clfs/conglomeration/file'
+    'https://src.fedoraproject.org/lookaside/pkgs/rpms/file'
     'ftp://ftp.astron.com/pub/file'
 )
 
