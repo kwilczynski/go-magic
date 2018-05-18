@@ -1,0 +1,28 @@
+{
+  "Vendor": true,
+  "EnableGC": true,
+  "Deadline": "5m",
+  "Aggregate": true,
+  "Sort": [
+    "linter",
+    "severity",
+    "path"
+  ],
+  "Exclude": [
+    "vendor/"
+  ],
+  "DisableAll": true,
+  "Enable": [
+    "deadcode",
+    "errcheck",
+    "gofmt",
+    "goimports",
+    "golint",
+    "ineffassign",
+    "misspell",
+    "staticcheck",
+    "structcheck",
+    "varcheck",
+    "vet"
+  ]
+}
