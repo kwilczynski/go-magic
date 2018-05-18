@@ -1,5 +1,5 @@
 language: go
-dist: precise
+dist: trusty
 
 cache:
   - apt
