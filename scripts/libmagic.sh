@@ -76,7 +76,7 @@ if [[ -n $PATCH_URL ]]; then
     curl -sL "$PATCH_URL" > patch.diff
 
     for option in '--dry-run -s -i' '-i'; do
-        if ! patch -l -t -p${PATCH_LEVEL} "$option" patch.diff; then
+        if ! patch -l -t -p${PATCH_LEVEL} $option patch.diff; then
             break
         fi
     done
