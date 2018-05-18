@@ -5,7 +5,7 @@ cache:
   - apt
 
 go:
-  - '1.10.x'
+  - 1.10.x
   - tip
 
 env:
@@ -20,6 +20,8 @@ env:
     - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=clang
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=gcc
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=clang
+    - VERSION=5.33 SHA1=d2ca2e91173c23af2c6fa702ccbec0ea38f61552 COMPILER=gcc
+    - VERSION=5.33 SHA1=d2ca2e91173c23af2c6fa702ccbec0ea38f61552 COMPILER=clang
 
 matrix:
   fast_finish: true
@@ -29,6 +31,7 @@ matrix:
 branches:
   only:
     - master
+    - development
 
 notifications:
   email:
