@@ -5,7 +5,7 @@ cache:
   - apt
 
 go:
-  - '1.10'
+  - '1.10.x'
   - tip
 
 env:
