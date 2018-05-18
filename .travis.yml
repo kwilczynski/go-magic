@@ -37,9 +37,7 @@ notifications:
 
 before_install:
   - export CC=$(which $COMPILER)
-  - export URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/2a4946c0b745b2bfdd124a14c1290d1290ebf64c/libmagic.sh"
-  - curl -L -s $URL > libmagic.sh
-  - sudo -H -E VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH bash libmagic.sh
+  - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH scripts/libmagic.sh
 
 install:
   - make tools
