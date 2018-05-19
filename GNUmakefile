@@ -20,6 +20,8 @@ ifneq ($(VERBOSE), 1)
 .SILENT:
 endif
 
+default: all
+
 all: lint build
 
 help: ## Show this help screen.
