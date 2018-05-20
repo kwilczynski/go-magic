@@ -36,7 +36,7 @@ const (
 	// file queried on systems that support such system calls.
 	PRESERVE_ATIME int = C.MAGIC_PRESERVE_ATIME
 
-	// Do not translate unprintable characters to an octal representation.
+	// Do not convert unprintable characters to an octal representation.
 	RAW int = C.MAGIC_RAW
 
 	// Treat operating system errors while trying to open files and follow
@@ -91,4 +91,10 @@ const (
 
 	// Do not look for troff sequences inside ASCII files.
 	NO_CHECK_TROFF int = C.MAGIC_NO_CHECK_TROFF
+
+	// Return a slash-separated list of extensions for this file type.
+	EXTENSION int = C.MAGIC_EXTENSION
+
+	// Do not report on compression, only report about the uncompressed data.
+	COMPRESS_TRANSP int = C.MAGIC_COMPRESS_TRANSP
 )

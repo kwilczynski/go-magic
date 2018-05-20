@@ -21,7 +21,7 @@ check_fd(int fd)
 {
     errno = 0;
     if (fd < 0 || (fcntl(fd, F_GETFD) < 0 && errno == EBADF)) {
-    	errno = EBADF;
+	errno = EBADF;
 	return -EBADF;
     }
 
@@ -65,7 +65,7 @@ safe_dup(int fd)
 
     new_fd = fcntl(fd, flags, fileno(stderr) + 1);
     if (new_fd < 0 && errno == EINVAL) {
-    	new_fd = dup(fd);
+	new_fd = dup(fd);
 	if (new_fd < 0) {
 	   local_errno = errno;
 	   goto out;
@@ -112,7 +112,7 @@ suppress_error_output(void *data)
 #endif
 
     assert(s != NULL && \
-    	    "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     s->data.file.old_fd = -1;
     s->data.file.new_fd = -1;
@@ -168,7 +168,7 @@ restore_error_output(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-    	    "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     if (s->data.file.old_fd < 0 && s->status != 0)
 	return -1;
@@ -204,7 +204,7 @@ override_current_locale(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-    	    "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     s->status = -1;
     s->data.locale.old_locale = NULL;
@@ -215,14 +215,14 @@ override_current_locale(void *data)
 	goto out;
 
     assert(s->data.locale.new_locale != NULL && \
-    	    "Must be a valid pointer to `locale_t' type");
+	    "Must be a valid pointer to `locale_t' type");
 
     s->data.locale.old_locale = uselocale(s->data.locale.new_locale);
     if (s->data.locale.old_locale == (locale_t)0)
 	goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-    	    "Must be a valid pointer to `locale_t' type");
+	    "Must be a valid pointer to `locale_t' type");
 
     s->status = 0;
 
@@ -236,18 +236,18 @@ restore_current_locale(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-    	    "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     if (!(s->data.locale.new_locale || \
-    	    s->data.locale.old_locale) && \
-    	    s->status != 0)
-    	return -1;
+	    s->data.locale.old_locale) && \
+	    s->status != 0)
+	return -1;
 
     if (uselocale(s->data.locale.old_locale) == (locale_t)0)
-    	goto out;
+	goto out;
 
     assert(s->data.locale.new_locale != NULL && \
-    	    "Must be a valid pointer to `locale_t' type");
+	    "Must be a valid pointer to `locale_t' type");
 
     freelocale(s->data.locale.new_locale);
 
@@ -270,7 +270,7 @@ magic_getpath_wrapper(void)
 inline int
 magic_setflags_wrapper(magic_t magic, int flags)
 {
-    if (flags < MAGIC_NONE || flags > MAGIC_NO_CHECK_BUILTIN) {
+    if (flags < 0 || flags > 0xfffffff) {
 	errno = EINVAL;
 	return -EINVAL;
     }
@@ -322,9 +322,14 @@ inline const char*
 magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 {
     const char *cstring;
-#if defined(HAVE_BROKEN_MAGIC)
     int local_errno;
 
+    if (check_fd(fd) < 0) {
+	local_errno = errno;
+	goto out;
+    }
+
+#if defined(HAVE_BROKEN_MAGIC)
     if ((fd = safe_dup(fd)) < 0) {
 	local_errno = errno;
 	goto out;
@@ -336,14 +341,14 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 	safe_close(fd);
 
     return cstring;
-
-out:
-    errno = local_errno;
-    return NULL;
 #else
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
     return cstring;
 #endif
+
+out:
+    errno = local_errno;
+    return NULL;
 }
 
 inline int

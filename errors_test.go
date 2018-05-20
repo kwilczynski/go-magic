@@ -30,7 +30,7 @@ func TestError_Error(t *testing.T) {
 	}
 	defer mgc.Close()
 
-	v = "magic: unknown error"
+	v = "magic: an unknown error has occurred"
 	if n, _ := Version(); n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = "magic: no magic files loaded"
@@ -86,7 +86,7 @@ func TestError_Message(t *testing.T) {
 	}
 	defer mgc.Close()
 
-	v = "unknown error"
+	v = "an unknown error has occurred"
 	if n, _ := Version(); n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = "no magic files loaded"

@@ -281,14 +281,14 @@ func TestMagic_SetFlags(t *testing.T) {
 		given    int
 	}{
 		// Test lower boundary limit.
-		{true, 22, 0x000000, -0xffffff},
+		{true, 22, 0x000000, -0xfffffff},
 		// Genuine flags ...
 		{false, 0, 0x000000, 0x000000}, // Flag: NONE
 		{false, 0, 0x000010, 0x000010}, // Flag: MIME_TYPE
 		{false, 0, 0x000400, 0x000400}, // Flag: MIME_ENCODING
 		{false, 0, 0x000410, 0x000410}, // Flag: MIME_TYPE, MIME_ENCODING
 		// Test upper boundary limit.
-		{true, 22, 0x000410, 0xffffff},
+		{true, 22, 0x000410, 0xffffffff},
 	}
 
 	for _, tt := range flagsTests {
@@ -307,7 +307,7 @@ func TestMagic_SetFlags(t *testing.T) {
 		}
 	}
 
-	err = mgc.SetFlags(0xffffff)
+	err = mgc.SetFlags(0xffffffff)
 
 	v = "magic: unknown or invalid flag specified"
 	if ok := compareStrings(err.Error(), v); !ok {
@@ -1056,11 +1056,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	_, err = mgc.Descriptor(f.Fd())
 
-	v = "magic: cannot read `(null)' (Bad file descriptor)"
-	if n >= 519 {
-		v = "magic: cannot read fd -1 (Bad file descriptor)"
-	}
-
+	v = "magic: bad file descriptor"
 	if ok = compareStrings(err.Error(), v); !ok {
 		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
 	}

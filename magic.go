@@ -188,7 +188,7 @@ func (mgc *Magic) SetFlags(flags int) error {
 	return nil
 }
 
-// Load
+// Load -
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Load(files ...string) (bool, error) {
@@ -220,7 +220,7 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	return true, nil
 }
 
-// Compile
+// Compile -
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Compile(files ...string) (bool, error) {
@@ -246,7 +246,7 @@ func (mgc *Magic) Compile(files ...string) (bool, error) {
 	return true, nil
 }
 
-// Check
+// Check -
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Check(files ...string) (bool, error) {
@@ -272,7 +272,7 @@ func (mgc *Magic) Check(files ...string) (bool, error) {
 	return true, nil
 }
 
-// File
+// File -
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) File(filename string) (string, error) {
@@ -308,7 +308,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 		// it to achieve the desired behaviour as per the standards.
 		if mgc.flags&ERROR != 0 {
 			return "", mgc.error()
-		} else if rv < 515 {
+		} else if rv < 515 || mgc.flags&EXTENSION != 0 {
 			C.magic_errno(mgc.cookie)
 			cstring = C.magic_error(mgc.cookie)
 		}
@@ -332,7 +332,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 	return s, nil
 }
 
-// Buffer
+// Buffer -
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Buffer(buffer []byte) (string, error) {
@@ -353,7 +353,7 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 	return C.GoString(cstring), nil
 }
 
-// Descriptor
+// Descriptor -
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
@@ -365,8 +365,12 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 		return "", mgc.error()
 	}
 
-	cstring := C.magic_descriptor_wrapper(mgc.cookie, C.int(fd), C.int(mgc.flags))
-	if cstring == nil {
+	cstring, err := C.magic_descriptor_wrapper(mgc.cookie, C.int(fd), C.int(mgc.flags))
+	if cstring == nil && err != nil {
+		errno := err.(syscall.Errno)
+		if errno == syscall.EBADF {
+			return "", &Error{int(errno), "bad file descriptor"}
+		}
 		return "", mgc.error()
 	}
 	return C.GoString(cstring), nil
@@ -395,7 +399,7 @@ func (mgc *Magic) error() *Error {
 		errno := int(C.magic_errno(mgc.cookie))
 		return &Error{errno, s}
 	}
-	return &Error{-1, "unknown error"}
+	return &Error{-1, "an unknown error has occurred"}
 }
 
 // XXX(kwilczynski): Most likely not used under any modern version of Go.
@@ -419,7 +423,7 @@ func open() (*Magic, error) {
 	return mgc, nil
 }
 
-// Open
+// Open -
 //
 // If there is an error, it will be of type *Error.
 func Open(f func(magic *Magic) error, files ...string) (err error) {
@@ -449,7 +453,7 @@ func Open(f func(magic *Magic) error, files ...string) (err error) {
 	return f(mgc)
 }
 
-// Compile
+// Compile -
 //
 // If there is an error, it will be of type *Error.
 func Compile(files ...string) (bool, error) {
@@ -466,7 +470,7 @@ func Compile(files ...string) (bool, error) {
 	return rv, nil
 }
 
-// Check
+// Check -
 //
 // If there is an error, it will be of type *Error.
 func Check(files ...string) (bool, error) {
@@ -495,7 +499,7 @@ func Version() (int, error) {
 		if errno == syscall.ENOSYS {
 			return -1, &Error{int(errno), "function is not implemented"}
 		}
-		return -1, &Error{-1, "unknown error"}
+		return -1, &Error{-1, "an unknown error has occurred"}
 	}
 	return int(rv), nil
 }

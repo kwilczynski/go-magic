@@ -49,10 +49,16 @@ extern "C" {
 # define HAVE_BROKEN_MAGIC 1
 #endif
 
+#if !defined(MAGIC_EXTENSION)
+# define MAGIC_EXTENSION -1
+#endif
+
+#if !defined(MAGIC_COMPRESS_TRANSP)
+# define MAGIC_COMPRESS_TRANSP -1
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* _COMMON_H */
-
-/* vim: set ts=8 sw=4 sts=4 noet : */
