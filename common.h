@@ -25,12 +25,20 @@ extern "C" {
 #include <sys/stat.h>
 #include <magic.h>
 
-#if !defined(EINVAL)
-# define EINVAL 22
+#if !defined(UNUSED)
+# define UNUSED(x) (void)(x)
 #endif
 
-#if !defined(ENOSYS)
-# define ENOSYS 38
+#if defined(F_DUPFD_CLOEXEC)
+# define HAVE_F_DUPFD_CLOEXEC 1
+#endif
+
+#if defined(O_CLOEXEC)
+# define HAVE_O_CLOEXEC 1
+#endif
+
+#if defined(POSIX_CLOSE_RESTART)
+# define HAVE_POSIX_CLOSE_RESTART 1
 #endif
 
 #if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
