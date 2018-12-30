@@ -1,6 +1,8 @@
 package magic
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestConstants(t *testing.T) {
 	// Any recent version of libmagic have 0x37b000 by default.
@@ -8,9 +10,14 @@ func TestConstants(t *testing.T) {
 		NO_CHECK_APPTYPE | NO_CHECK_ELF | NO_CHECK_TEXT |
 		NO_CHECK_CDF | NO_CHECK_TOKENS | NO_CHECK_ENCODING
 
+	rv, _ := Version()
 	// Older versions of libmagic have 0x3fb000 here historically ...
-	if rv, _ := Version(); rv < 0 && NO_CHECK_BUILTIN != 0x37b000 {
+	if rv < 0 && NO_CHECK_BUILTIN != 0x37b000 {
 		flags ^= 0x080000 // 0x37b000 ^ 0x080000 is 0x3fb000
+	}
+	// Latest version of libmagic have 0x77b000 by default.
+	if rv > 533 {
+		flags ^= 0x0400000 // 0x37b000 ^ 0x040000 is 0x77b000
 	}
 
 	// Check if underlaying constants coming from libmagic are sane.

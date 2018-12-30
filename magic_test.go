@@ -1087,9 +1087,11 @@ func TestMagic_Separator(t *testing.T) {
 	n, _ := Version()
 
 	v := []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable", "data"}
-	if n < 524 {
-		// Older version of libmagic reports the results differently.
-		v = []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable"}
+	if n < 524 || n > 533 {
+		// Older version of libmagic reports the results differently, but also latest version has been fixed
+		// so it does not try to report text files as "data" any more, albeit it returns an extra separator
+		// entry which causes an extra entry to be added.
+		v = []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable", ""}
 	}
 
 	var separatorTests = []struct {
