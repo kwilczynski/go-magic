@@ -85,7 +85,7 @@ func TestNew(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {\"%s\"}, want {\"%s\"}", err.Error(), v)
+		t.Errorf("value given {%q}, want {%q}", err.Error(), v)
 	}
 
 	mgc, err = New(genuineMagicFile)
@@ -97,7 +97,7 @@ func TestNew(t *testing.T) {
 	p, _ = mgc.Path()
 
 	if ok := compareStrings(p[0], genuineMagicFile); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuineMagicFile)
+		t.Errorf("value given %q, want %q", p[0], genuineMagicFile)
 	}
 
 	mgc.Close()
@@ -118,7 +118,7 @@ func TestNew(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {\"%s\"}, want {\"%s\"}", err.Error(), v)
+		t.Errorf("value given {%q}, want {%q}", err.Error(), v)
 	}
 }
 
@@ -162,7 +162,7 @@ func TestMagic_String(t *testing.T) {
 
 	v := fmt.Sprintf("Magic{flags:%d path:%s cookie:0x%x}", 0, paths, cookie)
 	if ok := compareStrings(mgc.String(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", mgc.String(), v)
+		t.Errorf("value given %q, want %q", mgc.String(), v)
 	}
 }
 
@@ -177,7 +177,7 @@ func TestMagic_Path(t *testing.T) {
 
 	v := "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -200,12 +200,12 @@ func TestMagic_Path(t *testing.T) {
 	//
 	//	p = path.Clean(path.Join(p, "fixtures"))
 	//	if err = os.Setenv("MAGIC", p); err != nil {
-	//		t.Fatalf("unable to set \"MAGIC\" environment variable to \"%s\"", p)
+	//		t.Fatalf("unable to set \"MAGIC\" environment variable to %q", p)
 	//	}
 	//
 	//	v, _ = mgc.Path()
 	//	if ok := compareStrings(v[0], p); !ok {
-	//		t.Errorf("value given \"%s\", want \"%s\"", v[0], p)
+	//		t.Errorf("value given %q, want %q", v[0], p)
 	//	}
 
 	// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
@@ -240,7 +240,7 @@ func TestMagic_Flags(t *testing.T) {
 
 	v := "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -268,7 +268,7 @@ func TestMagic_SetFlags(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -311,7 +311,7 @@ func TestMagic_SetFlags(t *testing.T) {
 
 	v = "magic: unknown or invalid flag specified"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 }
 
@@ -325,7 +325,7 @@ func TestMagic_FlagsSlice(t *testing.T) {
 
 	v := "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -370,7 +370,7 @@ func TestMagic_Load(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -395,12 +395,12 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 
@@ -414,7 +414,7 @@ func TestMagic_Load(t *testing.T) {
 
 	rv, err = mgc.Load(genuineMagicFile)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, true, "")
 	}
 
@@ -422,7 +422,7 @@ func TestMagic_Load(t *testing.T) {
 	p, _ = mgc.Path()
 
 	if ok := compareStrings(p[0], genuineMagicFile); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuineMagicFile)
+		t.Errorf("value given %q, want %q", p[0], genuineMagicFile)
 	}
 
 	rv, err = mgc.Load(brokenMagicFile)
@@ -434,19 +434,19 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 
 	// Since there was an error, path should remain the same.
 	p, _ = mgc.Path()
 	if ok := compareStrings(p[0], genuineMagicFile); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", p[0], genuineMagicFile)
+		t.Errorf("value given %q, want %q", p[0], genuineMagicFile)
 	}
 
 	mgc.Close()
@@ -474,7 +474,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	clean := func() {
@@ -506,12 +506,12 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 
@@ -543,7 +543,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	rv, err = mgc.Compile(genuine)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, true, "")
 	}
 
@@ -552,7 +552,7 @@ func TestMagic_Compile(t *testing.T) {
 	stat, err := os.Stat(compiledMagicFile)
 	if stat == nil && err != nil {
 		x := os.IsNotExist(err)
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			x, err.Error(), false, "")
 	}
 
@@ -599,12 +599,12 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 }
@@ -624,7 +624,7 @@ func TestMagic_Check(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -649,12 +649,12 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 
@@ -666,7 +666,7 @@ func TestMagic_Check(t *testing.T) {
 
 	rv, err = mgc.Check(genuineMagicFile)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, true, "")
 	}
 
@@ -682,12 +682,12 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 }
@@ -706,7 +706,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -729,7 +729,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(MIME)
@@ -738,7 +738,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(NONE)
@@ -748,7 +748,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(MIME)
@@ -757,7 +757,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(NONE)
@@ -765,13 +765,13 @@ func TestMagic_File(t *testing.T) {
 	// We expect no error to be risen at this time.
 	rv, err = mgc.File("does/not/exist")
 	if err != nil {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	// Return value contains the error message as per the IEEE 1003.1 standard.
 	v = "cannot open `does/not/exist' (No such file or directory)"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	// Now we expect an error to be risen.
@@ -781,7 +781,7 @@ func TestMagic_File(t *testing.T) {
 
 	v = "magic: cannot stat `does/not/exist' (No such file or directory)"
 	if ok = compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 }
 
@@ -801,7 +801,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -837,7 +837,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(MIME)
@@ -846,7 +846,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(NONE)
@@ -856,7 +856,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(MIME)
@@ -865,7 +865,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -875,7 +875,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "text/plain; charset=utf-8"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	mgc.SetFlags(NONE)
@@ -890,7 +890,7 @@ func TestMagic_Buffer(t *testing.T) {
 	// identify Bash scripts.
 	v = "ASCII text"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	// Load two custom Magic databases now, one of which has
@@ -901,7 +901,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "Bourne-Again shell script, ASCII text executable"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -913,7 +913,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -924,7 +924,7 @@ func TestMagic_Buffer(t *testing.T) {
 	// Quite redundant, but fun ...
 	v = "POSIX shell script, ASCII text executable"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -934,7 +934,7 @@ func TestMagic_Buffer(t *testing.T) {
 
 	v = "very short file (no magic)"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -947,7 +947,7 @@ func TestMagic_Buffer(t *testing.T) {
 		}
 		v = "runtime error: index out of range"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given \"%s\", want \"%s\"",
+			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
 			return
 		}
@@ -974,7 +974,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	v = "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	mgc, _ = New()
@@ -1013,7 +1013,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	f.Close()
@@ -1025,7 +1025,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	f.Close()
@@ -1038,7 +1038,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	v = "Go Gopher image, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	f.Close()
@@ -1049,7 +1049,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	f.Close()
@@ -1058,7 +1058,7 @@ func TestMagic_Descriptor(t *testing.T) {
 
 	v = "magic: bad file descriptor"
 	if ok = compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	// Reading from standard input (0) will yield no data in this case.
@@ -1071,7 +1071,7 @@ func TestMagic_Descriptor(t *testing.T) {
 	}
 
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 }
@@ -1208,7 +1208,7 @@ func TestOpen(t *testing.T) {
 
 	v = "magic: not a function or nil pointer"
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	err = Open(func(m *Magic) error {
@@ -1227,7 +1227,7 @@ func TestOpen(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1246,14 +1246,14 @@ func TestOpen(t *testing.T) {
 
 	if err != nil {
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), false, v)
 		}
 	}
 
 	v = "PNG image data, 1634 x 2224, 8-bit/color RGBA, non-interlaced"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	err = Open(func(m *Magic) error {
@@ -1263,7 +1263,7 @@ func TestOpen(t *testing.T) {
 
 	v = "magic: 123abc456"
 	if ok = compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	_ = Open(func(m *Magic) error {
@@ -1306,12 +1306,12 @@ func TestCompile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok && !rv {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 
@@ -1347,7 +1347,7 @@ func TestCompile(t *testing.T) {
 
 	rv, err = Compile(genuine)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, true, "")
 	}
 
@@ -1363,12 +1363,12 @@ func TestCompile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 }
@@ -1392,12 +1392,12 @@ func TestCheck(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 
@@ -1413,7 +1413,7 @@ func TestCheck(t *testing.T) {
 
 	rv, err = Check(genuineMagicFile)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, true, "")
 	}
 
@@ -1429,12 +1429,12 @@ func TestCheck(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
 			rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+		t.Errorf("value given {%v %q}, want {%v %q}",
 			rv, err.Error(), false, v)
 	}
 }
@@ -1458,7 +1458,7 @@ func TestVersionString(t *testing.T) {
 
 	v := fmt.Sprintf("%d.%02d", rv/100, rv%100)
 	if ok := compareStrings(s, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", s, v)
+		t.Errorf("value given %q, want %q", s, v)
 	}
 }
 
@@ -1496,7 +1496,7 @@ func TestFileMime(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1516,7 +1516,7 @@ func TestFileMime(t *testing.T) {
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), "", v)
 		}
 	}
@@ -1525,13 +1525,13 @@ func TestFileMime(t *testing.T) {
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = FileMime(sampleImageFile, fakeMagicFile)
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, err = FileMime(sampleImageFile, brokenMagicFile)
@@ -1548,7 +1548,7 @@ func TestFileMime(t *testing.T) {
 		}
 
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), false, v)
 		}
 	}
@@ -1573,7 +1573,7 @@ func TestFileType(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1593,7 +1593,7 @@ func TestFileType(t *testing.T) {
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), "", v)
 		}
 	}
@@ -1601,13 +1601,13 @@ func TestFileType(t *testing.T) {
 	rv, _ = FileType(sampleImageFile, genuineMagicFile)
 	v = "image/png"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = FileType(sampleImageFile, fakeMagicFile)
 	v = "image/x-go-gopher"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = FileType(sampleImageFile, brokenMagicFile)
@@ -1624,7 +1624,7 @@ func TestFileType(t *testing.T) {
 		}
 
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), false, v)
 		}
 	}
@@ -1649,7 +1649,7 @@ func TestFileEncoding(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1669,7 +1669,7 @@ func TestFileEncoding(t *testing.T) {
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), "", v)
 		}
 	}
@@ -1678,12 +1678,12 @@ func TestFileEncoding(t *testing.T) {
 
 	rv, _ = FileEncoding(sampleImageFile, genuineMagicFile)
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = FileEncoding(sampleImageFile, fakeMagicFile)
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = FileEncoding(sampleImageFile, brokenMagicFile)
@@ -1700,7 +1700,7 @@ func TestFileEncoding(t *testing.T) {
 		}
 
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v \"%s\"}, want {%v \"%s\"}",
+			t.Errorf("value given {%v %q}, want {%v %q}",
 				rv, err.Error(), false, v)
 		}
 	}
@@ -1725,7 +1725,7 @@ func TestBufferMime(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1751,14 +1751,14 @@ func TestBufferMime(t *testing.T) {
 
 	v = "image/png; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = BufferMime(buffer.Bytes(), fakeMagicFile)
 
 	v = "image/x-go-gopher; charset=binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1768,7 +1768,7 @@ func TestBufferMime(t *testing.T) {
 
 	v = "text/plain; charset=utf-8"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1778,7 +1778,7 @@ func TestBufferMime(t *testing.T) {
 
 	v = "text/x-shellscript; charset=us-ascii"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1793,7 +1793,7 @@ func TestBufferMime(t *testing.T) {
 	}
 
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1807,7 +1807,7 @@ func TestBufferMime(t *testing.T) {
 
 		v = "runtime error: index out of range"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given \"%s\", want \"%s\"",
+			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
 			return
 		}
@@ -1836,7 +1836,7 @@ func TestBufferType(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1862,14 +1862,14 @@ func TestBufferType(t *testing.T) {
 
 	v = "image/png"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = BufferType(buffer.Bytes(), fakeMagicFile)
 
 	v = "image/x-go-gopher"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1879,7 +1879,7 @@ func TestBufferType(t *testing.T) {
 
 	v = "text/plain"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1889,7 +1889,7 @@ func TestBufferType(t *testing.T) {
 
 	v = "text/x-shellscript"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1899,7 +1899,7 @@ func TestBufferType(t *testing.T) {
 
 	v = "application/octet-stream"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1912,7 +1912,7 @@ func TestBufferType(t *testing.T) {
 		}
 		v = "runtime error: index out of range"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given \"%s\", want \"%s\"",
+			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
 			return
 		}
@@ -1941,7 +1941,7 @@ func TestBufferEncoding(t *testing.T) {
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	if n >= 519 {
@@ -1967,14 +1967,14 @@ func TestBufferEncoding(t *testing.T) {
 
 	v = "binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	rv, _ = BufferEncoding(buffer.Bytes(), fakeMagicFile)
 
 	v = "binary"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1984,7 +1984,7 @@ func TestBufferEncoding(t *testing.T) {
 
 	v = "utf-8"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -1994,7 +1994,7 @@ func TestBufferEncoding(t *testing.T) {
 
 	v = "us-ascii"
 	if ok = compareStrings(rv, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -2004,7 +2004,7 @@ func TestBufferEncoding(t *testing.T) {
 
 	v = "" // Should be empty ...
 	if ok = compareStrings(rv, v); ok {
-		t.Errorf("value given \"%s\", want \"%s\"", rv, v)
+		t.Errorf("value given %q, want %q", rv, v)
 	}
 
 	buffer.Reset()
@@ -2017,7 +2017,7 @@ func TestBufferEncoding(t *testing.T) {
 		}
 		v = "runtime error: index out of range"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given \"%s\", want \"%s\"",
+			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
 			return
 		}

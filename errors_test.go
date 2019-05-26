@@ -38,14 +38,14 @@ func TestError_Error(t *testing.T) {
 
 	err = mgc.error()
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 
 	v = "the quick brown fox jumps over the lazy dog"
 
 	err = &Error{0, v}
 	if ok := compareStrings(err.Error(), fmt.Sprintf("magic: %s", v)); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.Error(), v)
+		t.Errorf("value given %q, want %q", err.Error(), v)
 	}
 }
 
@@ -94,13 +94,13 @@ func TestError_Message(t *testing.T) {
 
 	err = mgc.error()
 	if ok := compareStrings(err.(*Error).Message, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.(*Error).Message, v)
+		t.Errorf("value given %q, want %q", err.(*Error).Message, v)
 	}
 
 	v = "the quick brown fox jumps over the lazy dog"
 
 	err = &Error{0, v}
 	if ok := compareStrings(err.(*Error).Message, v); !ok {
-		t.Errorf("value given \"%s\", want \"%s\"", err.(*Error).Message, v)
+		t.Errorf("value given %q, want %q", err.(*Error).Message, v)
 	}
 }
