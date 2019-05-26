@@ -6,7 +6,6 @@ cache:
 
 go:
   - '1.12'
-  - tip
 
 env:
   matrix:
