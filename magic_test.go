@@ -945,7 +945,7 @@ func TestMagic_Buffer(t *testing.T) {
 			t.Error("did not panic")
 			return
 		}
-		v = "runtime error: index out of range"
+		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
 			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
@@ -1801,7 +1801,7 @@ func TestBufferMime(t *testing.T) {
 			return
 		}
 
-		v = "runtime error: index out of range"
+		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
 			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
@@ -1906,7 +1906,7 @@ func TestBufferType(t *testing.T) {
 			t.Error("did not panic")
 			return
 		}
-		v = "runtime error: index out of range"
+		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
 			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
@@ -2011,7 +2011,7 @@ func TestBufferEncoding(t *testing.T) {
 			t.Error("did not panic")
 			return
 		}
-		v = "runtime error: index out of range"
+		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
 			t.Errorf("value given %q, want %q",
 				r.(error).Error(), v)
