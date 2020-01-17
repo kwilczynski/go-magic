@@ -1073,7 +1073,6 @@ func TestMagic_Descriptor(t *testing.T) {
 	if ok = compareStrings(rv, v); !ok {
 		t.Errorf("value given %q, want %q", rv, v)
 	}
-
 }
 
 func TestMagic_Separator(t *testing.T) {
