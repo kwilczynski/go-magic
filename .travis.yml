@@ -5,7 +5,7 @@ cache:
   - apt
 
 go:
-  - '1.12'
+  - '1.13'
 
 env:
   matrix:
