@@ -15,6 +15,7 @@ func TestConstants(t *testing.T) {
 	if rv < 0 && NO_CHECK_BUILTIN != 0x37b000 {
 		flags ^= 0x080000 // 0x37b000 ^ 0x080000 is 0x3fb000
 	}
+
 	// Latest version of libmagic have 0x77b000 by default.
 	if rv > 533 {
 		flags ^= 0x0400000 // 0x37b000 ^ 0x040000 is 0x77b000
