@@ -12,7 +12,7 @@ EOF
 export DEBIAN_FRONTEND='noninteractive'
 export DEBCONF_NONINTERACTIVE_SEEN='true'
 
-apt-get update &> /dev/null
+apt-get update
 
 apt-get install --assume-yes \
     wget            \
@@ -27,33 +27,58 @@ apt-get install --assume-yes \
     autotools-dev   \
     libltdl-dev     \
     libtool         \
-    libtool-doc &> /dev/null
+    libtool-doc
 
-apt-get remove --purge --assume-yes \
-    libmagic-dev &> /dev/null
+dpkg --purge --ignore-depends libtool \
+    libmagic-dev \
+    libmagic1    \
+    file
 
 for action in 'autoremove' 'autoclean' 'clean'; do
-    apt-get --assume-yes "$action" &>/dev/null
+    apt-get --assume-yes "$action"
 done
+
+rm -Rf "file-${VERSION}"
+
+CACHE_DIRECTORY="${HOME}/cache"
+if [[ $USER == 'root' ]]; then
+    eval HOME_DIRECTORY="~${SUDO_USER}"
+    CACHE_DIRECTORY="${HOME_DIRECTORY}/cache"
+fi
 
 ARCHIVE_NAME="file-${VERSION}.tar.gz"
 
-rm -Rf \
-    "file-${VERSION}" \
-    "file-${VERSION}.tar.gz"
+mkdir -p "$CACHE_DIRECTORY"
 
-MIRRORS=(
-    'https://fossies.org/linux/misc'
-    'http://ftp.clfs.org/pub/clfs/conglomeration/file'
-    'http://ftp.uni-stuttgart.de/pub/mirrors/mirror.slitaz.org/slitaz/sources/packages/f'
-    'ftp://ftp.astron.com/pub/file'
-)
+if [[ -f "${CACHE_DIRECTORY}/${ARCHIVE_NAME}" ]]; then
+    cp -f "${CACHE_DIRECTORY}/${ARCHIVE_NAME}" .
+fi
 
-for mirror in "${MIRRORS[@]}"; do
-    wget -O "$ARCHIVE_NAME" "${mirror}/${ARCHIVE_NAME}" && break
-done
-
+set +e
 echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
+
+if [[ $? != 0 ]]; then
+    rm -f "file-${VERSION}.tar.gz"
+
+    MIRRORS=(
+        'https://fossies.org/linux/misc'
+        'http://ftp.clfs.org/pub/clfs/conglomeration/file'
+        'http://ftp.uni-stuttgart.de/pub/mirrors/mirror.slitaz.org/slitaz/sources/packages/f'
+        'ftp://ftp.astron.com/pub/file'
+    )
+
+    for mirror in "${MIRRORS[@]}"; do
+        wget -O "$ARCHIVE_NAME" "${mirror}/${ARCHIVE_NAME}" && break
+    done
+
+    echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
+
+    if [[ $? == 0 ]]; then
+        cp -f "$ARCHIVE_NAME" "${CACHE_DIRECTORY}/${ARCHIVE_NAME}"
+        chown -R "$SUDO_USER" "$CACHE_DIRECTORY"
+    fi
+fi
+set -e
 
 tar -zxf "$ARCHIVE_NAME"
 

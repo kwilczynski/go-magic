@@ -74,11 +74,17 @@ const (
 	// Do not check for CDF files.
 	NO_CHECK_CDF int = C.MAGIC_NO_CHECK_CDF
 
+	// Do not check for CDF files.
+	NO_CHECK_CSV int = C.MAGIC_NO_CHECK_CSV
+
 	// Do not look for known tokens inside ASCII files.
 	NO_CHECK_TOKENS int = C.MAGIC_NO_CHECK_TOKENS
 
 	// Return a MIME encoding, instead of a textual description.
 	NO_CHECK_ENCODING int = C.MAGIC_NO_CHECK_ENCODING
+
+	// Do not check for JSON files.
+	NO_CHECK_JSON int = C.MAGIC_NO_CHECK_JSON
 
 	// Do not use built-in tests; only consult the Magic files.
 	NO_CHECK_BUILTIN int = C.MAGIC_NO_CHECK_BUILTIN
