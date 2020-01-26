@@ -1,10 +1,11 @@
 language: go
-dist: precise
+dist: xenial
 
 cache:
   directories:
     - $HOME/cache
 go:
+  - 'tip'
   - '1.13'
 
 env:
@@ -40,12 +41,15 @@ notifications:
 
 before_install:
   - export CC=$(which $COMPILER)
-  - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH scripts/libmagic.sh
+  - export PREFIX='/tmp/travis'
+  - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PREFIX=$PREFIX PATH=$PATH scripts/libmagic.sh
 
 install:
   - make tools
 
 before_script:
+  - export CGO_CFLAGS="-I${PREFIX}/include" CGO_LDFLAGS="-L${PREFIX}/lib"
+  - export LD_LIBRARY_PATH="${PREFIX}/lib"
   - make clean
 
 script:
