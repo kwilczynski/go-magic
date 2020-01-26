@@ -43,10 +43,10 @@ clean: ## Remove binaries, artifacts and releases.
 	rm -f $(CURDIR)/coverage.*
 
 tools: ## Install tools needed by the project.
-	go get github.com/alecthomas/gometalinter
-	go get github.com/axw/gocov/gocov
-	go get github.com/matm/gocov-html
-	gometalinter --install
+	GO111MODULE=off go get github.com/alecthomas/gometalinter
+	GO111MODULE=off go get github.com/axw/gocov/gocov
+	GO111MODULE=off go get github.com/matm/gocov-html
+	GO111MODULE=off GOPATH=$(shell go env GOPATH) gometalinter --install
 
 test: ## Run unit tests.
 	go test -v ./...
