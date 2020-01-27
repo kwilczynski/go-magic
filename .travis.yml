@@ -6,7 +6,6 @@ cache:
     - $HOME/cache
 go:
   - 'tip'
-  - '1.13'
 
 env:
   matrix:
