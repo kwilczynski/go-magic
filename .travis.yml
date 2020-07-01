@@ -5,6 +5,7 @@ cache:
   directories:
     - $HOME/cache
 go:
+  - '1.14'
   - 'tip'
 
 env:
