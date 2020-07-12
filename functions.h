@@ -20,10 +20,10 @@ extern "C" {
 	 r = f(__VA_ARGS__)
 #endif
 
-#define SUPPRESS_EVERYTHING(f, r, ...)	    \
+#define OVERRIDE_EVERYTHING(f, r, ...)	    \
     do {				    \
 	save_t __e_##f;			    \
-	suppress_error_output(&(__e_##f));  \
+	override_error_output(&(__e_##f));  \
 	OVERRIDE_LOCALE(f, r, __VA_ARGS__); \
 	restore_error_output(&(__e_##f));   \
     } while(0)
@@ -33,7 +33,7 @@ extern "C" {
 	if ((x) & MAGIC_ERROR)			    \
 	    OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
 	else					    \
-	    SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
+	    OVERRIDE_EVERYTHING(f, r, __VA_ARGS__); \
      } while(0)
 
 typedef struct file_data {
@@ -66,8 +66,10 @@ extern int magic_load_wrapper(magic_t magic, const char *magicfile, int flags);
 extern int magic_compile_wrapper(magic_t magic, const char *magicfile, int flags);
 extern int magic_check_wrapper(magic_t magic, const char *magicfile, int flags);
 
-extern const char* magic_file_wrapper(magic_t magic, const char *filename, int flags);
-extern const char* magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size, int flags);
+extern const char* magic_file_wrapper(magic_t magic, const char *filename,
+				      int flags);
+extern const char* magic_buffer_wrapper(magic_t magic, const void *buffer,
+					size_t size, int flags);
 extern const char* magic_descriptor_wrapper(magic_t magic, int fd, int flags);
 
 extern int magic_version_wrapper(void);

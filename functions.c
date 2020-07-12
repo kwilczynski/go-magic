@@ -10,7 +10,7 @@ int check_fd(int fd);
 int safe_dup(int fd);
 int safe_close(int fd);
 
-int suppress_error_output(void *data);
+int override_error_output(void *data);
 int restore_error_output(void *data);
 
 int override_current_locale(void *data);
@@ -101,7 +101,7 @@ safe_close(int fd)
 }
 
 int
-suppress_error_output(void *data)
+override_error_output(void *data)
 {
     int local_errno;
     mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
