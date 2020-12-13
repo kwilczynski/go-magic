@@ -61,11 +61,8 @@ func TestNew(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
 
 	mgc.Close()
 
@@ -297,8 +294,7 @@ func TestMagic_SetFlags(t *testing.T) {
 		if err != nil && tt.broken {
 			errno = err.(*Error).Errno
 			if actual != tt.expected || errno != tt.errno {
-				t.Errorf("value given {0x%06x %d}, want {0x%06x %d}",
-					actual, errno, tt.expected, tt.errno)
+				t.Errorf("value given {0x%06x %d}, want {0x%06x %d}", actual, errno, tt.expected, tt.errno)
 				continue
 			}
 		}
@@ -380,11 +376,8 @@ func TestMagic_Load(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
 
 	rv, err = mgc.Load("does/not/exist")
 
@@ -395,13 +388,11 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 
 	// XXX(krzysztof): Currently, certain versions of libmagic API will *never*
@@ -414,8 +405,7 @@ func TestMagic_Load(t *testing.T) {
 
 	rv, err = mgc.Load(genuineMagicFile)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, true, "")
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, true, "")
 	}
 
 	// Current path should change accordingly ...
@@ -434,13 +424,11 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 
 	// Since there was an error, path should remain the same.
@@ -491,11 +479,8 @@ func TestMagic_Compile(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
 
 	rv, err = mgc.Compile("does/not/exist")
 
@@ -506,13 +491,11 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 
 	// See comment in TestMagic_Load() ...
@@ -543,8 +526,7 @@ func TestMagic_Compile(t *testing.T) {
 
 	rv, err = mgc.Compile(genuine)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, true, "")
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, true, "")
 	}
 
 	compiledMagicFile := fmt.Sprintf("%s.mgc", genuine)
@@ -552,8 +534,7 @@ func TestMagic_Compile(t *testing.T) {
 	stat, err := os.Stat(compiledMagicFile)
 	if stat == nil && err != nil {
 		x := os.IsNotExist(err)
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			x, err.Error(), false, "")
+		t.Errorf("value given {%v %q}, want {%v %q}", x, err.Error(), false, "")
 	}
 
 	// Assuming that success would yield a non-zero size compiled Magic file ...
@@ -582,8 +563,7 @@ func TestMagic_Compile(t *testing.T) {
 
 		ok := bytes.Equal(buffer, expected)
 		if !ok || last == 0 {
-			t.Errorf("value given {0x%x 0x%02x}, want {0x%x > 0x%02x}",
-				buffer, last, expected, 0)
+			t.Errorf("value given {0x%x 0x%02x}, want {0x%x > 0x%02x}", buffer, last, expected, 0)
 		}
 	}
 
@@ -599,13 +579,11 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 }
 
@@ -634,11 +612,8 @@ func TestMagic_Check(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
 
 	rv, err = mgc.Check("does/not/exist")
 
@@ -649,13 +624,11 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 
 	// See comment in TestMagic_Load() ...
@@ -666,8 +639,7 @@ func TestMagic_Check(t *testing.T) {
 
 	rv, err = mgc.Check(genuineMagicFile)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, true, "")
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, true, "")
 	}
 
 	rv, err = mgc.Check(brokenMagicFile)
@@ -682,13 +654,11 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 }
 
@@ -716,11 +686,8 @@ func TestMagic_File(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	mgc.SetFlags(NONE)
 	mgc.Load(genuineMagicFile)
@@ -811,11 +778,8 @@ func TestMagic_Buffer(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -947,8 +911,7 @@ func TestMagic_Buffer(t *testing.T) {
 		}
 		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given %q, want %q",
-				r.(error).Error(), v)
+			t.Errorf("value given %q, want %q", r.(error).Error(), v)
 			return
 		}
 	}()
@@ -986,11 +949,9 @@ func TestMagic_Descriptor(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
 
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	// Sadly, the function `const char* magic_descriptor(struct magic_set*, int)',
 	// which is a part of libmagic will *kindly* close file referenced by given
@@ -1122,8 +1083,7 @@ func TestMagic_Separator(t *testing.T) {
 
 		actual = strings.Split(rv, Separator)
 		if ok := reflect.DeepEqual(actual, tt.expected); !ok || flags != tt.flags {
-			t.Errorf("value given {0x%x %v}, want {0x%x %v}", flags, actual,
-				tt.flags, tt.expected)
+			t.Errorf("value given {0x%x %v}, want {0x%x %v}", flags, actual, tt.flags, tt.expected)
 		}
 	}
 }
@@ -1145,14 +1105,11 @@ func Test_open(t *testing.T) {
 	cookie := magic.FieldByName("cookie").Elem().UnsafeAddr()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v %d}",
-			path.Kind(), reflect.Slice, 0)
+		t.Errorf("value given {%v ?}, want {%v %d}", path.Kind(), reflect.Slice, 0)
 	}
 
 	if reflect.ValueOf(cookie).Kind() != reflect.Uintptr || cookie == 0 {
-		t.Errorf("value given {%v 0x%x}, want {%v > %d}",
-			reflect.ValueOf(cookie).Kind(),
-			cookie, reflect.Uintptr, 0)
+		t.Errorf("value given {%v 0x%x}, want {%v > %d}", reflect.ValueOf(cookie).Kind(), cookie, reflect.Uintptr, 0)
 	}
 }
 
@@ -1165,8 +1122,7 @@ func Test_close(t *testing.T) {
 	cookie := value.Elem().FieldByName("cookie").Elem()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v %d}",
-			path.Kind(), reflect.Slice, 0)
+		t.Errorf("value given {%v ?}, want {%v %d}", path.Kind(), reflect.Slice, 0)
 	}
 
 	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
@@ -1184,8 +1140,7 @@ func Test_destroy(t *testing.T) {
 	cookie := magic.FieldByName("cookie").Elem()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v %d}",
-			path.Kind(), reflect.Slice, 0)
+		t.Errorf("value given {%v ?}, want {%v %d}", path.Kind(), reflect.Slice, 0)
 	}
 
 	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
@@ -1234,8 +1189,7 @@ func TestOpen(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
 
 	err = Open(func(m *Magic) error {
 		m.Load(genuineMagicFile)
@@ -1246,8 +1200,7 @@ func TestOpen(t *testing.T) {
 
 	if err != nil {
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), false, v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 		}
 	}
 
@@ -1306,13 +1259,11 @@ func TestCompile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok && !rv {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 
 	wd, err := os.Getwd()
@@ -1332,11 +1283,8 @@ func TestCompile(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
 
 	_, genuine = path.Split(genuineMagicFile)
 	_, broken = path.Split(brokenMagicFile)
@@ -1347,8 +1295,7 @@ func TestCompile(t *testing.T) {
 
 	rv, err = Compile(genuine)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, true, "")
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, true, "")
 	}
 
 	rv, err = Compile(broken)
@@ -1363,13 +1310,11 @@ func TestCompile(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 }
 
@@ -1392,29 +1337,23 @@ func TestCheck(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 
 	if n >= 519 {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
 
 	rv, err = Check(genuineMagicFile)
 	if err != nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, true, "")
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, true, "")
 	}
 
 	rv, err = Check(brokenMagicFile)
@@ -1429,21 +1368,18 @@ func TestCheck(t *testing.T) {
 	}
 
 	if err == nil {
-		t.Errorf("value given {%v \"%v\"}, want {%v %q}",
-			rv, err, false, v)
+		t.Errorf("value given {%v \"%v\"}, want {%v %q}", rv, err, false, v)
 	}
 
 	if ok := compareStrings(err.Error(), v); !ok {
-		t.Errorf("value given {%v %q}, want {%v %q}",
-			rv, err.Error(), false, v)
+		t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 	}
 }
 
 func TestVersion(t *testing.T) {
 	v, _ := version()
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
-		t.Errorf("value given {%v %d}, want {%v > %d}",
-			reflect.ValueOf(v).Kind(), v, reflect.Int, 0)
+		t.Errorf("value given {%v %d}, want {%v > %d}", reflect.ValueOf(v).Kind(), v, reflect.Int, 0)
 	}
 }
 
@@ -1452,8 +1388,7 @@ func TestVersionString(t *testing.T) {
 
 	s, _ := versionString()
 	if reflect.ValueOf(s).Kind() != reflect.String || s == "" {
-		t.Errorf("value given {%v %d}, want {%v > %d}",
-			reflect.ValueOf(s).Kind(), len(s), reflect.String, 0)
+		t.Errorf("value given {%v %d}, want {%v > %d}", reflect.ValueOf(s).Kind(), len(s), reflect.String, 0)
 	}
 
 	v := fmt.Sprintf("%d.%02d", rv/100, rv%100)
@@ -1467,8 +1402,7 @@ func TestVersionSlice(t *testing.T) {
 
 	s, _ := versionSlice()
 	if reflect.ValueOf(s).Kind() != reflect.Slice || len(s) == 0 {
-		t.Errorf("value given {%v %d}, want {%v > %d}",
-			reflect.ValueOf(s).Kind(), len(s), reflect.Slice, 0)
+		t.Errorf("value given {%v %d}, want {%v > %d}", reflect.ValueOf(s).Kind(), len(s), reflect.Slice, 0)
 	}
 
 	v := []int{rv / 100, rv % 100}
@@ -1503,21 +1437,15 @@ func TestFileMime(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	rv, err = FileMime("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), "", v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), "", v)
 		}
 	}
 
@@ -1548,8 +1476,7 @@ func TestFileMime(t *testing.T) {
 		}
 
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), false, v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 		}
 	}
 }
@@ -1580,21 +1507,15 @@ func TestFileType(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	rv, err = FileType("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), "", v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), "", v)
 		}
 	}
 
@@ -1624,8 +1545,7 @@ func TestFileType(t *testing.T) {
 		}
 
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), false, v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 		}
 	}
 }
@@ -1656,21 +1576,15 @@ func TestFileEncoding(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	brokenMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-broken.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	brokenMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-broken.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	rv, err = FileEncoding("does/not/exist", genuineMagicFile)
 	if rv == "" && err != nil {
 		v = "magic: cannot open `does/not/exist' (No such file or directory)"
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), "", v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), "", v)
 		}
 	}
 
@@ -1700,8 +1614,7 @@ func TestFileEncoding(t *testing.T) {
 		}
 
 		if ok := compareStrings(err.Error(), v); !ok {
-			t.Errorf("value given {%v %q}, want {%v %q}",
-				rv, err.Error(), false, v)
+			t.Errorf("value given {%v %q}, want {%v %q}", rv, err.Error(), false, v)
 		}
 	}
 }
@@ -1732,11 +1645,8 @@ func TestBufferMime(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -1807,8 +1717,7 @@ func TestBufferMime(t *testing.T) {
 
 		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given %q, want %q",
-				r.(error).Error(), v)
+			t.Errorf("value given %q, want %q", r.(error).Error(), v)
 			return
 		}
 	}()
@@ -1843,11 +1752,8 @@ func TestBufferType(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -1912,8 +1818,7 @@ func TestBufferType(t *testing.T) {
 		}
 		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given %q, want %q",
-				r.(error).Error(), v)
+			t.Errorf("value given %q, want %q", r.(error).Error(), v)
 			return
 		}
 	}()
@@ -1948,11 +1853,8 @@ func TestBufferEncoding(t *testing.T) {
 		formatDirectory = "new-format"
 	}
 
-	genuineMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png.magic"))
-
-	fakeMagicFile := path.Clean(path.Join(fixturesDirectory,
-		formatDirectory, "png-fake.magic"))
+	genuineMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png.magic"))
+	fakeMagicFile := path.Clean(path.Join(fixturesDirectory, formatDirectory, "png-fake.magic"))
 
 	buffer := &bytes.Buffer{}
 
@@ -2017,8 +1919,7 @@ func TestBufferEncoding(t *testing.T) {
 		}
 		v = "runtime error: index out of range [0] with length 0"
 		if ok := compareStrings(r.(error).Error(), v); !ok {
-			t.Errorf("value given %q, want %q",
-				r.(error).Error(), v)
+			t.Errorf("value given %q, want %q", r.(error).Error(), v)
 			return
 		}
 	}()

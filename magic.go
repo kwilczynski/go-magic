@@ -55,10 +55,12 @@ type Magic struct {
 //
 // Optionally, a multiple distinct Magic database files can
 // be provided to load, otherwise a default database (usually
-// available system-wide) will be loaded.  Alternatively, the
-// "MAGIC" environment variable can be used to name any desired
-// Magic database files to be loaded, but it must be set prior
-// to calling this function for it to take effect.
+// available system-wide) will be loaded.
+//
+// Alternatively, the "MAGIC" environment variable can be used
+// to name any desired Magic database files to be loaded, but
+// it must be set prior to calling this function for it to take
+// effect.
 //
 // Remember to call Close to release initialized resources
 // and close currently opened Magic library, or use Open which
@@ -89,17 +91,17 @@ func (mgc *Magic) Close() {
 
 // String returns a string representation of the Magic type.
 func (mgc *Magic) String() string {
-	return fmt.Sprintf("Magic{flags:%d path:%s cookie:%p}",
-		mgc.flags, mgc.path, mgc.cookie)
+	return fmt.Sprintf("Magic{flags:%d path:%s cookie:%p}", mgc.flags, mgc.path, mgc.cookie)
 }
 
 // Path returns a slice containing fully-qualified path for each
 // of Magic database files that was loaded and is currently in use.
-// If there is an error, it will be of type *Error.
 //
 // Optionally, if the "MAGIC" environment variable is present,
 // then each path from it will be taken into the account and the
 // value that this function returns will be updated accordingly.
+//
+// If there is an error, it will be of type *Error.
 func (mgc *Magic) Path() ([]string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -119,6 +121,7 @@ func (mgc *Magic) Path() ([]string, error) {
 }
 
 // Flags returns a value (bitmask) representing current flags set.
+//
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Flags() (int, error) {
 	mgc.Lock()
@@ -133,7 +136,10 @@ func (mgc *Magic) Flags() (int, error) {
 
 // FlagsSlice returns a slice containing each distinct flag that
 // is currently set and included as a part of the current value
-// (bitmask) of flags.  Results are sorted in an ascending order.
+// (bitmask) of flags.
+//
+// Results are sorted in an ascending order.
+//
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) FlagsSlice() ([]int, error) {
 	mgc.Lock()
@@ -162,10 +168,12 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 	return flags, nil
 }
 
-// SetFlags sets the flags to the new value (bitmask).  Depending
-// on which flags are current set the results and/or behavior of
-// the Magic library will change accordingly.  If there is an error,
-// it will be of type *Error.
+// SetFlags sets the flags to the new value (bitmask).
+//
+// Depending on which flags are current set the results and/or
+// behavior of the Magic library will change accordingly.
+//
+// If there is an error, it will be of type *Error.
 func (mgc *Magic) SetFlags(flags int) error {
 	mgc.Lock()
 	defer mgc.Unlock()
@@ -487,10 +495,11 @@ func Check(files ...string) (bool, error) {
 	return rv, nil
 }
 
-// Version returns the underlying Magic library version as in integer
+// Version returns the underlying Magic library version as an integer
 // value in the format "XYY", where X is the major version and Y is
-// the minor version number.  If there is an error, it will be of
-// type *Error.
+// the minor version number.
+//
+// If there is an error, it will be of type *Error.
 func Version() (int, error) {
 	//
 	rv, err := C.magic_version_wrapper()
@@ -505,8 +514,9 @@ func Version() (int, error) {
 }
 
 // VersionString returns the underlying Magic library version
-// as string in the format "X.YY".  If there is an error,
-// it will be of type *Error.
+// as string in the format "X.YY".
+//
+// If there is an error, it will be of type *Error.
 func VersionString() (string, error) {
 	rv, err := Version()
 	if err != nil {
@@ -517,6 +527,7 @@ func VersionString() (string, error) {
 
 // VersionSlice returns a slice containing values of both the
 // major and minor version numbers separated from one another.
+//
 // If there is an error, it will be of type *Error.
 func VersionSlice() ([]int, error) {
 	rv, err := Version()
@@ -528,8 +539,9 @@ func VersionSlice() ([]int, error) {
 
 // FileMime returns MIME identification (both the MIME type
 // and MIME encoding), rather than a textual description,
-// for the named file.  If there is an error, it will be
-// of type *Error.
+// for the named file.
+//
+// If there is an error, it will be of type *Error.
 func FileMime(name string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -544,8 +556,9 @@ func FileMime(name string, files ...string) (string, error) {
 }
 
 // FileType returns MIME type only, rather than a textual
-// description, for the named file.  If there is an error,
-// it will be of type *Error.
+// description, for the named file.
+//
+// If there is an error, it will be of type *Error.
 func FileType(name string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -560,8 +573,9 @@ func FileType(name string, files ...string) (string, error) {
 }
 
 // FileEncoding returns MIME encoding only, rather than a textual
-// description, for the content of the buffer.  If there is an error,
-// it will be of type *Error.
+// description, for the content of the buffer.
+//
+// If there is an error, it will be of type *Error.
 func FileEncoding(name string, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -577,8 +591,9 @@ func FileEncoding(name string, files ...string) (string, error) {
 
 // BufferMime returns MIME identification (both the MIME type
 // and MIME encoding), rather than a textual description,
-// for the content of the buffer.  If there is an error,
-// it will be of type *Error.
+// for the content of the buffer.
+//
+// If there is an error, it will be of type *Error.
 func BufferMime(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -593,8 +608,9 @@ func BufferMime(buffer []byte, files ...string) (string, error) {
 }
 
 // BufferType returns MIME type only, rather than a textual
-// description, for the content of the buffer.  If there is
-// an error, it will be of type *Error.
+// description, for the content of the buffer.
+//
+// If there is an error, it will be of type *Error.
 func BufferType(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
@@ -609,8 +625,9 @@ func BufferType(buffer []byte, files ...string) (string, error) {
 }
 
 // BufferEncoding returns MIME encoding only, rather than a textual
-// description, for the content of the buffer.  If there is an error,
-// it will be of type *Error.
+// description, for the content of the buffer.
+//
+// If there is an error, it will be of type *Error.
 func BufferEncoding(buffer []byte, files ...string) (string, error) {
 	mgc, err := New(files...)
 	if err != nil {
