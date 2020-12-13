@@ -143,6 +143,20 @@ func TestMagic_Close(t *testing.T) {
 	mgc.Close()
 }
 
+func TestMagic_IsClosed(t *testing.T) {
+	mgc, _ := New()
+
+	if ok := mgc.IsClosed(); ok {
+		t.Errorf("value given %v, want %v", ok, false)
+	}
+
+	mgc.Close()
+
+	if ok := mgc.IsClosed(); !ok {
+		t.Errorf("value given %v, want %v", ok, true)
+	}
+}
+
 func TestMagic_String(t *testing.T) {
 	mgc, _ := New()
 	defer mgc.Close()

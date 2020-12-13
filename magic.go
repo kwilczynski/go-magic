@@ -89,6 +89,14 @@ func (mgc *Magic) Close() {
 	mgc.magic.close()
 }
 
+// IsClosed returns true if the underlying Magic library has
+// been closed, or false otherwise.
+func (mgc *Magic) IsClosed() bool {
+	mgc.Lock()
+	defer mgc.Unlock()
+	return mgc.cookie == nil
+}
+
 // String returns a string representation of the Magic type.
 func (mgc *Magic) String() string {
 	return fmt.Sprintf("Magic{flags:%d path:%s cookie:%p}", mgc.flags, mgc.path, mgc.cookie)
