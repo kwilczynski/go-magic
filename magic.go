@@ -32,7 +32,7 @@ const Separator string = "\x5c\x30\x31\x32\x2d\x20"
 type magic struct {
 	sync.Mutex
 	flags  int       // Current flags set (bitmask).
-	path   []string  // List of Magic database files currently in-use.
+	paths  []string  // List of Magic database files currently in-use.
 	cookie C.magic_t // Magic database session cookie (a "magic_set" struct on the C side).
 }
 
@@ -40,7 +40,7 @@ func (m *magic) close() {
 	if m != nil && m.cookie != nil {
 		// This will free resources on the Magic library side.
 		C.magic_close(m.cookie)
-		m.path = []string{}
+		m.paths = []string{}
 		m.cookie = nil
 	}
 	runtime.SetFinalizer(m, nil)
@@ -99,10 +99,10 @@ func (mgc *Magic) IsClosed() bool {
 
 // String returns a string representation of the Magic type.
 func (mgc *Magic) String() string {
-	return fmt.Sprintf("Magic{flags:%d path:%s cookie:%p}", mgc.flags, mgc.path, mgc.cookie)
+	return fmt.Sprintf("Magic{flags:%d paths:%v cookie:%p}", mgc.flags, mgc.paths, mgc.cookie)
 }
 
-// Path returns a slice containing fully-qualified path for each
+// Paths returns a slice containing fully-qualified path for each
 // of Magic database files that was loaded and is currently in use.
 //
 // Optionally, if the "MAGIC" environment variable is present,
@@ -110,7 +110,7 @@ func (mgc *Magic) String() string {
 // value that this function returns will be updated accordingly.
 //
 // If there is an error, it will be of type *Error.
-func (mgc *Magic) Path() ([]string, error) {
+func (mgc *Magic) Paths() ([]string, error) {
 	mgc.Lock()
 	defer mgc.Unlock()
 	runtime.KeepAlive(mgc.magic)
@@ -120,12 +120,12 @@ func (mgc *Magic) Path() ([]string, error) {
 	}
 
 	// Respect the "MAGIC" environment variable, if present.
-	if len(mgc.path) > 0 && os.Getenv("MAGIC") == "" {
-		return mgc.path, nil
+	if len(mgc.paths) > 0 && os.Getenv("MAGIC") == "" {
+		return mgc.paths, nil
 	}
 	rv := C.GoString(C.magic_getpath_wrapper())
-	mgc.path = strings.Split(rv, ":")
-	return mgc.path, nil
+	mgc.paths = strings.Split(rv, ":")
+	return mgc.paths, nil
 }
 
 // Flags returns a value (bitmask) representing current flags set.
@@ -232,7 +232,7 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	if rv := C.magic_load_wrapper(mgc.cookie, cfiles, C.int(mgc.flags)); rv < 0 {
 		return false, mgc.error()
 	}
-	mgc.path = strings.Split(C.GoString(cfiles), ":")
+	mgc.paths = strings.Split(C.GoString(cfiles), ":")
 	return true, nil
 }
 

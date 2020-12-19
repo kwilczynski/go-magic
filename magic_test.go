@@ -91,7 +91,7 @@ func TestNew(t *testing.T) {
 	}
 
 	// Current path should change accordingly ...
-	p, _ = mgc.Path()
+	p, _ = mgc.Paths()
 
 	if ok := compareStrings(p[0], genuineMagicFile); !ok {
 		t.Errorf("value given %q, want %q", p[0], genuineMagicFile)
@@ -162,7 +162,7 @@ func TestMagic_String(t *testing.T) {
 	defer mgc.Close()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
-	path := magic.FieldByName("path")
+	path := magic.FieldByName("paths")
 	cookie := magic.FieldByName("cookie").Elem().UnsafeAddr()
 
 	// Get whatever the underlying default path is ...
@@ -171,7 +171,7 @@ func TestMagic_String(t *testing.T) {
 		paths[i] = path.Index(i).String()
 	}
 
-	v := fmt.Sprintf("Magic{flags:%d path:%s cookie:0x%x}", 0, paths, cookie)
+	v := fmt.Sprintf("Magic{flags:%d paths:%v cookie:0x%x}", 0, paths, cookie)
 	if ok := compareStrings(mgc.String(), v); !ok {
 		t.Errorf("value given %q, want %q", mgc.String(), v)
 	}
@@ -184,7 +184,7 @@ func TestMagic_Path(t *testing.T) {
 	mgc, _ = New()
 	mgc.Close()
 
-	_, err := mgc.Path()
+	_, err := mgc.Paths()
 
 	v := "magic: Magic library is not open"
 	if ok := compareStrings(err.Error(), v); !ok {
@@ -193,7 +193,7 @@ func TestMagic_Path(t *testing.T) {
 
 	mgc, _ = New()
 
-	rv, _ = mgc.Path()
+	rv, _ = mgc.Paths()
 	if len(rv) == 0 {
 		t.Fatalf("value given \"%T\", should not be empty", rv)
 	}
@@ -228,7 +228,7 @@ func TestMagic_Path(t *testing.T) {
 		mgc.close()
 	}()
 
-	rv, _ = mgc.Path()
+	rv, _ = mgc.Paths()
 	if len(rv) == 0 {
 		t.Fatalf("value given \"%T\", should not be empty", rv)
 	}
@@ -423,7 +423,7 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	// Current path should change accordingly ...
-	p, _ = mgc.Path()
+	p, _ = mgc.Paths()
 
 	if ok := compareStrings(p[0], genuineMagicFile); !ok {
 		t.Errorf("value given %q, want %q", p[0], genuineMagicFile)
@@ -446,7 +446,7 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	// Since there was an error, path should remain the same.
-	p, _ = mgc.Path()
+	p, _ = mgc.Paths()
 	if ok := compareStrings(p[0], genuineMagicFile); !ok {
 		t.Errorf("value given %q, want %q", p[0], genuineMagicFile)
 	}
@@ -1115,7 +1115,7 @@ func Test_open(t *testing.T) {
 	}(mgc)
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
-	path := magic.FieldByName("path")
+	path := magic.FieldByName("paths")
 	cookie := magic.FieldByName("cookie").Elem().UnsafeAddr()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
@@ -1132,7 +1132,7 @@ func Test_close(t *testing.T) {
 	mgc.close()
 
 	value := reflect.ValueOf(mgc).Elem().FieldByName("magic")
-	path := value.Elem().FieldByName("path")
+	path := value.Elem().FieldByName("paths")
 	cookie := value.Elem().FieldByName("cookie").Elem()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
@@ -1150,7 +1150,7 @@ func Test_destroy(t *testing.T) {
 	mgc.destroy()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
-	path := magic.FieldByName("path")
+	path := magic.FieldByName("paths")
 	cookie := magic.FieldByName("cookie").Elem()
 
 	if path.Kind() != reflect.Slice || path.Len() > 0 {
