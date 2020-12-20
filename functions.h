@@ -30,7 +30,7 @@ extern "C" {
 
 #define MAGIC_FUNCTION(f, r, x, ...)		    \
      do {					    \
-	if ((x) & MAGIC_ERROR)			    \
+	if ((x) & MAGIC_DEBUG)			    \
 	    OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
 	else					    \
 	    OVERRIDE_EVERYTHING(f, r, __VA_ARGS__); \
@@ -58,11 +58,25 @@ typedef struct save {
 extern int safe_dup(int fd);
 extern int safe_close(int fd);
 
+extern magic_t magic_open_wrapper(int flags);
+extern void magic_close_wrapper(magic_t magic);
+
+extern const char* magic_error_wrapper(magic_t magic);
+extern int magic_errno_wrapper(magic_t magic);
+
 extern const char* magic_getpath_wrapper(void);
 
+extern int magic_getparam_wrapper(magic_t magic, int parameter, void *value);
+extern int magic_setparam_wrapper(magic_t magic, int parameter,
+				  const void *value);
+
+extern int magic_getflags_wrapper(magic_t magic);
 extern int magic_setflags_wrapper(magic_t magic, int flags);
 
 extern int magic_load_wrapper(magic_t magic, const char *magicfile, int flags);
+extern int magic_load_buffers_wrapper(magic_t magic, void **buffers,
+				      size_t *sizes, size_t count, int flags);
+
 extern int magic_compile_wrapper(magic_t magic, const char *magicfile, int flags);
 extern int magic_check_wrapper(magic_t magic, const char *magicfile, int flags);
 

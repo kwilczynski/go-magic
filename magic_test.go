@@ -241,6 +241,12 @@ func TestMagic_Path_Environment(t *testing.T) {
 	}
 }
 
+func TestMagic_Parameter(t *testing.T) {
+}
+
+func TestMagic_SetParameter(t *testing.T) {
+}
+
 func TestMagic_Flags(t *testing.T) {
 	var mgc *Magic
 

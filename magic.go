@@ -36,19 +36,40 @@ type magic struct {
 	cookie C.magic_t // Magic database session cookie (a "magic_set" struct on the C side).
 }
 
+// Magic represents the underlying Magic library.
+type Magic struct {
+	*magic
+}
+
+// open opens and initializes underlying Magic library and sets the
+// finalizer on the object accordingly.
+func open() (*Magic, error) {
+	// Can only fail allocating memory in this particular case.
+	rv := C.magic_open_wrapper(C.int(NONE))
+	if rv == nil {
+		errno := syscall.ENOMEM
+		return nil, &Error{int(errno), "failed to initialize Magic library"}
+	}
+
+	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
+	runtime.SetFinalizer(mgc.magic, (*magic).close)
+	runtime.KeepAlive(mgc.magic)
+	return mgc, nil
+}
+
 func (m *magic) close() {
 	if m != nil && m.cookie != nil {
 		// This will free resources on the Magic library side.
-		C.magic_close(m.cookie)
+		C.magic_close_wrapper(m.cookie)
 		m.paths = []string{}
 		m.cookie = nil
 	}
 	runtime.SetFinalizer(m, nil)
 }
 
-// Magic represents the underlying Magic library.
-type Magic struct {
-	*magic
+// XXX(kwilczynski): Most likely not used under any modern version of Go.
+func (mgc *Magic) destroy() {
+	mgc.Close()
 }
 
 // New opens and initializes Magic library.
@@ -126,6 +147,63 @@ func (mgc *Magic) Paths() ([]string, error) {
 	rv := C.GoString(C.magic_getpath_wrapper())
 	mgc.paths = strings.Split(rv, ":")
 	return mgc.paths, nil
+}
+
+// Parameter -
+//
+// If there is an error, it will be of type *Error.
+func (mgc *Magic) Parameter(parameter int) (int, error) {
+	mgc.Lock()
+	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
+
+	if mgc.cookie == nil {
+		return -1, mgc.error()
+	}
+
+	var value int
+	p := unsafe.Pointer(&value)
+
+	rv, err := C.magic_getparam_wrapper(mgc.cookie, C.int(parameter), p)
+	if rv < 0 && err != nil {
+		errno := err.(syscall.Errno)
+		if errno == syscall.EINVAL {
+			return -1, &Error{int(errno), "unknown or invalid parameter specified"}
+		}
+		return -1, mgc.error()
+	}
+
+	return int(value), nil
+}
+
+// SetParameter -
+//
+// If there is an error, it will be of type *Error.
+func (mgc *Magic) SetParameter(parameter int, value int) error {
+	mgc.Lock()
+	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
+
+	if mgc.cookie == nil {
+		return mgc.error()
+	}
+
+	p := unsafe.Pointer(&value)
+
+	rv, err := C.magic_setparam_wrapper(mgc.cookie, C.int(parameter), p)
+	if rv < 0 && err != nil {
+		errno := err.(syscall.Errno)
+		switch errno {
+		case syscall.EINVAL:
+			return &Error{int(errno), "unknown or invalid parameter specified"}
+		case syscall.EOVERFLOW:
+			return &Error{int(errno), "invalid parameter value specified"}
+		default:
+			return mgc.error()
+		}
+	}
+
+	return nil
 }
 
 // Flags returns a value (bitmask) representing current flags set.
@@ -325,8 +403,8 @@ func (mgc *Magic) File(filename string) (string, error) {
 		if mgc.flags&ERROR != 0 {
 			return "", mgc.error()
 		} else if rv < 515 || mgc.flags&EXTENSION != 0 {
-			C.magic_errno(mgc.cookie)
-			cstring = C.magic_error(mgc.cookie)
+			C.magic_errno_wrapper(mgc.cookie)
+			cstring = C.magic_error_wrapper(mgc.cookie)
 		}
 	}
 
@@ -400,7 +478,7 @@ func (mgc *Magic) error() *Error {
 	}
 	runtime.KeepAlive(mgc.magic)
 
-	cstring := C.magic_error(mgc.cookie)
+	cstring := C.magic_error_wrapper(mgc.cookie)
 	if cstring != nil {
 		// Depending on the version of the underlying
 		// Magic library, the error reporting facilities
@@ -412,31 +490,10 @@ func (mgc *Magic) error() *Error {
 		if s == "" || s == "(null)" {
 			return &Error{-1, "empty or invalid error message"}
 		}
-		errno := int(C.magic_errno(mgc.cookie))
+		errno := int(C.magic_errno_wrapper(mgc.cookie))
 		return &Error{errno, s}
 	}
 	return &Error{-1, "an unknown error has occurred"}
-}
-
-// XXX(kwilczynski): Most likely not used under any modern version of Go.
-func (mgc *Magic) destroy() {
-	mgc.Close()
-}
-
-// open opens and initializes underlying Magic library and sets the
-// finalizer on the object accordingly.
-func open() (*Magic, error) {
-	// Can only fail allocating memory in this particular case.
-	rv := C.magic_open(C.int(NONE))
-	if rv == nil {
-		errno := syscall.ENOMEM
-		return nil, &Error{int(errno), "failed to initialize Magic library"}
-	}
-
-	mgc := &Magic{&magic{flags: NONE, cookie: rv}}
-	runtime.SetFinalizer(mgc.magic, (*magic).close)
-	runtime.KeepAlive(mgc.magic)
-	return mgc, nil
 }
 
 // Open -

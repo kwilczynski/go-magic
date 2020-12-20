@@ -6,6 +6,28 @@ package magic
 import "C"
 
 const (
+	// Controls how many levels of recursion will be followed for
+	// indirect magic entries.
+	PARAM_INDIR_MAX int = C.MAGIC_PARAM_INDIR_MAX
+
+	// Controls the maximum number of calls for name or use magic.
+	PARAM_NAME_MAX int = C.MAGIC_PARAM_NAME_MAX
+
+	// Controls how many ELF program sections will be processed.
+	PARAM_ELF_PHNUM_MAX int = C.MAGIC_PARAM_ELF_PHNUM_MAX
+
+	// Controls how many ELF sections will be processed.
+	PARAM_ELF_SHNUM_MAX int = C.MAGIC_PARAM_ELF_SHNUM_MAX
+
+	// Controls how many ELF notes will be processed.
+	PARAM_ELF_NOTES_MAX int = C.MAGIC_PARAM_ELF_NOTES_MAX
+
+	// Controls the length limit for regular expression searches.
+	PARAM_REGEX_MAX int = C.MAGIC_PARAM_REGEX_MAX
+
+	// Controls the maximum number of bytes to read from a file.
+	PARAM_BYTES_MAX int = C.MAGIC_PARAM_BYTES_MAX
+
 	// No special handling and/or flags specified. Default behaviour.
 	NONE int = C.MAGIC_NONE
 

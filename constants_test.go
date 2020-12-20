@@ -41,3 +41,6 @@ func TestConstants(t *testing.T) {
 		}
 	}
 }
+
+func TestParameters(t *testing.T) {
+}

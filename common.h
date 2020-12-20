@@ -15,6 +15,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -24,10 +25,6 @@ extern "C" {
 #include <xlocale.h>
 #include <sys/stat.h>
 #include <magic.h>
-
-#if !defined(UNUSED)
-# define UNUSED(x) (void)(x)
-#endif
 
 #if defined(F_DUPFD_CLOEXEC)
 # define HAVE_F_DUPFD_CLOEXEC 1
@@ -47,6 +44,34 @@ extern "C" {
 
 #if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
 # define HAVE_BROKEN_MAGIC 1
+#endif
+
+#if !defined(MAGIC_PARAM_INDIR_MAX)
+# define MAGIC_PARAM_INDIR_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_NAME_MAX)
+# define MAGIC_PARAM_NAME_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_ELF_PHNUM_MAX)
+# define MAGIC_PARAM_ELF_PHNUM_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_ELF_SHNUM_MAX)
+# define MAGIC_PARAM_ELF_SHNUM_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_ELF_NOTES_MAX)
+# define MAGIC_PARAM_ELF_NOTES_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_REGEX_MAX)
+# define MAGIC_PARAM_REGEX_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_BYTES_MAX)
+# define MAGIC_PARAM_BYTES_MAX -1
 #endif
 
 #if !defined(MAGIC_EXTENSION)
