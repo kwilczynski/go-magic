@@ -1154,24 +1154,6 @@ func Test_close(t *testing.T) {
 	}
 }
 
-func Test_destroy(t *testing.T) {
-	mgc, _ := open()
-	mgc.destroy()
-
-	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
-	path := magic.FieldByName("paths")
-	cookie := magic.FieldByName("cookie").Elem()
-
-	if path.Kind() != reflect.Slice || path.Len() > 0 {
-		t.Errorf("value given {%v ?}, want {%v %d}", path.Kind(), reflect.Slice, 0)
-	}
-
-	// Should be NULL (at C level) as magic_close() will free underlying Magic database.
-	if ok := cookie.IsValid(); ok {
-		t.Errorf("value given %v, want %v", ok, false)
-	}
-}
-
 func TestOpen(t *testing.T) {
 	var mgc *Magic
 
