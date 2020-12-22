@@ -144,6 +144,7 @@ func (mgc *Magic) Paths() ([]string, error) {
 	if len(mgc.paths) > 0 && os.Getenv("MAGIC") == "" {
 		return mgc.paths, nil
 	}
+
 	rv := C.GoString(C.magic_getpath_wrapper())
 	mgc.paths = strings.Split(rv, ":")
 	return mgc.paths, nil
@@ -314,6 +315,37 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	return true, nil
 }
 
+// LoadBuffers -
+//
+// If there is an error, it will be of type *Error.
+func (mgc *Magic) LoadBuffers(buffers ...[]byte) (bool, error) {
+	mgc.Lock()
+	defer mgc.Unlock()
+	runtime.KeepAlive(mgc.magic)
+
+	if mgc.cookie == nil {
+		return false, mgc.error()
+	}
+
+	size := C.size_t(len(buffers))
+	pointers := make([]uintptr, size)
+	sizes := make([]C.size_t, size)
+
+	for i := range buffers {
+		pointers[i] = uintptr(unsafe.Pointer(&buffers[i][0]))
+		sizes[i] = C.size_t(len(buffers[i]))
+	}
+
+	p := (*unsafe.Pointer)(unsafe.Pointer(&pointers[0]))
+	s := (*C.size_t)(unsafe.Pointer(&sizes[0]))
+
+	if rv := C.magic_load_buffers_wrapper(mgc.cookie, p, s, size, C.int(mgc.flags)); rv < 0 {
+		return false, mgc.error()
+	}
+
+	return true, nil
+}
+
 // Compile -
 //
 // If there is an error, it will be of type *Error.
@@ -438,9 +470,10 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 		return "", mgc.error()
 	}
 
-	p, length := unsafe.Pointer(&buffer[0]), C.size_t(len(buffer))
+	p := unsafe.Pointer(&buffer[0])
+	size := C.size_t(len(buffer))
 
-	cstring := C.magic_buffer_wrapper(mgc.cookie, p, length, C.int(mgc.flags))
+	cstring := C.magic_buffer_wrapper(mgc.cookie, p, size, C.int(mgc.flags))
 	if cstring == nil {
 		return "", mgc.error()
 	}

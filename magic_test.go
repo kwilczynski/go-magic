@@ -370,6 +370,9 @@ func TestMagic_FlagsSlice(t *testing.T) {
 	}
 }
 
+func TestMagic_LoadBuffers(t *testing.T) {
+}
+
 func TestMagic_Load(t *testing.T) {
 	var mgc *Magic
 
