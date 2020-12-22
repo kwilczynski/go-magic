@@ -53,6 +53,7 @@ func open() (*Magic, error) {
 
 	mgc := &Magic{&magic{flags: NONE, cookie: cMagic}}
 	runtime.SetFinalizer(mgc.magic, (*magic).close)
+
 	return mgc, nil
 }
 
@@ -92,6 +93,7 @@ func New(files ...string) (*Magic, error) {
 	if _, err := mgc.Load(files...); err != nil {
 		return nil, err
 	}
+
 	return mgc, nil
 }
 
@@ -122,7 +124,14 @@ func (mgc *Magic) String() string {
 	mgc.Lock()
 	defer mgc.Unlock()
 
-	return fmt.Sprintf("Magic{flags:%d paths:%v cookie:%p}", mgc.flags, mgc.paths, mgc.cookie)
+	open := false
+	if mgc != nil && mgc.cookie != nil {
+		open = true
+	}
+
+	s := fmt.Sprintf("Magic{flags:%d paths:%v cookie:%p open:%t}", mgc.flags, mgc.paths, mgc.cookie, open)
+
+	return s
 }
 
 // Paths returns a slice containing fully-qualified path for each

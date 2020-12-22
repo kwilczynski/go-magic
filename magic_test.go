@@ -159,7 +159,6 @@ func TestMagic_IsClosed(t *testing.T) {
 
 func TestMagic_String(t *testing.T) {
 	mgc, _ := New()
-	defer mgc.Close()
 
 	magic := reflect.ValueOf(mgc).Elem().FieldByName("magic").Elem()
 	path := magic.FieldByName("paths")
@@ -171,7 +170,16 @@ func TestMagic_String(t *testing.T) {
 		paths[i] = path.Index(i).String()
 	}
 
-	v := fmt.Sprintf("Magic{flags:%d paths:%v cookie:0x%x}", 0, paths, cookie)
+	var v string
+
+	v = fmt.Sprintf("Magic{flags:%d paths:%v cookie:0x%x open:%t}", 0, paths, cookie, true)
+	if ok := compareStrings(mgc.String(), v); !ok {
+		t.Errorf("value given %q, want %q", mgc.String(), v)
+	}
+
+	mgc.Close()
+
+	v = fmt.Sprintf("Magic{flags:%d paths:%v cookie:0x%x open:%t}", 0, []string{}, 0, false)
 	if ok := compareStrings(mgc.String(), v); !ok {
 		t.Errorf("value given %q, want %q", mgc.String(), v)
 	}
