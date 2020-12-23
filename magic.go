@@ -274,6 +274,33 @@ func (mgc *Magic) Flags() (int, error) {
 	return mgc.flags, nil
 }
 
+// SetFlags sets the flags to the new value (bitmask).
+//
+// Depending on which flags are current set the results and/or
+// behavior of the Magic library will change accordingly.
+//
+// If there is an error, it will be of type *Error.
+func (mgc *Magic) SetFlags(flags int) error {
+	mgc.Lock()
+	defer mgc.Unlock()
+
+	if mgc.cookie == nil {
+		return mgc.error()
+	}
+
+	cResult, err := C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
+	if cResult < 0 && err != nil {
+		errno := err.(syscall.Errno)
+		if errno == syscall.EINVAL {
+			return &Error{int(errno), "unknown or invalid flag specified"}
+		}
+		return mgc.error()
+	}
+	mgc.flags = flags
+
+	return nil
+}
+
 // FlagsSlice returns a slice containing each distinct flag that
 // is currently set and included as a part of the current value
 // (bitmask) of flags.
@@ -306,33 +333,6 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 	sort.Ints(flags)
 
 	return flags, nil
-}
-
-// SetFlags sets the flags to the new value (bitmask).
-//
-// Depending on which flags are current set the results and/or
-// behavior of the Magic library will change accordingly.
-//
-// If there is an error, it will be of type *Error.
-func (mgc *Magic) SetFlags(flags int) error {
-	mgc.Lock()
-	defer mgc.Unlock()
-
-	if mgc.cookie == nil {
-		return mgc.error()
-	}
-
-	cResult, err := C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
-	if cResult < 0 && err != nil {
-		errno := err.(syscall.Errno)
-		if errno == syscall.EINVAL {
-			return &Error{int(errno), "unknown or invalid flag specified"}
-		}
-		return mgc.error()
-	}
-	mgc.flags = flags
-
-	return nil
 }
 
 // Load -
