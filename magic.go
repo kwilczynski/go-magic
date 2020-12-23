@@ -264,6 +264,13 @@ func (mgc *Magic) Flags() (int, error) {
 		return -1, mgc.error()
 	}
 
+	var cRv C.int
+
+	if cRv = C.magic_getflags_wrapper(mgc.cookie); cRv < 0 {
+		return -1, mgc.error()
+	}
+	mgc.flags = int(cRv)
+
 	return mgc.flags, nil
 }
 
