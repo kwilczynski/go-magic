@@ -470,11 +470,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 
 	cString := C.magic_file_wrapper(mgc.cookie, cFilename, C.int(mgc.flags))
 	if cString == nil {
-		version, err := Version()
-		if err != nil && err.(*Error).Errno != int(syscall.ENOSYS) {
-			return "", err
-		}
-
+		version := Version()
 		// Handle the case when the "ERROR" flag is set regardless
 		// of the current version of the underlying Magic library.
 		//
@@ -659,46 +655,33 @@ func Check(files ...string) (bool, error) {
 // Version returns the underlying Magic library version as an integer
 // value in the format "XYY", where X is the major version and Y is
 // the minor version number.
-//
-// If there is an error, it will be of type *Error.
-func Version() (int, error) {
-	//
-	cRv, err := C.magic_version_wrapper()
-	if cRv < 0 && err != nil {
-		errno := err.(syscall.Errno)
-		if errno == syscall.ENOSYS {
-			return -1, &Error{int(errno), "function is not implemented"}
-		}
-		return -1, &Error{-1, "an unknown error has occurred"}
-	}
-
-	return int(cRv), nil
+func Version() int {
+	cRv := C.magic_version_wrapper()
+	return int(cRv)
 }
 
 // VersionString returns the underlying Magic library version
 // as string in the format "X.YY".
 //
 // If there is an error, it will be of type *Error.
-func VersionString() (string, error) {
-	version, err := Version()
-	if err != nil {
-		return "", err
-	}
+func VersionString() string {
+	version := Version()
 
-	return fmt.Sprintf("%d.%02d", version/100, version%100), nil
+	s := fmt.Sprintf("%d.%02d", version/100, version%100)
+
+	return s
 }
 
 // VersionSlice returns a slice containing values of both the
 // major and minor version numbers separated from one another.
 //
 // If there is an error, it will be of type *Error.
-func VersionSlice() ([]int, error) {
-	version, err := Version()
-	if err != nil {
-		return []int{}, err
-	}
+func VersionSlice() []int {
+	version := Version()
 
-	return []int{version / 100, version % 100}, nil
+	s := []int{version / 100, version % 100}
+
+	return s
 }
 
 // FileMime returns MIME identification (both the MIME type

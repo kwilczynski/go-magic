@@ -9,32 +9,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	"syscall"
 	"testing"
 )
-
-// Reference original functions.
-var (
-	version       = Version
-	versionString = VersionString
-	versionSlice  = VersionSlice
-)
-
-func init() {
-	_, err := version()
-	if err != nil && err.(*Error).Errno == int(syscall.ENOSYS) {
-		// Mock return values by replacing original functions.
-		version = func() (int, error) {
-			return 518, nil
-		}
-		versionString = func() (string, error) {
-			return "5.18", nil
-		}
-		versionSlice = func() ([]int, error) {
-			return []int{5, 18}, nil
-		}
-	}
-}
 
 func TestNew(t *testing.T) {
 	var mgc *Magic
@@ -55,7 +31,7 @@ func TestNew(t *testing.T) {
 		}
 	}(mgc)
 
-	n, _ = Version()
+	n = Version()
 
 	if n >= 519 {
 		formatDirectory = "new-format"
@@ -401,7 +377,7 @@ func TestMagic_Load(t *testing.T) {
 	}
 
 	mgc, _ = New()
-	n, _ = Version()
+	n = Version()
 
 	if n >= 519 {
 		formatDirectory = "new-format"
@@ -504,7 +480,7 @@ func TestMagic_Compile(t *testing.T) {
 	}
 
 	mgc, _ = New()
-	n, _ = Version()
+	n = Version()
 
 	if n >= 519 {
 		formatDirectory = "new-format"
@@ -637,7 +613,7 @@ func TestMagic_Check(t *testing.T) {
 	}
 
 	mgc, _ = New()
-	n, _ = Version()
+	n = Version()
 
 	if n >= 519 {
 		formatDirectory = "new-format"
@@ -713,7 +689,7 @@ func TestMagic_File(t *testing.T) {
 	mgc, _ = New()
 	defer mgc.Close()
 
-	if n, _ := Version(); n >= 519 {
+	if n := Version(); n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -805,7 +781,7 @@ func TestMagic_Buffer(t *testing.T) {
 	mgc, _ = New()
 	defer mgc.Close()
 
-	if n, _ := Version(); n >= 519 {
+	if n := Version(); n >= 519 {
 		formatDirectory = "new-format"
 	}
 
@@ -974,7 +950,7 @@ func TestMagic_Descriptor(t *testing.T) {
 	mgc, _ = New()
 	defer mgc.Close()
 
-	n, _ = Version()
+	n = Version()
 
 	if n >= 519 {
 		formatDirectory = "new-format"
@@ -1057,7 +1033,7 @@ func TestMagic_Descriptor(t *testing.T) {
 	rv, err = mgc.Descriptor(0)
 
 	v = "application/x-empty; charset=binary"
-	if n, _ := Version(); n < 515 {
+	if n := Version(); n < 515 {
 		// Older version of libmagic reports same error differently.
 		v = "application/x-empty"
 	}
@@ -1075,7 +1051,7 @@ func TestMagic_Separator(t *testing.T) {
 	var rv string
 	var actual []string
 
-	n, _ := Version()
+	n := Version()
 
 	v := []string{"Bourne-Again shell script text executable", "a /bin/bash script, ASCII text executable", "data"}
 	if n < 524 || n > 536 {
@@ -1170,7 +1146,7 @@ func TestOpen(t *testing.T) {
 	var err error
 	var rv, v string
 
-	n, _ = Version()
+	n = Version()
 
 	err = Open(nil)
 
@@ -1258,7 +1234,7 @@ func TestCompile(t *testing.T) {
 		}
 	}
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = Compile("does/not/exist")
 
@@ -1336,7 +1312,7 @@ func TestCheck(t *testing.T) {
 	var err error
 	var v string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = Check("does/not/exist")
 
@@ -1390,16 +1366,16 @@ func TestCheck(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	v, _ := version()
+	v := Version()
 	if reflect.ValueOf(v).Kind() != reflect.Int || v <= 0 {
 		t.Errorf("value given {%v %d}, want {%v > %d}", reflect.ValueOf(v).Kind(), v, reflect.Int, 0)
 	}
 }
 
 func TestVersionString(t *testing.T) {
-	rv, _ := version()
+	rv := Version()
 
-	s, _ := versionString()
+	s := VersionString()
 	if reflect.ValueOf(s).Kind() != reflect.String || s == "" {
 		t.Errorf("value given {%v %d}, want {%v > %d}", reflect.ValueOf(s).Kind(), len(s), reflect.String, 0)
 	}
@@ -1411,9 +1387,9 @@ func TestVersionString(t *testing.T) {
 }
 
 func TestVersionSlice(t *testing.T) {
-	rv, _ := version()
+	rv := Version()
 
-	s, _ := versionSlice()
+	s := VersionSlice()
 	if reflect.ValueOf(s).Kind() != reflect.Slice || len(s) == 0 {
 		t.Errorf("value given {%v %d}, want {%v > %d}", reflect.ValueOf(s).Kind(), len(s), reflect.Slice, 0)
 	}
@@ -1429,7 +1405,7 @@ func TestFileMime(t *testing.T) {
 	var err error
 	var v, rv string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = FileMime(sampleImageFile, "does/not/exist")
 
@@ -1477,7 +1453,7 @@ func TestFileMime(t *testing.T) {
 
 	rv, err = FileMime(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
-		n, _ := Version()
+		n := Version()
 
 		v = "magic: line 1: No current entry for continuation"
 		if n < 518 && n >= 514 {
@@ -1499,7 +1475,7 @@ func TestFileType(t *testing.T) {
 	var err error
 	var v, rv string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = FileType(sampleImageFile, "does/not/exist")
 
@@ -1546,7 +1522,7 @@ func TestFileType(t *testing.T) {
 
 	rv, _ = FileType(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
-		n, _ := Version()
+		n := Version()
 
 		v = "magic: line 1: No current entry for continuation"
 		if n < 518 && n >= 514 {
@@ -1568,7 +1544,7 @@ func TestFileEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = FileEncoding(sampleImageFile, "does/not/exist")
 
@@ -1615,7 +1591,7 @@ func TestFileEncoding(t *testing.T) {
 
 	rv, _ = FileEncoding(sampleImageFile, brokenMagicFile)
 	if rv == "" && err != nil {
-		n, _ := Version()
+		n := Version()
 
 		v = "magic: line 1: No current entry for continuation"
 		if n < 518 && n >= 514 {
@@ -1637,7 +1613,7 @@ func TestBufferMime(t *testing.T) {
 	var err error
 	var v, rv string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = BufferMime([]byte{}, "does/not/exist")
 
@@ -1710,7 +1686,7 @@ func TestBufferMime(t *testing.T) {
 	rv, _ = BufferMime(buffer.Bytes())
 
 	v = "application/octet-stream; charset=binary"
-	if n, _ := Version(); n < 515 {
+	if n := Version(); n < 515 {
 		// A few releases of libmagic were having issues.
 		v = "application/octet-stream"
 	}
@@ -1744,7 +1720,7 @@ func TestBufferType(t *testing.T) {
 	var err error
 	var v, rv string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = BufferType([]byte{}, "does/not/exist")
 
@@ -1845,7 +1821,7 @@ func TestBufferEncoding(t *testing.T) {
 	var err error
 	var v, rv string
 
-	n, _ := Version()
+	n := Version()
 
 	_, err = BufferEncoding([]byte{}, "does/not/exist")
 

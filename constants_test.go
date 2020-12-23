@@ -10,7 +10,7 @@ func TestConstants(t *testing.T) {
 		NO_CHECK_APPTYPE | NO_CHECK_ELF | NO_CHECK_TEXT |
 		NO_CHECK_CDF | NO_CHECK_TOKENS | NO_CHECK_ENCODING
 
-	rv, _ := Version()
+	rv := Version()
 	// Older versions of libmagic have 0x3fb000 here historically ...
 	if rv < 0 && NO_CHECK_BUILTIN != 0x37b000 {
 		flags ^= 0x080000 // 0x37b000 ^ 0x080000 is 0x3fb000

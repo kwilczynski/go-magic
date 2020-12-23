@@ -393,22 +393,8 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
         goto out;
     }
 
-#if defined(HAVE_BROKEN_MAGIC)
-    if ((fd = safe_dup(fd)) < 0) {
-        local_errno = errno;
-        goto out;
-    }
-
-    MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
-
-    if (check_fd(fd) == 0)
-        safe_close(fd);
-
-    return cstring;
-#else
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
     return cstring;
-#endif
 
 out:
     errno = local_errno;
@@ -418,12 +404,7 @@ out:
 inline int
 magic_version_wrapper(void)
 {
-#if defined(HAVE_MAGIC_VERSION)
     return magic_version();
-#else
-    errno = ENOSYS;
-    return -ENOSYS;
-#endif
 }
 
 #if defined(__cplusplus)

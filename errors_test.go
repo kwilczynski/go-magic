@@ -31,7 +31,7 @@ func TestError_Error(t *testing.T) {
 	defer mgc.Close()
 
 	v = "magic: an unknown error has occurred"
-	if n, _ := Version(); n < 518 && n >= 514 {
+	if n := Version(); n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = "magic: no magic files loaded"
 	}
@@ -59,7 +59,7 @@ func TestError_Errno(t *testing.T) {
 	defer mgc.Close()
 
 	v = -1
-	if n, _ := Version(); n < 518 && n >= 514 {
+	if n := Version(); n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = 0
 	}
@@ -87,7 +87,7 @@ func TestError_Message(t *testing.T) {
 	defer mgc.Close()
 
 	v = "an unknown error has occurred"
-	if n, _ := Version(); n < 518 && n >= 514 {
+	if n := Version(); n < 518 && n >= 514 {
 		// A few releases of libmagic were having issues.
 		v = "no magic files loaded"
 	}
