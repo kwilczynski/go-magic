@@ -1,5 +1,3 @@
-// +build !windows
-
 package magic
 
 /*
@@ -29,13 +27,16 @@ import (
 // matches found by the Magic library to be returned.
 const Separator string = "\x5c\x30\x31\x32\x2d\x20"
 
+// Option
 type Option func(*Magic) error
 
+// DisableAutoload
 func DisableAutoload(mgc *Magic) error {
 	mgc.autoload = false
 	return nil
 }
 
+// Load
 func Load(files ...string) Option {
 	return func(mgc *Magic) error {
 		DisableAutoload(mgc)
@@ -44,6 +45,7 @@ func Load(files ...string) Option {
 	}
 }
 
+// LoadBuffers
 func LoadBuffers(buffers ...[]byte) Option {
 	return func(mgc *Magic) error {
 		DisableAutoload(mgc)
@@ -198,7 +200,7 @@ func (mgc *Magic) Paths() ([]string, error) {
 	return mgc.paths, nil
 }
 
-// Parameter -
+// Parameter
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Parameter(parameter int) (int, error) {
@@ -224,7 +226,7 @@ func (mgc *Magic) Parameter(parameter int) (int, error) {
 	return value, nil
 }
 
-// SetParameter -
+// SetParameter
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) SetParameter(parameter int, value int) error {
@@ -335,7 +337,7 @@ func (mgc *Magic) FlagsSlice() ([]int, error) {
 	return flags, nil
 }
 
-// Load -
+// Load
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Load(files ...string) (bool, error) {
@@ -368,7 +370,7 @@ func (mgc *Magic) Load(files ...string) (bool, error) {
 	return true, nil
 }
 
-// LoadBuffers -
+// LoadBuffers
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) LoadBuffers(buffers ...[]byte) (bool, error) {
@@ -400,7 +402,7 @@ func (mgc *Magic) LoadBuffers(buffers ...[]byte) (bool, error) {
 	return true, nil
 }
 
-// Compile -
+// Compile
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Compile(files ...string) (bool, error) {
@@ -427,7 +429,7 @@ func (mgc *Magic) Compile(files ...string) (bool, error) {
 	return true, nil
 }
 
-// Check -
+// Check
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Check(files ...string) (bool, error) {
@@ -454,7 +456,7 @@ func (mgc *Magic) Check(files ...string) (bool, error) {
 	return true, nil
 }
 
-// File -
+// File
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) File(filename string) (string, error) {
@@ -509,7 +511,7 @@ func (mgc *Magic) File(filename string) (string, error) {
 	return s, nil
 }
 
-// Buffer -
+// Buffer
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Buffer(buffer []byte) (string, error) {
@@ -533,7 +535,7 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 	return C.GoString(cString), nil
 }
 
-// Descriptor -
+// Descriptor
 //
 // If there is an error, it will be of type *Error.
 func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
@@ -586,7 +588,7 @@ func (mgc *Magic) error() *Error {
 	return &Error{-1, "an unknown error has occurred"}
 }
 
-// Open -
+// Open
 //
 // If there is an error, it will be of type *Error.
 func Open(f func(magic *Magic) error, options ...Option) (err error) {
@@ -616,7 +618,7 @@ func Open(f func(magic *Magic) error, options ...Option) (err error) {
 	return f(mgc)
 }
 
-// Compile -
+// Compile
 //
 // If there is an error, it will be of type *Error.
 func Compile(files ...string) (bool, error) {
@@ -634,7 +636,7 @@ func Compile(files ...string) (bool, error) {
 	return result, nil
 }
 
-// Check -
+// Check
 //
 // If there is an error, it will be of type *Error.
 func Check(files ...string) (bool, error) {
