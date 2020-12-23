@@ -140,7 +140,7 @@ func (mgc *Magic) Close() {
 	mgc.Lock()
 	defer mgc.Unlock()
 
-	mgc.magic.close()
+	mgc.close()
 }
 
 // IsClosed returns true if the underlying Magic library has
