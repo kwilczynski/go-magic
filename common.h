@@ -21,8 +21,6 @@ extern "C" {
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
-#include <locale.h>
-#include <xlocale.h>
 #include <sys/stat.h>
 #include <magic.h>
 
