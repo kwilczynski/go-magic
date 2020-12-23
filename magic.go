@@ -29,16 +29,37 @@ import (
 // matches found by the Magic library to be returned.
 const Separator string = "\x5c\x30\x31\x32\x2d\x20"
 
+type Option func(*Magic) error
+
+func DisableAutoload(mgc *Magic) error {
+	mgc.autoload = false
+	return nil
+}
+
+func Load(files ...string) Option {
+	return func(mgc *Magic) error {
+		DisableAutoload(mgc)
+		_, err := mgc.Load(files...)
+		return err
+	}
+}
+
+func LoadBuffers(buffers ...[]byte) Option {
+	return func(mgc *Magic) error {
+		DisableAutoload(mgc)
+		_, err := mgc.LoadBuffers(buffers...)
+		return err
+	}
+}
+
 type magic struct {
 	sync.Mutex
+
 	flags  int       // Current flags set (bitmask).
 	paths  []string  // List of Magic database files currently in-use.
 	cookie C.magic_t // Magic database session cookie (a "magic_set" struct on the C side).
-}
 
-// Magic represents the underlying Magic library.
-type Magic struct {
-	*magic
+	autoload bool // Enables autoloading of Magic database files.
 }
 
 // open opens and initializes underlying Magic library and sets the
@@ -51,12 +72,14 @@ func open() (*Magic, error) {
 		return nil, &Error{int(errno), "failed to initialize Magic library"}
 	}
 
-	mgc := &Magic{&magic{flags: NONE, cookie: cMagic}}
+	mgc := &Magic{&magic{flags: NONE, cookie: cMagic, autoload: true}}
 	runtime.SetFinalizer(mgc.magic, (*magic).close)
 
 	return mgc, nil
 }
 
+// close closes underlying Magic library and clears finalizer currently
+// set on the object.
 func (m *magic) close() {
 	if m != nil && m.cookie != nil {
 		// This will free resources on the Magic library side.
@@ -65,6 +88,11 @@ func (m *magic) close() {
 		m.cookie = nil
 	}
 	runtime.SetFinalizer(m, nil)
+}
+
+// Magic represents the underlying Magic library.
+type Magic struct {
+	*magic
 }
 
 // New opens and initializes Magic library.
@@ -84,14 +112,23 @@ func (m *magic) close() {
 //
 // If there is an error originating from the underlying Magic
 // library, it will be of type *Error.
-func New(files ...string) (*Magic, error) {
+func New(options ...Option) (*Magic, error) {
 	mgc, err := open()
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err := mgc.Load(files...); err != nil {
-		return nil, err
+	for _, option := range options {
+		if err := option(mgc); err != nil {
+			mgc.close()
+			return nil, err
+		}
+	}
+
+	if mgc.autoload {
+		if _, err := mgc.Load(); err != nil {
+			return nil, err
+		}
 	}
 
 	return mgc, nil
@@ -549,14 +586,14 @@ func (mgc *Magic) error() *Error {
 // Open -
 //
 // If there is an error, it will be of type *Error.
-func Open(f func(magic *Magic) error, files ...string) (err error) {
+func Open(f func(magic *Magic) error, options ...Option) (err error) {
 	var ok bool
 
 	if f == nil || reflect.TypeOf(f).Kind() != reflect.Func {
 		return &Error{-1, "not a function or nil pointer"}
 	}
 
-	mgc, err := New(files...)
+	mgc, err := New(options...)
 	if err != nil {
 		return err
 	}
@@ -663,7 +700,7 @@ func VersionSlice() ([]int, error) {
 //
 // If there is an error, it will be of type *Error.
 func FileMime(name string, files ...string) (string, error) {
-	mgc, err := New(files...)
+	mgc, err := New(Load(files...))
 	if err != nil {
 		return "", err
 	}
@@ -681,7 +718,7 @@ func FileMime(name string, files ...string) (string, error) {
 //
 // If there is an error, it will be of type *Error.
 func FileType(name string, files ...string) (string, error) {
-	mgc, err := New(files...)
+	mgc, err := New(Load(files...))
 	if err != nil {
 		return "", err
 	}
@@ -699,7 +736,7 @@ func FileType(name string, files ...string) (string, error) {
 //
 // If there is an error, it will be of type *Error.
 func FileEncoding(name string, files ...string) (string, error) {
-	mgc, err := New(files...)
+	mgc, err := New(Load(files...))
 	if err != nil {
 		return "", err
 	}
@@ -718,7 +755,7 @@ func FileEncoding(name string, files ...string) (string, error) {
 //
 // If there is an error, it will be of type *Error.
 func BufferMime(buffer []byte, files ...string) (string, error) {
-	mgc, err := New(files...)
+	mgc, err := New(Load(files...))
 	if err != nil {
 		return "", err
 	}
@@ -736,7 +773,7 @@ func BufferMime(buffer []byte, files ...string) (string, error) {
 //
 // If there is an error, it will be of type *Error.
 func BufferType(buffer []byte, files ...string) (string, error) {
-	mgc, err := New(files...)
+	mgc, err := New(Load(files...))
 	if err != nil {
 		return "", err
 	}
@@ -754,7 +791,7 @@ func BufferType(buffer []byte, files ...string) (string, error) {
 //
 // If there is an error, it will be of type *Error.
 func BufferEncoding(buffer []byte, files ...string) (string, error) {
-	mgc, err := New(files...)
+	mgc, err := New(Load(files...))
 	if err != nil {
 		return "", err
 	}

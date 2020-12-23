@@ -66,7 +66,7 @@ func TestNew(t *testing.T) {
 
 	mgc.Close()
 
-	_, err = New("does/not/exist")
+	_, err = New(Load("does/not/exist"))
 
 	v = "magic: could not find any valid magic files!"
 	if n < 518 && n >= 514 {
@@ -85,7 +85,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("value given {%q}, want {%q}", err.Error(), v)
 	}
 
-	mgc, err = New(genuineMagicFile)
+	mgc, err = New(Load(genuineMagicFile))
 	if err != nil {
 		t.Errorf("value given \"%T\", should be empty", err)
 	}
@@ -99,7 +99,7 @@ func TestNew(t *testing.T) {
 
 	mgc.Close()
 
-	_, err = New(brokenMagicFile)
+	_, err = New(Load(brokenMagicFile))
 
 	v = "magic: line 1: No current entry for continuation"
 	if n < 518 && n >= 514 {
@@ -1183,7 +1183,7 @@ func TestOpen(t *testing.T) {
 		// There should be an error originating from magic.New()
 		// which is wrapped inside magic.Open().
 		return nil
-	}, "does/not/exist")
+	}, Load("does/not/exist"))
 
 	v = "magic: could not find any valid magic files!"
 	if n < 518 && n >= 514 {
