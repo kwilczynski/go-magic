@@ -42,7 +42,9 @@ func TestConstants(t *testing.T) {
 	for _, tt := range constantTests {
 		expected := 0
 		for _, flag := range tt.expected {
-			expected |= flag
+			if flag > -1 {
+				expected |= flag
+			}
 		}
 
 		if tt.given != expected {
