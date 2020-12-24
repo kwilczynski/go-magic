@@ -275,7 +275,7 @@ func (mgc *Magic) Flags() (int, error) {
 		return -1, mgc.error()
 	}
 
-	return mgc.flags, nil
+	return int(cRv), nil
 }
 
 // SetFlags sets the flags to the new value (bitmask).
