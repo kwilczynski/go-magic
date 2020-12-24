@@ -28,6 +28,10 @@ extern "C" {
 #include <sys/stat.h>
 #include <magic.h>
 
+ #if !defined(UNUSED)
+ # define UNUSED(x) (void)(x)
+ #endif
+
 #if defined(F_DUPFD_CLOEXEC)
 # define HAVE_F_DUPFD_CLOEXEC 1
 #endif
@@ -38,6 +42,18 @@ extern "C" {
 
 #if defined(POSIX_CLOSE_RESTART)
 # define HAVE_POSIX_CLOSE_RESTART 1
+#endif
+
+#if !defined(MAGIC_NO_CHECK_CSV)
+# define MAGIC_NO_CHECK_CSV -1
+#endif
+
+#if !defined(MAGIC_NO_CHECK_JSON)
+# define MAGIC_NO_CHECK_JSON -1
+#endif
+
+#if defined(MAGIC_VERSION) && MAGIC_VERSION >= 532
+# define HAVE_MAGIC_GETFLAGS 1
 #endif
 
 #if defined(__cplusplus)

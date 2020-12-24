@@ -266,12 +266,14 @@ func (mgc *Magic) Flags() (int, error) {
 		return -1, mgc.error()
 	}
 
-	var cRv C.int
-
-	if cRv = C.magic_getflags_wrapper(mgc.cookie); cRv < 0 {
+	cRv, err := C.magic_getflags_wrapper(mgc.cookie)
+	if cRv < 0 && err != nil {
+		errno := err.(syscall.Errno)
+		if errno == syscall.ENOSYS {
+			return mgc.flags, nil
+		}
 		return -1, mgc.error()
 	}
-	mgc.flags = int(cRv)
 
 	return mgc.flags, nil
 }
