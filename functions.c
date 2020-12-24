@@ -204,7 +204,7 @@ magic_open_wrapper(int flags)
 inline void
 magic_close_wrapper(magic_t magic)
 {
-	(void)magic_close(magic);
+	magic_close(magic);
 }
 
 inline const char*
@@ -268,10 +268,12 @@ magic_setflags_wrapper(magic_t magic, int flags)
 }
 
 inline int
-magic_load_wrapper(magic_t magic, const char *magicfile, int flags)
+magic_load_wrapper(magic_t magic, const char *magic_file, int flags)
 {
 	int rv;
-	MAGIC_FUNCTION(magic_load, rv, flags, magic, magicfile);
+
+	MAGIC_FUNCTION(magic_load, rv, flags, magic, magic_file);
+
 	return rv;
 }
 
@@ -279,23 +281,29 @@ inline int
 magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes, size_t count, int flags)
 {
 	int rv;
+
 	MAGIC_FUNCTION(magic_load_buffers, rv, flags, magic, buffers, sizes, count);
+
 	return rv;
 }
 
 inline int
-magic_compile_wrapper(magic_t magic, const char *magicfile, int flags)
+magic_compile_wrapper(magic_t magic, const char *magic_file, int flags)
 {
 	int rv;
-	MAGIC_FUNCTION(magic_compile, rv, flags, magic, magicfile);
+
+	MAGIC_FUNCTION(magic_compile, rv, flags, magic, magic_file);
+
 	return rv;
 }
 
 inline int
-magic_check_wrapper(magic_t magic, const char *magicfile, int flags)
+magic_check_wrapper(magic_t magic, const char *magic_file, int flags)
 {
 	int rv;
-	MAGIC_FUNCTION(magic_check, rv, flags, magic, magicfile);
+
+	MAGIC_FUNCTION(magic_check, rv, flags, magic, magic_file);
+
 	return rv;
 }
 
@@ -303,7 +311,9 @@ inline const char*
 magic_file_wrapper(magic_t magic, const char* filename, int flags)
 {
 	const char *cstring;
+
 	MAGIC_FUNCTION(magic_file, cstring, flags, magic, filename);
+
 	return cstring;
 }
 
@@ -311,15 +321,17 @@ inline const char*
 magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size, int flags)
 {
 	const char *cstring;
+
 	MAGIC_FUNCTION(magic_buffer, cstring, flags, magic, buffer, size);
+
 	return cstring;
 }
 
 inline const char*
 magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 {
-	const char *cstring;
 	int local_errno;
+	const char *cstring;
 
 	if (check_fd(fd) < 0) {
 		local_errno = errno;
@@ -327,10 +339,12 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 	}
 
 	MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
+
 	return cstring;
 
 out:
 	errno = local_errno;
+
 	return NULL;
 }
 

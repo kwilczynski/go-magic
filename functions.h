@@ -7,16 +7,16 @@ extern "C" {
 
 #include "common.h"
 
-#define MAGIC_FUNCTION(f, r, x, ...)				\
-	do {							\
-		if ((x) & MAGIC_DEBUG)				\
-			r = f(__VA_ARGS__);			\
-		else {						\
-			save_t __e_##f;				\
-			override_error_output(&(__e_##f));	\
-			r = f(__VA_ARGS__);			\
-			restore_error_output(&(__e_##f));	\
-		}						\
+#define MAGIC_FUNCTION(f, r, x, ...)			   \
+	do {						   \
+		if ((x) & MAGIC_DEBUG)			   \
+			r = f(__VA_ARGS__);		   \
+		else {					   \
+			save_t __e_##f;			   \
+			override_error_output(&(__e_##f)); \
+			r = f(__VA_ARGS__);		   \
+			restore_error_output(&(__e_##f));  \
+		}					   \
 	} while(0)
 
 typedef struct file_data {
@@ -48,12 +48,12 @@ extern int magic_setparam_wrapper(magic_t magic, int parameter,
 extern int magic_getflags_wrapper(magic_t magic);
 extern int magic_setflags_wrapper(magic_t magic, int flags);
 
-extern int magic_load_wrapper(magic_t magic, const char *magicfile, int flags);
+extern int magic_load_wrapper(magic_t magic, const char *magic_file, int flags);
 extern int magic_load_buffers_wrapper(magic_t magic, void **buffers,
 				      size_t *sizes, size_t count, int flags);
 
-extern int magic_compile_wrapper(magic_t magic, const char *magicfile, int flags);
-extern int magic_check_wrapper(magic_t magic, const char *magicfile, int flags);
+extern int magic_compile_wrapper(magic_t magic, const char *magic_file, int flags);
+extern int magic_check_wrapper(magic_t magic, const char *magic_file, int flags);
 
 extern const char* magic_file_wrapper(magic_t magic, const char *filename,
 				      int flags);
