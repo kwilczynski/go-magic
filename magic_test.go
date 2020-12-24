@@ -161,7 +161,7 @@ func TestMagic_String(t *testing.T) {
 	}
 }
 
-func TestMagic_Path(t *testing.T) {
+func TestMagic_Paths(t *testing.T) {
 	var mgc *Magic
 	var rv []string
 
@@ -184,9 +184,9 @@ func TestMagic_Path(t *testing.T) {
 
 	mgc.Close()
 
-	// XXX(krzysztof): Setting "MAGIC" here breaks tests later as it will
-	// be persistent between different tests, sadly needed to be disabled
-	// for the time being.
+	// Setting "MAGIC" here breaks tests later as it will be persistent
+	// between different tests, sadly needed to be disabled for the time
+	// being.
 	//
 	//	p, err := os.Getwd()
 	//	if err != nil {
@@ -203,9 +203,9 @@ func TestMagic_Path(t *testing.T) {
 	//		t.Errorf("value given %q, want %q", v[0], p)
 	//	}
 
-	// TODO(kwilczynski): Test Magic.Load() affecting Magic.Path() as well. But
-	// that requires working os.Clearenv() which is yet to be implemented as
-	// per http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
+	// Test Magic.Load() affecting Magic.Path() as well. But that requires
+	// working os.Clearenv() which is yet to be implemented as per
+	// http://golang.org/src/pkg/syscall/env_unix.go?s=1772:1787#L101
 
 	mgc, _ = open()
 	defer func() {
@@ -218,11 +218,7 @@ func TestMagic_Path(t *testing.T) {
 	}
 }
 
-func TestMagic_Path_Environment(t *testing.T) {
-	if ok, v := oldGoVersion(); ok {
-		skip(t, fmt.Sprintf("this version of the Go Language is too old: %s", v))
-		return // Should not me reachable on modern Go version.
-	}
+func TestMagic_Paths_Environment(t *testing.T) {
 }
 
 func TestMagic_Parameter(t *testing.T) {
@@ -448,10 +444,6 @@ func TestMagic_Load(t *testing.T) {
 }
 
 func TestMagic_Load_Environment(t *testing.T) {
-	if ok, v := oldGoVersion(); ok {
-		skip(t, fmt.Sprintf("this version of the Go Language is too old: %s", v))
-		return // Should not me reachable on modern Go version.
-	}
 }
 
 func TestMagic_Compile(t *testing.T) {
