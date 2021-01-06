@@ -45,11 +45,11 @@ extern "C" {
 #endif
 
 #if !defined(MAGIC_NO_CHECK_CSV)
-# define MAGIC_NO_CHECK_CSV -1
+# define MAGIC_NO_CHECK_CSV 0
 #endif
 
 #if !defined(MAGIC_NO_CHECK_JSON)
-# define MAGIC_NO_CHECK_JSON -1
+# define MAGIC_NO_CHECK_JSON 0
 #endif
 
 #if defined(MAGIC_VERSION) && MAGIC_VERSION >= 532
