@@ -143,6 +143,13 @@ func New(options ...Option) (*Magic, error) {
 		return nil, err
 	}
 
+	if s := os.Getenv("MAGIC_DO_NOT_AUTOLOAD"); s != "" {
+		mgc.autoload = false
+	}
+	if s := os.Getenv("MAGIC_DO_NOT_STOP_ON_ERROR"); s != "" {
+		mgc.errors = false
+	}
+
 	for _, option := range options {
 		if err := option(mgc); err != nil {
 			mgc.close()
