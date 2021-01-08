@@ -363,7 +363,6 @@ func (mgc *Magic) Load(files ...string) error {
 	if err := verifyOpen(mgc); err != nil {
 		return err
 	}
-
 	// Clear paths. To be set again when the Magic
 	// database files are successfully loaded.
 	mgc.paths = []string{}
@@ -404,7 +403,6 @@ func (mgc *Magic) LoadBuffers(buffers ...[]byte) error {
 		p     *unsafe.Pointer
 		s     *C.size_t
 	)
-
 	// Clear paths. To be set again when the Magic
 	// database files are successfully loaded.
 	mgc.paths = []string{}

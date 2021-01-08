@@ -61,3 +61,6 @@ func Example_closure() {
 
 // func Example_disable_autoload() {
 // }
+
+// func Example_do_not_stop_on_errors() {
+// }

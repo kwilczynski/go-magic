@@ -29,6 +29,9 @@ func Example_basic() {
 	// File MIME is: image/png; charset=binary
 }
 
+// func Example_must() {
+// }
+
 // This example shows how to quickly find MIME type for a file.
 func ExampleFileType() {
 	// The magic.FileType function will open the Magic database,
