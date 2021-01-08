@@ -30,6 +30,11 @@ const Separator string = "\n- "
 // Option represents an option that can be set when creating a new object.
 type Option func(*Magic) error
 
+func DoNotStopOnErrors(mgc *Magic) error {
+	mgc.errors = false
+	return nil
+}
+
 // DisableAutoload disables autoloading of the Magic database files when
 // creating a new object.
 //
@@ -40,11 +45,6 @@ type Option func(*Magic) error
 // function.
 func DisableAutoload(mgc *Magic) error {
 	mgc.autoload = false
-	return nil
-}
-
-func DoNotStopOnErrors(mgc *Magic) error {
-	mgc.errors = false
 	return nil
 }
 
@@ -163,6 +163,13 @@ func New(options ...Option) (*Magic, error) {
 		}
 	}
 	return mgc, nil
+}
+
+func Must(magic *Magic, err error) *Magic {
+	if err != nil {
+		panic(err)
+	}
+	return magic
 }
 
 // Close releases all initialized resources and closes
@@ -488,13 +495,11 @@ func (mgc *Magic) File(file string) (string, error) {
 	cFile := C.CString(file)
 	defer C.free(unsafe.Pointer(cFile))
 
-	flags := mgc.flags
-	if mgc.errors {
-		flags |= ERROR
-	}
-	cFlags := C.int(flags)
+	var cString *C.char
 
-	cString := C.magic_file_wrapper(mgc.cookie, cFile, cFlags)
+	flagsSaveAndRestore(mgc, func() {
+		cString = C.magic_file_wrapper(mgc.cookie, cFile, C.int(mgc.flags))
+	})
 	if cString == nil {
 		// Handle the case when the "ERROR" flag is set regardless
 		// of the current version of the Magic library.
@@ -509,10 +514,8 @@ func (mgc *Magic) File(file string) (string, error) {
 		// it to achieve the desired behaviour as per the standards.
 		if mgc.errors || mgc.flags&ERROR != 0 {
 			return "", mgc.error()
-		} else if mgc.autoload || mgc.flags&EXTENSION != 0 {
-			C.magic_errno_wrapper(mgc.cookie)
-			cString = C.magic_error_wrapper(mgc.cookie)
 		}
+		cString = C.magic_error_wrapper(mgc.cookie)
 	}
 	return errorOrString(mgc, cString)
 }
@@ -530,25 +533,18 @@ func (mgc *Magic) Buffer(buffer []byte) (string, error) {
 	}
 
 	var (
-		flags int
-		p     unsafe.Pointer
+		cString *C.char
+		p       unsafe.Pointer
 	)
 
 	cSize := C.size_t(len(buffer))
 	if cSize > 0 {
 		p = unsafe.Pointer(&buffer[0])
 	}
-	if mgc.flags&CONTINUE != 0 {
-		flags, mgc.flags = mgc.flags, mgc.flags|RAW
-		C.magic_setflags_wrapper(mgc.cookie, C.int(mgc.flags))
-	}
 
-	cString := C.magic_buffer_wrapper(mgc.cookie, p, cSize, C.int(mgc.flags))
-
-	if mgc.flags&CONTINUE != 0 && flags > 0 {
-		mgc.flags = flags
-		C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
-	}
+	flagsSaveAndRestore(mgc, func() {
+		cString = C.magic_buffer_wrapper(mgc.cookie, p, cSize, C.int(mgc.flags))
+	})
 	return errorOrString(mgc, cString)
 }
 
@@ -564,19 +560,14 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 		return "", err
 	}
 
-	var flags int
+	var (
+		err     error
+		cString *C.char
+	)
 
-	if mgc.flags&CONTINUE != 0 {
-		flags, mgc.flags = mgc.flags, mgc.flags|RAW
-		C.magic_setflags_wrapper(mgc.cookie, C.int(mgc.flags))
-	}
-
-	cString, err := C.magic_descriptor_wrapper(mgc.cookie, C.int(fd), C.int(mgc.flags))
-
-	if mgc.flags&CONTINUE != 0 && flags > 0 {
-		mgc.flags = flags
-		C.magic_setflags_wrapper(mgc.cookie, C.int(flags))
-	}
+	flagsSaveAndRestore(mgc, func() {
+		cString, err = C.magic_descriptor_wrapper(mgc.cookie, C.int(fd), C.int(mgc.flags))
+	})
 	if err != nil {
 		if errno := err.(syscall.Errno); errno == syscall.EBADF {
 			return "", &Error{int(errno), "bad file descriptor"}
@@ -586,7 +577,7 @@ func (mgc *Magic) Descriptor(fd uintptr) (string, error) {
 }
 
 // Open
-func Open(f func(magic *Magic) error, options ...Option) (err error) {
+func Open(f func(*Magic) error, options ...Option) (err error) {
 	var ok bool
 
 	if f == nil || reflect.TypeOf(f).Kind() != reflect.Func {
@@ -759,6 +750,30 @@ func verifyLoaded(mgc *Magic) error {
 		return nil
 	}
 	return &Error{-1, "Magic database not loaded"}
+}
+
+func flagsSaveAndRestore(mgc *Magic, f func()) {
+	var flags int
+
+	flags, mgc.flags = mgc.flags, mgc.flags|RAW
+	// Make sure to set the "ERROR" flag so that any
+	// I/O-related errors will become first class
+	// errors reported back by the Magic library.
+	if mgc.errors {
+		mgc.flags |= ERROR
+	}
+
+	ok := mgc.flags&CONTINUE != 0 || mgc.flags&ERROR != 0
+	if ok {
+		C.magic_setflags_wrapper(mgc.cookie, C.int(mgc.flags))
+	}
+	defer func() {
+		if ok && flags > 0 {
+			C.magic_setflags_wrapper(mgc.cookie, C.int(mgc.flags))
+		}
+	}()
+	mgc.flags = flags
+	f()
 }
 
 func errorOrString(mgc *Magic, cString *C.char) (string, error) {
