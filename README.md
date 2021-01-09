@@ -1,4 +1,4 @@
-# File Magic in Go.
+# File Magic in Go
 
 [![Build Status](https://travis-ci.org/kwilczynski/go-magic.svg)](https://travis-ci.org/kwilczynski/go-magic)
 [![Go Report Card](https://goreportcard.com/badge/kwilczynski/go-magic)](https://goreportcard.com/report/kwilczynski/go-magic)
