@@ -1,6 +1,11 @@
 * text=auto
 
+*.c eol=lf linguist-language=c
+*.h eol=lf linguist-language=c
+
+*.go eol=lf
+*.sh eol=lf
+
 Makefile eol=lf
 
-*.sh eol=lf
-*.go eol=lf
+.github/ export-ignore
