@@ -28,7 +28,7 @@ const (
 	// Controls the maximum number of bytes to read from a file.
 	PARAM_BYTES_MAX int = C.MAGIC_PARAM_BYTES_MAX
 
-	// No special handling and/or flags specified. Default behaviour.
+	// No special handling and/or flags specified. Default behavior.
 	NONE int = C.MAGIC_NONE
 
 	// Print debugging messages to standard error output.

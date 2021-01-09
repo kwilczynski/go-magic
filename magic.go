@@ -502,14 +502,14 @@ func (mgc *Magic) File(file string) (string, error) {
 		// Handle the case when the "ERROR" flag is set regardless
 		// of the current version of the Magic library.
 		//
-		// Prior to version 5.15 the correct behaviour that concerns
+		// Prior to version 5.15 the correct behavior that concerns
 		// the following IEEE 1003.1 standards was broken:
 		//
 		//   http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
 		//   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
 		//
 		// This is an attempt to mitigate the problem and correct
-		// it to achieve the desired behaviour as per the standards.
+		// it to achieve the desired behavior as per the standards.
 		if mgc.errors || mgc.flags&ERROR != 0 {
 			return "", mgc.error()
 		}
