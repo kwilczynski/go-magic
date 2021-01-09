@@ -30,6 +30,7 @@ const Separator string = "\n- "
 // Option represents an option that can be set when creating a new object.
 type Option func(*Magic) error
 
+// DoNotStopOnErrors
 func DoNotStopOnErrors(mgc *Magic) error {
 	mgc.errors = false
 	return nil
@@ -48,12 +49,14 @@ func DisableAutoload(mgc *Magic) error {
 	return nil
 }
 
+// WithFiles
 func WithFiles(files ...string) Option {
 	return func(mgc *Magic) error {
 		return mgc.Load(files...)
 	}
 }
 
+// WithBuffers
 func WithBuffers(buffers ...[]byte) Option {
 	return func(mgc *Magic) error {
 		return mgc.LoadBuffers(buffers...)
@@ -165,6 +168,7 @@ func New(options ...Option) (*Magic, error) {
 	return mgc, nil
 }
 
+/// Must
 func Must(magic *Magic, err error) *Magic {
 	if err != nil {
 		panic(err)
