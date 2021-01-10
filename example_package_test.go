@@ -30,7 +30,7 @@ func Example_separator() {
 		fmt.Printf("\t%s\n", s)
 	}
 	m.Close()
-	// Output:
+	// Should output:
 	// Matches for data in the buffer are:
 	//	Bourne-Again shell script text executable
 	//	a /bin/bash script, ASCII text executable
