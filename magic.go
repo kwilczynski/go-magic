@@ -49,6 +49,20 @@ func DisableAutoload(mgc *Magic) error {
 	return nil
 }
 
+// WithParameter
+func WithParameter(parameter int, value int) Option {
+	return func(mgc *Magic) error {
+		return mgc.SetParameter(parameter, value)
+	}
+}
+
+// WithFlags
+func WithFlags(flags int) Option {
+	return func(mgc *Magic) error {
+		return mgc.SetFlags(flags)
+	}
+}
+
 // WithFiles
 func WithFiles(files ...string) Option {
 	return func(mgc *Magic) error {
